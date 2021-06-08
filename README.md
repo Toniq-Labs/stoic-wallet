@@ -1,1 +1,1 @@
-# elastic-wallet
+# stoic-wallet

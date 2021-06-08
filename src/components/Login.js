@@ -88,7 +88,7 @@ export default (props) => {
   return (
     <div>
       <nav className="sb-topnav navbar navbar-expand navbar-dark bg-dark">
-        <a className="navbar-brand ps-3" target="_blank" href="https://toniqlabs.com" rel="noreferrer">Elastic Wallet <small>by Toniq Labs</small></a>
+        <a className="navbar-brand ps-3" target="_blank" href="https://toniqlabs.com" rel="noreferrer">Stoic Wallet <small>by Toniq Labs</small></a>
       </nav>
       <div className="container">
         <div className="row">
