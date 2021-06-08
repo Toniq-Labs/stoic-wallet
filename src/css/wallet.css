@@ -1,0 +1,143 @@
+.account-sidebar .nav-link.selected {
+  background-color: #212529;
+  color:white!important;
+}
+.account-sidebar .nav-link.selected:hover {
+  color:white!important;
+}
+.account-sidebar .nav-link.selected img{
+  border-color: white;
+}
+.account-sidebar .nav-link img{
+  width:32px;
+  border-radius:50%;
+  border: 2px solid black;
+  margin-right:20px;
+}
+.account-sidebar .nav-link {
+  cursor:pointer;
+}
+.account-sidebar .nav-link:hover {
+  color:#00a1ff!important;
+}
+.sb-sidenav-menu-heading {
+  color: #464646!important;
+}
+.accountCards .card{
+  border-width:3px;
+  cursor: pointer;
+  
+  box-shadow: 0 8px 6px -6px black;
+}
+.accountCards .card h1{
+  font-size:1rem;
+}
+.accountCards .card h2{
+  font-size:1rem;
+}
+.accountCards .card h3{
+  font-size:.7rem;
+}
+
+
+.accountCards.selectedAccount .card {
+  background-color: #00a1ff;
+  color: white;
+}
+.navbar-brand small{
+  font-size: .7rem;
+}
+.accountAddress svg{
+  margin-left:10px;
+  cursor: pointer;
+  color: black!important;
+}
+.accountAddress .dropdown{
+  display: inline-block;
+}
+.accountAddress {
+  font-size: .9rem;
+}
+.loginForm h1{
+  font-size:1.6rem;
+}
+.loginForm{
+  position: absolute;
+    top: 100px;
+    left: 0;
+    right: 0;
+}
+.nav-item .dropdown>a{
+  color:white;
+  text-decoration:none;
+}
+.loginOption img{
+  width: 120px;
+}
+.loginOption:hover{
+  background-color:#aaa;
+}
+.loginOption{
+  width: 150px;
+  padding:10px;
+  cursor: pointer;
+  display:inline-block;
+  border: 1px solid black;
+  border-radius: 5px;
+  margin-right:5px;
+  box-shadow: 0 8px 6px -6px black;
+  transition: 0.3s;
+}
+.loginForm>div{
+  box-shadow: 0 8px 6px -6px black;
+  background-color:#f9f9f9;
+  
+}
+.form-group label{
+  font-weight:bold;
+}
+.tx-head span{
+  font-weight: bold;
+}
+.tx-1>span{
+  font-size:.8rem;
+}
+.tx-out .tx-3{
+  color: red;
+}
+.tx-in .tx-3{
+  color: green;
+}
+.tx {
+  margin-bottom: 15px;
+  border-bottom:1px solid #aaa;
+  padding-bottom:20px;
+}
+.tx-2 {
+  text-align:left;
+}
+.tx-3 {
+  font-weight: bold;
+  text-align:right;
+}
+.tx-4 {
+  
+  overflow-y:hidden
+}
+#layoutSidenav_nav{
+  z-index:700!important;
+}
+.sb-nav-fixed .sb-topnav {
+    z-index: 701!important;
+}
+._loading_overlay_wrapper{
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+}
+.mnemonic{
+  font-weight:bold;
+  color: #d65252;
+}
