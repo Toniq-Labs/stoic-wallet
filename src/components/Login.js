@@ -82,7 +82,7 @@ export default (props) => {
         _password("");
         _cpassword("");
         props.login(ll);
-      }, 100);
+      }, 1000);
     }
   }
   return (

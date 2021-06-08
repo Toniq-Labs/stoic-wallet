@@ -143,7 +143,6 @@ var ICPLedger = {
           var mnemonic = atob(decrypt(t, o.principal, o.password));
           localStorage.setItem('_m', mnemonic);
           var id = mnemonicToId(mnemonic);
-          console.log(id);
           resolve(initAPI(id, o.type));
           break;
       }

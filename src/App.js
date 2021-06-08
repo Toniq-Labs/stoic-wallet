@@ -161,7 +161,6 @@ function App() {
         resolve(b);
       }).catch(e => {
         reject(e);
-        console.log(e);
       });
     });
   }
@@ -194,7 +193,6 @@ function App() {
   function unlock(ll, t){
     loader(true);
     ll.then(identity => {      
-      console.log(identity);
       loader(false);
       UNLOCKED = true;
       _unlocked(true);
@@ -273,7 +271,6 @@ function App() {
     return a.substr(0, 32) + "...";
   }
   function displaydate(d){
-    console.log(new Date(d).toString());
     return new Date(d).toString();
   }
   function numf(n, d){

@@ -56,7 +56,6 @@ export default (props) => {
   
   function unlock(){
     var i = props.identity;
-    console.log(i);
     props.loader(true);
     setTimeout(() => {
       switch(i.type){
@@ -73,7 +72,7 @@ export default (props) => {
         alert("Password incorrect or corrupted data");
         props.loader(false);
       });
-    }, 100)
+    }, 1000)
   }
   return (
     <div>
