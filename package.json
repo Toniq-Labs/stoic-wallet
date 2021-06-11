@@ -24,6 +24,7 @@
     "react-scripts": "4.0.3",
     "react-timestamp": "^5.1.0",
     "sjcl": "^1.0.8",
+    "use-state-with-callback": "^2.0.3",
     "web-vitals": "^1.0.1"
   },
   "scripts": {

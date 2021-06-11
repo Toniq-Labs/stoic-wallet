@@ -69,8 +69,7 @@ export default (props) => {
       if (password.length < 8) return err("Please enter a password with at least 8 characters");
       if (password != cpassword) return err("Your passwords do not match");
       _showPKDialog(false)
-      props.loader(true);
-      setTimeout(() => {
+      props.loader(true, () => {
         var ll = ICPLedger.setup({
           type : 'private',
           mnemonic : mnemonic,
@@ -82,7 +81,7 @@ export default (props) => {
         _password("");
         _cpassword("");
         props.login(ll);
-      }, 1000);
+      });
     }
   }
   return (
@@ -124,7 +123,7 @@ export default (props) => {
             Cancel
           </Button>
           <Button onClick={iiLogin} variant="primary">
-            Conitnue
+            Continue
           </Button>
         </DialogActions>
       </Dialog>
@@ -172,7 +171,7 @@ export default (props) => {
             Cancel
           </Button>
           <Button onClick={pkLogin} variant="primary">
-            Conitnue
+            Continue
           </Button>
         </DialogActions>
       </Dialog>
