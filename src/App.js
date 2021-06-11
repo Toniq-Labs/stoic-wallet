@@ -10,8 +10,15 @@ import Balances from './components/Balances';
 import Account from './components/Account';
 import Login from './components/Login';
 import Lockscreen from './components/Lockscreen';
-import {ICPLedger} from './ledger.js';
+import {ICPLedger} from './ic/ledger.js';
 import LoadingOverlay from 'react-loading-overlay';
+
+import Button from 'react-bootstrap/Button';
+import Dialog from '@material-ui/core/Dialog';
+import DialogActions from '@material-ui/core/DialogActions';
+import DialogContent from '@material-ui/core/DialogContent';
+import DialogContentText from '@material-ui/core/DialogContentText';
+import DialogTitle from '@material-ui/core/DialogTitle';
 
 //Helpers
 var _defaultDb = {
@@ -45,15 +52,17 @@ function initDb(){
         name : "Internet Computer",
         symbol : "ICP",
         amount : "Loading",
+        decimals : 8,
         transactions : false
       });
       a[1].map(t => {
         _b.push({
+          id : t.id,
           name : t.name,
           symbol : t.symbol,
-          id : t.id,
+          decimals : t.decimals,
           amount : "Loading",
-          transactions : false
+          transactions : []
         });
         return true;
       });
@@ -82,9 +91,10 @@ function updateDb(accounts){
     a.balances.map((b, i) => {
       if (i === 0) return false;
       _b.push({
+        id : b.id,
         name : b.name,
         symbol : b.symbol,
-        id : b.id,
+        decimals : b.decimals,
       });
       return true;
     });
@@ -94,7 +104,7 @@ function updateDb(accounts){
   localStorage.setItem('_db', JSON.stringify(updatedDb));
 }
 initDb();
-
+var loaderCb = false;
 //Render
 function App() {
   const [currentAccount, _currentAccount] = useState(0);
@@ -106,7 +116,15 @@ function App() {
   const [active, _active] = useState(ACTIVE);
   const [isLoaderActive, _isLoaderActive] = useState(false);
   const [connectionType, _connectionType] = useState(appData.identity.type);
+  const [showError, _showError] = useState(false);
+  const [errorText, _errorText] = useState("");
   
+  useEffect(() => {
+    if (loaderCb){
+      loaderCb();
+      loaderCb = false;
+    }
+  }, [isLoaderActive]);
   useEffect(() => {
     ICPLedger.init().then(() => {
       var checkLoad = ICPLedger.load(appData.identity);
@@ -120,7 +138,10 @@ function App() {
       INTV = setInterval(fetchAllData, 10000);
     
   }, []);
-  
+  function error(t){
+    _errorText(t);
+    _showError(true);
+  }
   function fetchAllData(){
     appData.accounts.map((a,i) => {
       a.balances.map((b,j) => {
@@ -145,6 +166,10 @@ function App() {
             appData.accounts[i].balances[j].amount = _b;
             appData.accounts[i].balances[j].transactions = [];
             _accounts(arr => [...appData.accounts]);
+          }).catch(e => {
+            if (e.message.includes("Specified sender delegation has expired")){
+              lockWallet();
+            }
           });
         }
         return true;
@@ -152,12 +177,14 @@ function App() {
       return true;
     });
   }
-  function loader(t){
+  function loader(t, fn){
+    if (fn) loaderCb = fn;
     _isLoaderActive(t);
   }
   function send(toaddress, amount, fee){
     return new Promise((resolve, reject) => {
-      ICPLedger.transfer(toaddress, fee, 0, currentAccount, amount).then(b => {
+      var p = (currentToken == 0 ? ICPLedger.transfer(toaddress, fee, 0, currentAccount, amount) : ICPLedger.transferTokens(balances[currentToken].id, toaddress, amount) );
+      p.then(b => {
         resolve(b);
       }).catch(e => {
         reject(e);
@@ -177,8 +204,21 @@ function App() {
     _accounts( arr => [...appData.accounts]);
     updateDb(appData.accounts);
   }
-  function addToken(i){
-    //TODO in future
+  function addToken(name, symbol, decimals, id){
+    if (currentAccount != 0) return error("This token can only be added to your main account as it is connected to your Principal (not your address)");
+    if (appData.accounts[currentAccount].balances.findIndex(x => x.id === id) >= 0) return error("This token has already been added to this account");
+    appData.accounts[currentAccount].balances.push({
+      id : id,
+      name : name,
+      symbol : symbol,
+      decimals : decimals,
+      amount : "Loading",
+      transactions : []
+    });
+    _accounts( arr => [...appData.accounts]);
+    updateDb(appData.accounts);
+    fetchAllData();
+    changeToken(appData.accounts[currentAccount].balances.length-1);
   }
   function changeToken(i){
     _currentToken(i);
@@ -295,7 +335,7 @@ function App() {
               <div className="container-fluid px-4">
                   <Account currentAccountName={currentAccountName} updateName={updateName} accounts={accounts} currentAccount={currentAccount} setAccounts={_accounts} deleteAccount={deleteAccount}/>
                   <hr />
-                  <Balances addToken={addToken} balances={balances} currentToken={currentToken} changeToken={changeToken} />
+                  <Balances addToken={addToken} error={error} balances={balances} currentToken={currentToken} changeToken={changeToken} />
                   <div className="row">
                     <div className="col">
                       <Tabs defaultActiveKey="activity" id="uncontrolled-tab-example" className="mb-3">
@@ -339,7 +379,7 @@ function App() {
                         </Tab>
                         <Tab eventKey="send" title="Send">
                           <h3>Send {balances[currentToken].symbol}</h3>
-                          <Send loader={loader} send={send} currentBalance={balances[currentToken].amount} />
+                          <Send currentToken={currentToken} loader={loader} send={send} currentBalance={balances[currentToken].amount} />
                         </Tab>
                       </Tabs>
                     </div>
@@ -351,8 +391,25 @@ function App() {
       </div>
     </div> :
     ( active ?
-    <Lockscreen identity={appData.identity} loader={loader} unlock={unlock} clearWallet={clearWallet} /> :
-    <Login loader={loader} login={login} /> )}
+    <Lockscreen identity={appData.identity} error={error} loader={loader} unlock={unlock} clearWallet={clearWallet} /> :
+    <Login error={error} loader={loader} login={login} /> )}
+    <Dialog
+      open={showError}
+      aria-labelledby="alert-dialog-title"
+      aria-describedby="alert-dialog-description"
+    >
+      <DialogTitle id="alert-dialog-title">{"Something went wrong"}</DialogTitle>
+      <DialogContent>
+        <DialogContentText id="alert-dialog-description">
+        {errorText}
+        </DialogContentText>
+      </DialogContent>
+      <DialogActions>
+        <Button onClick={() => _showError(false)} variant="secondary">
+          Close
+        </Button>
+      </DialogActions>
+    </Dialog>
     </LoadingOverlay>
   );
 }

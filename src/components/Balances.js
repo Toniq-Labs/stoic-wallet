@@ -12,13 +12,20 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 export default (props) => {
-  const [show, setShow] = useState(false);
   const [showToken, _showToken] = useState(false);
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
-  function addToken(i){
-    handleShow();
-    //props.addToken();
+  const [tokenId, _tokenId] = useState("");
+  function error(t){
+    props.error(t);
+    _showToken(false);
+    _tokenId("");
+  }
+  function addToken(){
+    //Hard card only HZLD for now
+    if (tokenId != "qz7gu-giaaa-aaaaf-qaaka-cai") return error("Sorry, this token is not compatiable at this time");
+    _showToken(false);
+    _tokenId("");
+    //In future we will pull down metadata
+    props.addToken("HZLD", "HZLD", 0, tokenId);
   }
   return (
     <div className="row">
@@ -26,14 +33,14 @@ export default (props) => {
          return (<Balance key={i} token={i} data={b} clickEv={props.changeToken} selected={(props.currentToken === i)} />) 
       })}
       <div key={100} className="col accountCards" style={{display:'flex'}}>
-        <div onClick={addToken} className="card bg-secondary text-white mb-3 text-center">
+        <div onClick={()=> _showToken(true)} className="card bg-secondary text-white mb-3 text-center">
             <div className="card-body">
               Add Token<br />
               <FontAwesomeIcon icon={faPlus} />
             </div>
         </div>
       </div>
-      <Dialog open={show} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog open={showToken} aria-labelledby="form-dialog-title">
         <DialogTitle id="form-dialog-title">Add token</DialogTitle>
         <DialogContent>
           <DialogContentText>Enter the Canister ID for the token you wish to add.</DialogContentText>
@@ -44,34 +51,16 @@ export default (props) => {
             label="Canister ID"
             type="text"
             fullWidth
+            value={tokenId} 
+            onChange={event => _tokenId(event.target.value)} 
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} variant="secondary">
+          <Button onClick={() => {_showToken(false); _tokenId("");}} variant="secondary">
             Cancel
           </Button>
-          <Button onClick={() => {
-            setShow(false);
-            _showToken(true);
-          }} variant="primary">
+          <Button onClick={addToken} variant="primary">
             Add
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={showToken}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Coming soon!"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-            This feature is currently being worked on. Please check back in future.
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => _showToken(false)} variant="secondary">
-            Close
           </Button>
         </DialogActions>
       </Dialog>
