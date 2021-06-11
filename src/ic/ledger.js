@@ -1,16 +1,16 @@
 import { Actor, HttpAgent, Principal } from "@dfinity/agent";  
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { AuthClient } from "@dfinity/auth-client";
-import idlFactory from './ledger.did.js';
+import ledgerIDL from './ledger.did.js';
+import tokenIDL from './token.did.js';
 import { getCrc32 } from '@dfinity/agent/lib/esm/utils/getCrc';
 import { sha224 } from '@dfinity/agent/lib/esm/utils/sha224';
-import RosettaApi from './util/RosettaApi.js';
+import RosettaApi from '../util/RosettaApi.js';
+
+//Helpers
 const sjcl = require('sjcl')
 const bip39 = require('bip39')
 const pbkdf2 = require("pbkdf2");
-const canisterId = "ryjl3-tyaaa-aaaaa-aaaba-cai";
-
-//Helpers
 const principalToAccountIdentifier = (p, s) => {
   const padding = Buffer("\x0Aaccount-id");
   const array = new Uint8Array([
@@ -47,34 +47,45 @@ const mnemonicToId = (mnemonic) => {
   return Ed25519KeyIdentity.generate(seed);
 }
 const encrypt = (mnemonic, principal, password) => {
-  return sjcl.encrypt(pbkdf2.pbkdf2Sync(password, principal, 30000, 512, 'sha512').toString(), btoa(mnemonic));
+  return new Promise((resolve, reject) => {
+    pbkdf2.pbkdf2(password, principal, 30000, 512, 'sha512', (e, d) => {
+      if (e) return reject(e);
+      resolve(sjcl.encrypt(d.toString(), btoa(mnemonic)));
+    });
+  });
 }
 const decrypt = (data, principal, password) => {
-  return sjcl.decrypt(pbkdf2.pbkdf2Sync(password, principal, 30000, 512, 'sha512').toString(), data);
+  return new Promise((resolve, reject) => {
+    pbkdf2.pbkdf2(password, principal, 30000, 512, 'sha512', (e, d) => {
+      if (e) return reject(e);
+      resolve(atob(sjcl.decrypt(d.toString(), data)));
+    });
+  });
 }
+
 //Initiates the API
-var identity, API, authClient;
+const LEDGERCANISTER = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+var IDENTITY, API, AUTH, AGENT;
 const init = async () => {
-  authClient = await AuthClient.create();
-  var id = await authClient.getIdentity();
+  AUTH = await AuthClient.create();
+  var id = await AUTH.getIdentity();
   initAPI(id);
 }
 const initAPI = (id, type) => {
-  identity = id;
-  API = Actor.createActor(idlFactory, {
-    agent: new HttpAgent({
-      host: "https://boundary.ic0.app/",
-      identity,
-    }),
-    canisterId,
+  IDENTITY = id;
+  AGENT = new HttpAgent({
+    host: "https://boundary.ic0.app/",
+    identity : IDENTITY,
   });
+  //Ledger API
+  API = Actor.createActor(ledgerIDL, {agent : AGENT, canisterId : LEDGERCANISTER});
   return {
-    principal : identity.getPrincipal().toString(),
+    principal : IDENTITY.getPrincipal().toString(),
     type : type ?? 'default'
   };
 }
 const rosettaApi = new RosettaApi();
-var ICPLedger = {
+const ICPLedger = {
   //Identity management
   init : init,
   //When generating a new identity to use with the wallet
@@ -82,10 +93,10 @@ var ICPLedger = {
     return new Promise((resolve, reject) => {
       switch(o.type){
         case "ii":
-          authClient.login({
+          AUTH.login({
             identityProvider: "https://identity.ic0.app/",
             onSuccess: async () => {
-              var id = await authClient.getIdentity()
+              var id = await AUTH.getIdentity()
               resolve(initAPI(id, o.type));
             },
           });
@@ -93,10 +104,10 @@ var ICPLedger = {
         case "private":
           localStorage.setItem('_m', o.mnemonic);
           var id = mnemonicToId(o.mnemonic);
-          var _em = encrypt(o.mnemonic, id.getPrincipal().toString(), o.password);
-          localStorage.setItem('_em', _em);
-          resolve(initAPI(id, o.type));
-          break;
+          encrypt(o.mnemonic, id.getPrincipal().toString(), o.password).then(_em => {
+            localStorage.setItem('_em', _em);
+            resolve(initAPI(id, o.type));            
+          });
       }
     });
   },
@@ -104,9 +115,9 @@ var ICPLedger = {
   load : (o) => {
     switch(o.type){
       case "ii":
-        if (identity.getPrincipal().toString() != '2vxsx-fae') {
+        if (IDENTITY.getPrincipal().toString() != '2vxsx-fae') {
           return { 
-            principal : identity.getPrincipal().toString(),
+            principal : IDENTITY.getPrincipal().toString(),
             type : o.type
           }
         } else return false;
@@ -128,10 +139,10 @@ var ICPLedger = {
       if (tl) return resolve(tl);
       switch(o.type){
         case "ii":
-          authClient.login({
+          AUTH.login({
             identityProvider: "https://identity.ic0.app/",
             onSuccess: async () => {
-              var id = await authClient.getIdentity()
+              var id = await AUTH.getIdentity()
               resolve(initAPI(id, o.type));
             },
           });
@@ -139,11 +150,11 @@ var ICPLedger = {
         case "private":
           var t = localStorage.getItem('_em');
           if (!t) return reject("No encrypted data to decrypt");
-          
-          var mnemonic = atob(decrypt(t, o.principal, o.password));
-          localStorage.setItem('_m', mnemonic);
-          var id = mnemonicToId(mnemonic);
-          resolve(initAPI(id, o.type));
+          decrypt(t, o.principal, o.password).then(mnemonic => {
+            localStorage.setItem('_m', mnemonic);
+            var id = mnemonicToId(mnemonic);
+            resolve(initAPI(id, o.type));
+          });
           break;
       }
     });
@@ -152,8 +163,8 @@ var ICPLedger = {
   lock : (o) => {
     switch(o.type){
       case "ii":
-          authClient.logout();
-          initAPI(identity);
+          AUTH.logout();
+          initAPI(IDENTITY);
         break;
       case "private":
           localStorage.removeItem("_m");
@@ -163,7 +174,7 @@ var ICPLedger = {
   clear : (o) => {
     switch(o.type){
       case "ii":
-          authClient.logout();
+          AUTH.logout();
         break;
       case "private":
           localStorage.removeItem("_m");
@@ -174,7 +185,19 @@ var ICPLedger = {
   
   //Helpers
   p2aid : principalToAccountIdentifier,
-  getIdentity : () => identity,
+  getIdentity : () => IDENTITY,
+  isAuthenticated : (o) => {
+    switch(o.type){
+      case "ii":
+          return AUTH.isAuthenticated()
+        break;
+      case "private":
+          return new Promise((resolve, reject) => {
+            resolve(localStorage.getItem("_m") != null);
+          });
+        break;
+    }
+  },
   validateMnemonic : bip39.validateMnemonic,
   generateMnemonic : bip39.generateMnemonic,
   //Ledger API
@@ -185,9 +208,17 @@ var ICPLedger = {
       });
     });
   },
-  getTokenBalance : (tid, aid) => {
-    //TODO
-    return ICPLedger.getBalance(aid);
+  getTokenBalance : (cid, aid) => {
+    return new Promise((resolve, reject) => {
+      var _api = Actor.createActor(tokenIDL, {agent : AGENT, canisterId : cid});
+      var args = {
+        "user" : IDENTITY.getPrincipal()
+      };
+      _api.getBalanceInsecure(args).then(b => {
+        var bal = b.length == 0 ? 0 : b[0];
+        resolve(Number(bal));
+      }).catch(reject);
+    });
   },
   getTransactions : (aid, i) => {
     return new Promise((resolve, reject) => {
@@ -211,7 +242,7 @@ var ICPLedger = {
     });
   },
   transfer : async (to_aid, fee, memo, from_sub, amount) => {
-    var sargs = {
+    var args = {
       "to" : to_aid, 
       "fee" : { "e8s" : fee*100000000 }, 
       "memo" : memo, 
@@ -219,8 +250,26 @@ var ICPLedger = {
       "created_at_time" : [], 
       "amount" : { "e8s" : amount*100000000}
     };
-    var b = await API.send_dfx(sargs)
+    var b = await API.send_dfx(args)
     return b;
+  },
+  transferTokens : async (cid,to, amount) => {
+    return new Promise((resolve, reject) => {
+      var _api = Actor.createActor(tokenIDL, {agent : AGENT, canisterId : cid});
+      var args = {
+        "to" : Principal.fromText(to), 
+        "metadata" : [], 
+        "from" : IDENTITY.getPrincipal(),
+        "amount" : amount
+      };
+      _api.transfer(args).then(b => {
+        if (typeof b.ok != 'undefined') {          
+          resolve();
+        } else {
+          reject(b.err);
+        }
+      }).catch(reject);
+    });
   },
 }
 export {ICPLedger};
