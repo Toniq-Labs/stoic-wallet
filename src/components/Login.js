@@ -3,7 +3,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Card from '@material-ui/core/Card';
 import CardContent from '@material-ui/core/CardContent';
 import Button from 'react-bootstrap/Button';
-import {ICPLedger} from '../ledger.js';
+import {ICPLedger} from '../ic/ledger.js';
 import Alert from 'react-bootstrap/Alert';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
@@ -42,32 +42,30 @@ export default (props) => {
   const [mnemonic, _mnemonic] = useState("");
   const [password, _password] = useState("");
   const [cpassword, _cpassword] = useState("");
-  const [showError, _showError] = useState(false);
-  const [error, _error] = useState("");
   const [key, setKey] = useState('new');
   const [stage, _stage] = useState(0);
   const classes = useStyles();
-  function err(e){
-    _error(e);
-    _showError(true);
+  function error(e){
+    props.error(e);
   }
   function iiLogin(){
     _showIIDialog(false)
-    props.loader(true);
-    var ll = ICPLedger.setup({
-      type : 'ii'
+    props.loader(true, () => {      
+      var ll = ICPLedger.setup({
+        type : 'ii'
+      });
+      props.login(ll);
     });
-    props.login(ll);
   }
   function pkLogin(){
     if (stage === 0){
-      if (mnemonic !== dmnemonic && key === 'new') return err("Mnemonic's do not match, try again");
-      if (mnemonic === "") return err("Please enter a Mnemonic");
-      if (!ICPLedger.validateMnemonic(mnemonic))  return err("Invalid mnemonic");
+      if (mnemonic !== dmnemonic && key === 'new') return error("Mnemonic's do not match, try again");
+      if (mnemonic === "") return error("Please enter a Mnemonic");
+      if (!ICPLedger.validateMnemonic(mnemonic))  return error("Invalid mnemonic");
       _stage(1);
     } else if (stage === 1){
-      if (password.length < 8) return err("Please enter a password with at least 8 characters");
-      if (password != cpassword) return err("Your passwords do not match");
+      if (password.length < 8) return error("Please enter a password with at least 8 characters");
+      if (password != cpassword) return error("Your passwords do not match");
       _showPKDialog(false)
       props.loader(true, () => {
         var ll = ICPLedger.setup({
@@ -172,23 +170,6 @@ export default (props) => {
           </Button>
           <Button onClick={pkLogin} variant="primary">
             Continue
-          </Button>
-        </DialogActions>
-      </Dialog>
-      <Dialog
-        open={showError}
-        aria-labelledby="alert-dialog-title"
-        aria-describedby="alert-dialog-description"
-      >
-        <DialogTitle id="alert-dialog-title">{"Something went wrong"}</DialogTitle>
-        <DialogContent>
-          <DialogContentText id="alert-dialog-description">
-          {error}
-          </DialogContentText>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => _showError(false)} variant="secondary">
-            Close
           </Button>
         </DialogActions>
       </Dialog>

@@ -8,7 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from 'react-bootstrap/Button';
-import {ICPLedger} from '../ledger.js';
+import {ICPLedger} from '../ic/ledger.js';
 import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form'
 import iiimage from '../img/ii.png';
@@ -35,15 +35,8 @@ export default (props) => {
 
   const [warningDialog, _warningDialog] = useState(false);
   const [warningText, _warningText] = useState('');
-  
-  const [showError, _showError] = useState(false);
-  const [error, _error] = useState("");
 
   const classes = useStyles();
-  function err(e){
-    _error(e);
-    _showError(true);
-  }
   function warning(t, f){
     _warningText(t);
     _wfn = f;
@@ -56,8 +49,7 @@ export default (props) => {
   
   function unlock(){
     var i = props.identity;
-    props.loader(true);
-    setTimeout(() => {
+    props.loader(true, () => {
       switch(i.type){
         case "ii":
           var ll = ICPLedger.unlock(i);
@@ -69,10 +61,17 @@ export default (props) => {
       }
       props.unlock(ll);
       ll.catch(e => {
-        alert("Password incorrect or corrupted data");
+        switch(i.type){
+          case "ii":
+            alert("Error with Identity portal");
+            break;
+          case "private":
+            alert("Password incorrect or corrupted data");
+            break;
+        }
         props.loader(false);
       });
-    }, 1000)
+    });
   }
   return (
     <div>
