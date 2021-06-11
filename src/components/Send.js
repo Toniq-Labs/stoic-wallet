@@ -5,6 +5,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
 const MINFEE = 0.0001;
 const TOKENMINFEE = 1;
 export default (props) => {
@@ -73,6 +74,15 @@ export default (props) => {
   }
   return (
     <div>
+      {props.currentToken == 0 ? "" :
+        <div className="row">
+          <div className="col-md-6">
+            <Alert variant="warning">
+              Note that tokens use the <strong>Principal</strong> as an addresses. You can copy your Principal by clicking <strong>top right > Copy Principal</strong>
+            </Alert>
+          </div>
+        </div>
+      }
       <div className="row">
         <div className="col-md-4">
             <div className="form-group mb-4">
