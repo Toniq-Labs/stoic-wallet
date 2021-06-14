@@ -1,7 +1,7 @@
 {
-  "name": "sleipnir",
-  "version": "0.1.0",
-  "private": true,
+  "name": "stoic_wallet",
+  "version": "1.1.0",
+  "private": false,
   "dependencies": {
     "@dfinity/agent": "^0.8.9",
     "@dfinity/auth-client": "^0.8.9",
@@ -19,6 +19,7 @@
     "ethereum-blockies-base64": "^1.0.2",
     "json-bigint": "^1.0.0",
     "react": "^17.0.2",
+    "react-app-rewired": "^2.1.8",
     "react-bootstrap": "^1.6.0",
     "react-dom": "^17.0.2",
     "react-loading-overlay": "^1.0.1",
@@ -31,7 +32,7 @@
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build",
+    "build": "react-scripts build && serve -s build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -43,14 +44,9 @@
   },
   "browserslist": {
     "production": [
-      "Opera 39",
-      "Edge 14",
-      "Firefox 52",
-      "Safari 10.1",
-      "Node 7",
-      "ios 10.3",
-      "Electron 1.3",
-      "Chrome 52"
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
     ],
     "development": [
       "last 1 chrome version",
