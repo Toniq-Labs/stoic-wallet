@@ -253,11 +253,11 @@ const ICPLedger = {
   transfer : async (to_aid, fee, memo, from_sub, amount) => {
     var args = {
       "to" : to_aid, 
-      "fee" : { "e8s" : BigInt(fee)*100000000n }, 
+      "fee" : { "e8s" : fee*100000000 }, 
       "memo" : memo, 
       "from_subaccount" : [getSubAccountArray(from_sub)], 
       "created_at_time" : [], 
-      "amount" : { "e8s" : BigInt(amount)*100000000n}
+      "amount" : { "e8s" : amount*100000000 }
     };
     var b = await API.send_dfx(args)
     return b;
