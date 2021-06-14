@@ -6,6 +6,7 @@ import Nav from './components/Nav';
 import Sidebar from './components/Sidebar';
 import Footer from './components/Footer';
 import Send from './components/Send';
+import Cycles from './components/Cycles';
 import Balances from './components/Balances';
 import Account from './components/Account';
 import Login from './components/Login';
@@ -184,6 +185,16 @@ function App() {
   function send(toaddress, amount, fee){
     return new Promise((resolve, reject) => {
       var p = (currentToken == 0 ? ICPLedger.transfer(toaddress, fee, 0, currentAccount, amount) : ICPLedger.transferTokens(balances[currentToken].id, toaddress, amount) );
+      p.then(b => {
+        resolve(b);
+      }).catch(e => {
+        reject(e);
+      });
+    });
+  }
+  function cycles(canisterid, amount, fee){
+    return new Promise((resolve, reject) => {
+      var p = ICPLedger.convertCycles(canisterid, fee, currentAccount, amount);
       p.then(b => {
         resolve(b);
       }).catch(e => {
@@ -380,6 +391,10 @@ function App() {
                         <Tab eventKey="send" title="Send">
                           <h3>Send {balances[currentToken].symbol}</h3>
                           <Send currentToken={currentToken} loader={loader} send={send} currentBalance={balances[currentToken].amount} />
+                        </Tab>
+                        <Tab eventKey="cycles" title="Topup Canisters">
+                          <h3>Topup Canisters with ICP</h3>
+                          <Cycles currentToken={0} loader={loader} cycles={cycles} currentBalance={balances[0].amount} />
                         </Tab>
                       </Tabs>
                     </div>

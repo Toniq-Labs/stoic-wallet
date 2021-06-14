@@ -11,7 +11,8 @@ import RosettaApi from '../util/RosettaApi.js';
 const sjcl = require('sjcl')
 const bip39 = require('bip39')
 const pbkdf2 = require("pbkdf2");
-
+const LEDGERCANISTER = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+const CMINTINGCANISTER = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 const principalToAccountIdentifier = (p, s) => {
   const padding = Buffer("\x0Aaccount-id");
   const array = new Uint8Array([
@@ -28,7 +29,12 @@ const principalToAccountIdentifier = (p, s) => {
   return toHexString(array2);
 };
 const getSubAccountArray = (s) => {
-  return Array(28).fill(0).concat(to32bits(s ? s : 0))
+  if (Array.isArray(s)){
+    return s.concat(Array(32-s.length).fill(0));
+  } else {
+    //32 bit number only
+    return Array(28).fill(0).concat(to32bits(s ? s : 0))
+  }
 };
 const to32bits = num => {
   let b = new ArrayBuffer(4);
@@ -72,8 +78,14 @@ const tokenIdentifier = (principal, index) => {
   ]);
   return Principal.fromBlob(array).toText();
 };
+const getCyclesTopupAddress = (canisterId) => {
+  return principalToAccountIdentifier(CMINTINGCANISTER, getCyclesTopupSubAccount(canisterId));
+}
+const getCyclesTopupSubAccount = (canisterId) => {
+  var pb = Array.from(Principal.fromText(canisterId).toBlob());
+  return [pb.length, ...pb];
+}
 //Initiates the API
-const LEDGERCANISTER = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 var IDENTITY, API, AUTH, AGENT;
 const init = async () => {
   AUTH = await AuthClient.create();
@@ -95,7 +107,6 @@ const initAPI = (id, type) => {
 }
 const rosettaApi = new RosettaApi();
 const ICPLedger = {
-  //Identity management
   init : init,
   //When generating a new identity to use with the wallet
   setup : (o) => { //promise
@@ -262,6 +273,23 @@ const ICPLedger = {
     var b = await API.send_dfx(args)
     return b;
   },
+  notify : async (block, fee, from_sub, p, to_sub) => {
+    var args = {
+      "block_height" : block,
+      "max_fee": {e8s: fee*100000000},
+      "from_subaccount": [getSubAccountArray(from_sub)],
+      "to_subaccount": [getSubAccountArray(to_sub)],
+      "to_canister": Principal.fromText(p)
+    };
+    var r = await API.notify_dfx(args)
+    return r;
+  },
+  transferAndNotify : async (p, to_sub, fee, memo, from_sub, amount) => {
+    var b = await ICPLedger.transfer(principalToAccountIdentifier(p, to_sub), fee, memo, from_sub, amount);
+    console.log("New block added", b);
+    var r = await ICPLedger.notify(b, fee, from_sub, p, to_sub);
+    return r;
+  },
   transferTokens : async (cid,to, amount) => {
     return new Promise((resolve, reject) => {
       var _api = Actor.createActor(tokenIDL, {agent : AGENT, canisterId : cid});
@@ -280,5 +308,8 @@ const ICPLedger = {
       }).catch(reject);
     });
   },
+  convertCycles : async (cid, fee, from_sub, amount) => {
+    return await ICPLedger.transferAndNotify(CMINTINGCANISTER, getCyclesTopupSubAccount(cid), fee, 1347768404, from_sub, amount);
+  }
 }
 export {ICPLedger};
