@@ -1,3 +1,4 @@
+/* global BigInt */
 import { Actor, HttpAgent, Principal } from "@dfinity/agent";  
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { AuthClient } from "@dfinity/auth-client";
@@ -6,11 +7,11 @@ import tokenIDL from './token.did.js';
 import { getCrc32 } from '@dfinity/agent/lib/esm/utils/getCrc';
 import { sha224 } from '@dfinity/agent/lib/esm/utils/sha224';
 import RosettaApi from '../util/RosettaApi.js';
-
 //Helpers
 const sjcl = require('sjcl')
 const bip39 = require('bip39')
 const pbkdf2 = require("pbkdf2");
+
 const principalToAccountIdentifier = (p, s) => {
   const padding = Buffer("\x0Aaccount-id");
   const array = new Uint8Array([
@@ -62,7 +63,15 @@ const decrypt = (data, principal, password) => {
     });
   });
 }
-
+const tokenIdentifier = (principal, index) => {
+  const padding = Buffer("\x0Atoken-id");
+  const array = new Uint8Array([
+      ...padding,
+      ...Principal.fromText(principal).toBlob(),
+      ...to32bits(index),
+  ]);
+  return Principal.fromBlob(array).toText();
+};
 //Initiates the API
 const LEDGERCANISTER = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 var IDENTITY, API, AUTH, AGENT;
@@ -244,11 +253,11 @@ const ICPLedger = {
   transfer : async (to_aid, fee, memo, from_sub, amount) => {
     var args = {
       "to" : to_aid, 
-      "fee" : { "e8s" : fee*100000000 }, 
+      "fee" : { "e8s" : BigInt(fee)*100000000n }, 
       "memo" : memo, 
       "from_subaccount" : [getSubAccountArray(from_sub)], 
       "created_at_time" : [], 
-      "amount" : { "e8s" : amount*100000000}
+      "amount" : { "e8s" : BigInt(amount)*100000000n}
     };
     var b = await API.send_dfx(args)
     return b;
