@@ -147,7 +147,7 @@ function App() {
     appData.accounts.map((a,i) => {
       a.balances.map((b,j) => {
         if (j === 0) {
-          ICPLedger.getBalance(appData.accounts[i].address).then(_b => {
+          ICPLedger.getBalance(appData.accounts[i].address, 8).then(_b => {
             if (!ACTIVE) return false;
             if (!UNLOCKED) return false;
             ICPLedger.getTransactions(appData.accounts[i].address, i).then(ts => {
@@ -160,7 +160,7 @@ function App() {
             });
           });
         } else {
-          ICPLedger.getTokenBalance(b.id, appData.accounts[i].address).then(_b => {
+          ICPLedger.getTokenBalance(b.id, appData.accounts[i].address, appData.accounts[i].balances[j].decimals).then(_b => {
             if (!ACTIVE) return false;
             if (!UNLOCKED) return false;
             appData.accounts[i].name = appData.accounts[i].name;
@@ -182,9 +182,17 @@ function App() {
     if (fn) loaderCb = fn;
     _isLoaderActive(t);
   }
-  function send(toaddress, amount, fee){
+  function send(toaddress, amount, fee, memo){
     return new Promise((resolve, reject) => {
-      var p = (currentToken == 0 ? ICPLedger.transfer(toaddress, fee, 0, currentAccount, amount) : ICPLedger.transferTokens(balances[currentToken].id, toaddress, amount) );
+      
+      var p = (currentToken == 'icp' ? ICPLedger.transfer(toaddress, fee, memo, currentAccount, amount) : ICPLedger.transferTokens(
+        balances[currentToken].id, 
+        toaddress, 
+        fee, 
+        memo, 
+        currentAccount, 
+        amount, 
+        balances[currentToken].decimals));
       p.then(b => {
         resolve(b);
       }).catch(e => {
@@ -216,7 +224,7 @@ function App() {
     updateDb(appData.accounts);
   }
   function addToken(name, symbol, decimals, id){
-    if (currentAccount != 0) return error("This token can only be added to your main account as it is connected to your Principal (not your address)");
+    if (id == "qz7gu-giaaa-aaaaf-qaaka-cai" && currentAccount != 0) return error("HZLD can only be added to your main account as it is connected to your Principal (not your address)");
     if (appData.accounts[currentAccount].balances.findIndex(x => x.id === id) >= 0) return error("This token has already been added to this account");
     appData.accounts[currentAccount].balances.push({
       id : id,
@@ -233,6 +241,9 @@ function App() {
   }
   function changeToken(i){
     _currentToken(i);
+  }
+  function metadata(tid){
+    return ICPLedger.getTokenMetadata(tid);
   }
   function changeAccount(i){
     _currentAccount(i);
@@ -346,7 +357,7 @@ function App() {
               <div className="container-fluid px-4">
                   <Account currentAccountName={currentAccountName} updateName={updateName} accounts={accounts} currentAccount={currentAccount} setAccounts={_accounts} deleteAccount={deleteAccount}/>
                   <hr />
-                  <Balances addToken={addToken} error={error} balances={balances} currentToken={currentToken} changeToken={changeToken} />
+                  <Balances addToken={addToken} loader={loader} metadata={metadata} error={error} balances={balances} currentToken={currentToken} changeToken={changeToken} />
                   <div className="row">
                     <div className="col">
                       <Tabs defaultActiveKey="activity" id="uncontrolled-tab-example" className="mb-3">
@@ -374,10 +385,10 @@ function App() {
                               <div className="col-lg-9 col-md-7 col-sm-12 tx-2">
                                {t.from === accounts[currentAccount].address ? 
                                 <>
-                                Sent <strong>{numf(t.amount, 4)} {balances[currentToken].symbol}</strong> to {t.to} with a <strong>{t.fee} ICP</strong> Fee<br />(<a href={ "https://dashboard.internetcomputer.org/transaction/" + t.hash} target="_blank" rel="noreferrer">View Transaction</a>)
+                                Sent <strong>{numf(t.amount, 4)} {balances[currentToken].symbol}</strong> to {t.to} with a <strong>{t.fee} ICP</strong> Fee<br />(<a href={ "https://ic.rocks/transaction/" + t.hash} target="_blank" rel="noreferrer">View Transaction</a>)
                                 </> : 
                                 <>
-                                Received <strong>{numf(t.amount, 4)} {balances[currentToken].symbol}</strong> from {t.from}<br />(<a href={ "https://dashboard.internetcomputer.org/transaction/" + t.hash} target="_blank" rel="noreferrer">View Transaction</a>)
+                                Received <strong>{numf(t.amount, 4)} {balances[currentToken].symbol}</strong> from {t.from}<br />(<a href={ "https://ic.rocks/transaction/" + t.hash} target="_blank" rel="noreferrer">View Transaction</a>)
                                </>}
                               </div>
                               <div className="col-lg-2 col-md-3 col-sm-12 tx-3">
@@ -390,7 +401,7 @@ function App() {
                         </Tab>
                         <Tab eventKey="send" title="Send">
                           <h3>Send {balances[currentToken].symbol}</h3>
-                          <Send currentToken={currentToken} loader={loader} send={send} currentBalance={balances[currentToken].amount} />
+                          <Send symbol={balances[currentToken].symbol} currentToken={balances[currentToken].id ?? 'icp'} loader={loader} send={send} currentBalance={balances[currentToken].amount} />
                         </Tab>
                         <Tab eventKey="cycles" title="Topup Canisters">
                           <h3>Topup Canisters with ICP</h3>

@@ -20,12 +20,23 @@ export default (props) => {
     _tokenId("");
   }
   function addToken(){
-    //Hard card only HZLD for now
-    if (tokenId != "qz7gu-giaaa-aaaaf-qaaka-cai") return error("Sorry, this token is not compatiable at this time");
     _showToken(false);
+    //hard code in hzld
+    if (tokenId == "qz7gu-giaaa-aaaaf-qaaka-cai") {
+      props.addToken("HZLD", "HZLD", 0, tokenId);
+    } else {
+      props.loader(true);
+      props.metadata(tokenId).then(m => {
+        console.log(m);
+        if (typeof m.fungible != 'undefined'){
+          props.addToken(m.fungible.name, m.fungible.symbol, m.fungible.decimals, tokenId);
+          props.loader(false);
+        } else {
+          return error("Sorry, we do not support NFT's right now");
+        };
+      });
+    }
     _tokenId("");
-    //In future we will pull down metadata
-    props.addToken("HZLD", "HZLD", 0, tokenId);
   }
   return (
     <div className="row">

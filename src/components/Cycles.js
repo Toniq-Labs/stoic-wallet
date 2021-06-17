@@ -63,9 +63,13 @@ export default (props) => {
   }
   return (
     <div>
-      <Alert variant="warning">
-        Only use this if you want to convert ICP to cycles and send it to a canister.
-      </Alert>
+      <div className="row">
+        <div className="col-md-6">        
+          <Alert variant="warning">
+            Only use this if you want to convert ICP to cycles and send it to a canister. You can also use <a href="https://dsneu-dyaaa-aaaad-qagwa-cai.ic.fleek.co/" target="_blank">WTC</a> to power your canisters!
+          </Alert>
+        </div>
+      </div>
       <div className="row">
         <div className="col-md-4">
             <div className="form-group mb-4">
