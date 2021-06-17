@@ -21,6 +21,9 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
+//Testing
+//import {API} from './test/api.js';
+
 //Helpers
 var _defaultDb = {
   accounts : [
@@ -184,15 +187,19 @@ function App() {
   }
   function send(toaddress, amount, fee, memo){
     return new Promise((resolve, reject) => {
-      
-      var p = (currentToken == 'icp' ? ICPLedger.transfer(toaddress, fee, memo, currentAccount, amount) : ICPLedger.transferTokens(
-        balances[currentToken].id, 
-        toaddress, 
-        fee, 
-        memo, 
-        currentAccount, 
-        amount, 
-        balances[currentToken].decimals));
+        
+      var p = (currentToken == 0 ? 
+        ICPLedger.transfer(toaddress, fee, memo, currentAccount, amount) 
+      : 
+        ICPLedger.transferTokens(
+          balances[currentToken].id, 
+          toaddress, 
+          fee, 
+          memo, 
+          currentAccount, 
+          amount, 
+          balances[currentToken].decimals)
+      );
       p.then(b => {
         resolve(b);
       }).catch(e => {

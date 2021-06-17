@@ -214,6 +214,7 @@ const ICPLedger = {
     switch(o.type){
       case "ii":
         if (IDENTITY.getPrincipal().toString() != '2vxsx-fae') {
+          //Does this actually work?
           return { 
             principal : IDENTITY.getPrincipal().toString(),
             type : o.type
@@ -362,7 +363,7 @@ const ICPLedger = {
     var args = {
       "to" : to, 
       "fee" : { "e8s" : BigInt(fee*100000000) }, 
-      "memo" : memo ? BigInt(memo) : 0n, 
+      "memo" : memo ? Number(BigInt(memo)) : 0, 
       "from_subaccount" : [getSubAccountArray(from_sub)], 
       "created_at_time" : [], 
       "amount" : { "e8s" : BigInt(amount*100000000) }
