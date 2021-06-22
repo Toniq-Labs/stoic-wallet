@@ -1,38 +1,32 @@
 {
-  "name": "stoic_wallet",
-  "version": "1.1.0",
-  "private": false,
+  "name": "stoic-wallet",
+  "version": "0.1.0",
+  "private": true,
   "dependencies": {
     "@dfinity/agent": "^0.8.9",
     "@dfinity/auth-client": "^0.8.9",
-    "@fortawesome/fontawesome-svg-core": "^1.2.35",
-    "@fortawesome/free-solid-svg-icons": "^5.15.3",
-    "@fortawesome/react-fontawesome": "^0.1.14",
+    "@dfinity/identity": "^0.8.9",
+    "@fontsource/roboto": "^4.4.5",
     "@material-ui/core": "^4.11.4",
+    "@material-ui/icons": "^4.11.2",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.1",
     "bip39": "^3.0.4",
-    "bootstrap": "^5.0.1",
-    "ec-key": "0.0.4",
     "ethereum-blockies-base64": "^1.0.2",
     "json-bigint": "^1.0.0",
     "react": "^17.0.2",
-    "react-app-rewired": "^2.1.8",
-    "react-bootstrap": "^1.6.0",
     "react-dom": "^17.0.2",
-    "react-loading-overlay": "^1.0.1",
+    "react-redux": "^7.2.4",
     "react-scripts": "4.0.3",
     "react-timestamp": "^5.1.0",
-    "serve": "^12.0.0",
     "sjcl": "^1.0.8",
-    "use-state-with-callback": "^2.0.3",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
-    "build": "react-scripts build && serve -s build",
+    "build": "react-scripts build",
     "test": "react-scripts test",
     "eject": "react-scripts eject"
   },
@@ -53,5 +47,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "redux": "^4.1.0"
   }
 }
