@@ -42,10 +42,10 @@ export default function Transactions(props) {
     intervalId = setInterval(fetchTx, 10000);
   };
   const fetchTx = () => {
-    console.log("Fetching for " + props.data.id);
+    //console.log("Fetching for " + props.data.id);
     updateTransactions(props.data.id, props.address).then(txs => {
-      console.log("Fetched for " + txs[1]);
-      console.log("Current " + props.data.id);
+      //console.log("Fetched for " + txs[1]);
+      //console.log("Current " + props.data.id);
       if (txs[1] != props.data.id || txs[2] != props.address) return;
       setTransactions(txs[0]);
     });

@@ -7,6 +7,7 @@ import RosettaApi from './RosettaApi.js';
 import ledgerIDL from './candid/ledger.did.js';
 import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import extIDL from './candid/ext.did.js';
+import governanceIDL from './candid/governance.did.js';
 
 const LEDGER_CANISTER_ID = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 const CYCLES_MINTING_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
@@ -55,12 +56,21 @@ const getCyclesTopupSubAccount = (canisterId) => {
 }
 
 
-//Add way to preload other idls
-//TODO download idls
+//Preload IDLS against a common name
+const _preloadedIdls = {
+  'governance' : governanceIDL,
+  'ledger' : ledgerIDL,
+  'hzld' : hzldIDL,
+  'ext' : extIDL,
+  'default' : extIDL,
+};
+
 class ExtConnection {
-  _preloadedIdls = {
-    "ryjl3-tyaaa-aaaaa-aaaba-cai" : ledgerIDL,
-    "qz7gu-giaaa-aaaaf-qaaka-cai" : hzldIDL,
+  //map known canisters to preloaded IDLs
+  _mapIdls = {
+    "ryjl3-tyaaa-aaaaa-aaaba-cai" : _preloadedIdls['ledger'],
+    "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
+    "rrkah-fqaaa-aaaaa-aaaaq-cai" : _preloadedIdls['governance'],
   };
   _metadata = {
     LEDGER_CANISTER_ID : {
@@ -73,11 +83,16 @@ class ExtConnection {
   _host = false;
   _agent = false;
   _canisters = {};
+  
   constructor(host, identity) {
     if (identity) this._identity = identity;
     if (host) this._host = host;
     this._makeAgent();
   }
+  idl(canister, idl) {
+    //Map a canister to a preloaded idl
+    this._mapIdls[canister] = idl;
+  };
   setIdentity(identity) {
     if (identity) this._identity = identity;
     else this._identity = false;
@@ -92,10 +107,19 @@ class ExtConnection {
   }
   canister(cid, idl) {
     if (!idl){
-      if (this._preloadedIdls.hasOwnProperty(cid)) {
-        idl = this._preloadedIdls[cid];
+      if (this._mapIdls.hasOwnProperty(cid)) {
+        idl = this._mapIdls[cid];
       } else {
-        idl = extIDL;
+        //Resort to default IDLS
+        //todo: Look into loading IDLs on the fly
+        idl = _preloadedIdls['default'];
+      }
+    } else if (typeof idl == 'string') {
+      if (_preloadedIdls.hasOwnProperty(idl)) {
+        idl = _preloadedIdls[idl];
+      } else {
+        throw idl + " is not a preloaded IDL";
+        return false;
       }
     }
     if (!this._canisters.hasOwnProperty(cid)){
@@ -107,11 +131,12 @@ class ExtConnection {
     if (!tid) tid = LEDGER_CANISTER_ID;//defaults to ledger
     var tokenObj = decodeTokenId(tid);
     if (!idl) {
-      if (this._preloadedIdls.hasOwnProperty(tokenObj.canister)) idl = this._preloadedIdls[tokenObj.canister];
-      else idl = extIDL; //ext is our token default...
+      if (this._mapIdls.hasOwnProperty(tokenObj.canister)) idl = this._mapIdls[tokenObj.canister];
+      else idl = _preloadedIdls['ext']; //ext is our token default...
     }
     var api = this.canister(tokenObj.canister, idl);
     return {
+      call : api,
       fee : () => {
         return new Promise((resolve, reject) => {
           switch(tokenObj.canister) {
@@ -313,3 +338,5 @@ const extjs = {
   connect : (identity, host) => new ExtConnection(identity, host)
 };
 export default extjs;
+
+
