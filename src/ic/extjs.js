@@ -54,7 +54,15 @@ const getCyclesTopupSubAccount = (canisterId) => {
   var pb = Array.from(Principal.fromText(canisterId).toBlob());
   return [pb.length, ...pb];
 }
-
+const amountToBigInt = (amount, decimals) => {
+  //decimals = decimals ?? 8;
+  if (amount < 1) {
+    amount = BigInt(amount*(10**decimals));
+  } else {
+    amount = BigInt(amount)*BigInt(10**decimals)
+  }
+  return amount;
+}
 
 //Preload IDLS against a common name
 const _preloadedIdls = {
@@ -244,6 +252,7 @@ class ExtConnection {
                     fee : Number(_t.fee)/(10**8),
                     hash : _t.hash,
                     timestamp : _t.timestamp,
+                    memo : Number(_t.memo),
                   });
                 });
                 resolve(_ts);
@@ -319,9 +328,37 @@ class ExtConnection {
           }
         });
       },
-      //TODO
-      mintCycles : () => {
+      mintCycles : (from_principal, from_sa, canister, amount, fee) => {
         return new Promise((resolve, reject) => {
+          switch(tokenObj.canister) {
+            case LEDGER_CANISTER_ID:
+              var _to_sub = getCyclesTopupSubAccount(canister);
+              var _to = principalToAccountIdentifier(CYCLES_MINTING_CANISTER_ID, _to_sub);
+              var args = {
+                "from_subaccount" : [getSubAccountArray(from_sa ?? 0)], 
+                "to" : _to, 
+                "fee" : { "e8s" : amountToBigInt(fee, 8) }, 
+                "memo" : Number(BigInt("0x50555054")), 
+                "created_at_time" : [], 
+                "amount" : { "e8s" : amountToBigInt(amount, 8) }
+              };
+              api.send_dfx(args).then(block => {
+                var args = {
+                  "block_height" : block,
+                  "max_fee": {e8s: amountToBigInt(fee, 8)},
+                  "from_subaccount": [getSubAccountArray(from_sa ?? 0)],
+                  "to_subaccount": [getSubAccountArray(_to_sub)],
+                  "to_canister": Principal.fromText(CYCLES_MINTING_CANISTER_ID)
+                };
+                api.notify_dfx(args).then(resolve).catch(reject);
+              }).catch(reject);
+            break;
+            case "5ymop-yyaaa-aaaah-qaa4q-cai"://WTC
+            break;
+            default:
+              reject("Cycle topup is not supported by this token");
+            break;
+          }
         });
       }
     };

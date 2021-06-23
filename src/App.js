@@ -9,6 +9,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import {StoicIdentity} from './ic/identity.js';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
+import NeuronManager from './ic/neuron.js';
 
 const useStyles = makeStyles((theme) => ({
   backdrop: {

@@ -98,7 +98,7 @@ export default function Transactions(props) {
                   <TableCell>
                     {tx.from == props.address ?
                       <>Sent <strong>{tx.amount} {props.data.symbol}</strong> to {tx.to} with a <strong>{tx.fee} {props.data.symbol}</strong> Fee<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank">View Transaction</a>)</> :
-                      <>Received <strong>{tx.amount} {props.data.symbol}</strong> from {tx.from}<br />(<a href="https://ic.rocks/transaction/771f1ebeb599d34429cff7d7a5148864d238a0e4081166f50ac20e401d6e1b26" target="_blank">View Transaction</a>)</> }
+                      <>Received <strong>{tx.amount} {props.data.symbol}</strong> from {tx.from}<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank">View Transaction</a>)</> }
                   </TableCell>
                   <TableCell align="right">
                     {tx.from == props.address ? 

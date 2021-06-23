@@ -4,6 +4,7 @@ import {principalToAccountIdentifier} from './ic/utils.js';
 var appData = {
   principals : [],
   addresses : [],
+  neurons : [],
   currentPrincipal : 0,
   currentAccount : 0,
   currentToken : 0,
@@ -22,14 +23,19 @@ function initDb(){
     }
     if (db.length == 2) {
       db[2] = [0,0,0];
+      db[3] = [];
       savenow = true;
     }
-    
+    if (db.length == 3) {
+      db[3] = [];
+      savenow = true;
+    }
     
     appData.currentPrincipal = db[2][0];
     appData.currentAccount = db[2][1];
     appData.currentToken = db[2][2];
     appData.addresses = db[1];
+    appData.neurons = db[3];
     db[0].map(principal => {
       var _principal = {
         accounts : [],
@@ -74,7 +80,7 @@ function newDb(identity){
       ],
       identity : identity
     }
-  ],[],[0,0,0]];
+  ],[],[0,0,0],[]];
   localStorage.setItem('_db', JSON.stringify(tc));
   return initDb();
 }
@@ -83,6 +89,7 @@ function clearDb(){
   var clearState = {
     principals : [],
     addresses : [],
+    neurons : [],
     currentPrincipal : 0,
     currentAccount : 0,
     currentToken : 0,
@@ -91,7 +98,7 @@ function clearDb(){
   return clearState;
 }
 function saveDb(newState){
-  var updatedDb = [[], newState.addresses,[appData.currentPrincipal, appData.currentAccount, appData.currentToken]];
+  var updatedDb = [[], newState.addresses,[newState.currentPrincipal, newState.currentAccount, newState.currentToken], newState.neurons];
   
   newState.principals.map(principal => {
     var _p = {
@@ -122,6 +129,10 @@ function saveDb(newState){
 initDb();
 function rootReducer(state = appData, action) {
   switch(action.type){
+    case "neuron/add": //TODO
+    break;
+    case "neuron/update": //TODO
+    break;
     case "removewallet":
       return clearDb();
     break;
