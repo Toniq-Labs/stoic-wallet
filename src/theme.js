@@ -18,6 +18,14 @@ const theme = createMuiTheme({
     },
   },
   overrides: {
+    MuiCssBaseline: {
+      "@global": {
+        body: {
+          backgroundImage:
+            "url(./bg.png)"
+        }
+      }
+    },
     MuiIconButton: {
       label : {
         color : "#00b894"

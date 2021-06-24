@@ -14,6 +14,7 @@ import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import VisibilityIcon from '@material-ui/icons/Visibility';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
+import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
 import {StoicIdentity} from '../ic/identity.js';
 
@@ -65,7 +66,13 @@ export default function WalletDialog(props) {
     setRoute("address");
     type = 'watch';
   }
-  
+  const showPem = () => {
+    return error("PEM file support is still being worked on!");
+    //todo file picker
+    //type = 'pem';
+    //submit();
+    
+  }
   const confirmAddress = () => {
     if (!StoicIdentity.validatePrincipal(address)) return error("Please enter a valid principal");
     submit();
@@ -88,6 +95,9 @@ export default function WalletDialog(props) {
         t = 'private';
         od.mnemonic = mnemonic;
         od.password = password;
+      break;
+      case "pem":
+        t = "pem";
       break;
       case "watch":
         t = 'watch';
@@ -143,6 +153,16 @@ export default function WalletDialog(props) {
                 <ListItemText 
                   primary="Import using a seed phrase" 
                   secondary="Enter your mnemonic seed to recover full access to your wallet" 
+                />
+                
+              </ListItem>
+              <ListItem button onClick={showPem}>
+                <ListItemIcon>
+                  <InsertDriveFileIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Import using a PEM file" 
+                  secondary="If you have a PEM private key file you can import your wallet here" 
                 />
                 
               </ListItem>

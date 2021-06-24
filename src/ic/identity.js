@@ -2,13 +2,14 @@
 import { Principal } from "@dfinity/agent";  
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { AuthClient } from "@dfinity/auth-client";
+import { Secp256k1KeyIdentity } from "./secp256k1.js";
 import { 
   mnemonicToId, 
   validatePrincipal, 
   encrypt, 
   decrypt, 
+  fromHexString, 
   bip39 } from "./utils.js";
-
 var identities = {};
 const processId = (id, type) => {
   var p = id.getPrincipal().toString();
@@ -53,6 +54,10 @@ const StoicIdentity = {
             resolve(processId(id, type));        
           });
         break;
+        case "pem":
+          var id = Secp256k1KeyIdentity.generate(optdata.pem);
+          resolve(processId(id, type));
+        break;
         case "watch":
           resolve({
             principal : optdata.principal,
@@ -89,6 +94,7 @@ const StoicIdentity = {
           });   
         break;
       }
+      reject();
     });
   },
   unlock : (_id, optdata) => {
@@ -129,6 +135,10 @@ const StoicIdentity = {
               resolve(processId(id, _id.type));
             }).catch(reject);
             break;
+          case "pem":
+            var id = Secp256k1KeyIdentity.generate(optdata.pem);
+            resolve(processId(id, _id.type));
+          break;
         }
       });
     });
@@ -185,5 +195,4 @@ const StoicIdentity = {
     return re.test(p);
   }
 }
-window.StoicIdentity = StoicIdentity;
 export {StoicIdentity};

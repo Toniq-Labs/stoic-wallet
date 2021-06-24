@@ -67,7 +67,7 @@ function Connect(props) {
   return (
     <>
       <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Stoic Wallet</DialogTitle>
+        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}><img style={{maxHeight:'80px',marginTop:'5px'}} alt="Stoic Wallet by Toniq Labs" src="logo.png" /></DialogTitle>
         <DialogContent>
           <ConnectList handler={handleClick} />
         </DialogContent>

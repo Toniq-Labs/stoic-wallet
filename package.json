@@ -13,6 +13,7 @@
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
     "axios": "^0.21.1",
+    "bigint-conversion": "^2.1.12",
     "bip39": "^3.0.4",
     "ethereum-blockies-base64": "^1.0.2",
     "json-bigint": "^1.0.0",
@@ -22,6 +23,7 @@
     "react-scripts": "4.0.3",
     "react-timestamp": "^5.1.0",
     "sjcl": "^1.0.8",
+    "starkbank-ecdsa": "^1.1.2",
     "web-vitals": "^1.0.1"
   },
   "scripts": {

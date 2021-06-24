@@ -38,6 +38,7 @@ identityTypes = {
   'ii' : "Internet Identity",
   'private' : "Mnemonic Key",
   'watch' : "Read-only",
+  'pem' : "PEM Import",
 },
 clipboardCopy = (text) => {
   if (!navigator.clipboard) {

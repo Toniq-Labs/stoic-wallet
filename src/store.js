@@ -139,6 +139,12 @@ function rootReducer(state = appData, action) {
     case "createwallet":
       return newDb(action.payload.identity);
     break;
+    case "deletewallet":
+      return saveDb({
+        ...state,
+        principals : state.principals.filter((e,i) => i !== action.payload.index)
+      });
+    break;
     case "addwallet": //TODO
       var cp = state.principals.length;
       return saveDb({

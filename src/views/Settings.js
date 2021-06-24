@@ -63,8 +63,11 @@ function Settings(props) {
     }
   }
   const changePrincipal = (p) => {
-    dispatch({ type: 'currentPrincipal', payload : {index : p}});
-    props.lockWallet();
+    props.confirm("Please confirm", "You are about to lock your current Principal and switch to another one. Are you sure you want to continue?").then(v => {
+      StoicIdentity.lock(principals[currentPrincipal].identity).then(r => {      
+        dispatch({ type: 'currentPrincipal', payload : {index : p}});
+      });
+    });
   }
   const submit = (type, optdata) => {
     props.loader(true);
@@ -87,8 +90,13 @@ function Settings(props) {
     });
     setAssets(assets);
   }
+  const deletePrincipal = (i) => {
+    props.confirm("Please confirm", "You are about to remove this Principal, which will remove all data regarding this wallet from this device. Are you sure you want to continue?").then(v => {
+      dispatch({ type: 'deletewallet', payload : {index : i}});
+    });
+  };
   const clearWallet = () => {
-    props.confirm("Please confirm", "You are about to clear your wallet, which will remove all data from this device. Are you sure you want to continue?").then(v => {
+    props.confirm("Please confirm", "You are about to clear your wallet, which will remove ALL data from this device. Are you sure you want to continue?").then(v => {
       if (v) props.clearWallet();
     });
   };
@@ -141,10 +149,6 @@ function Settings(props) {
             <IconButton href={"https://ic.rocks/principal/"+identity.principal} target="_blank" edge="end" aria-label="search">
               <LaunchIcon />
             </IconButton>
-            { principals.length > 1 ?
-            <IconButton edge="end" aria-label="search">
-              <DeleteIcon />
-            </IconButton> : "" }
           </ListItemSecondaryAction>
         </ListItem>
       </List>
@@ -162,7 +166,7 @@ function Settings(props) {
           {principals.map((principal, i) => {
             if (i == currentPrincipal) return;
             return (
-            <ListItem button onClick={() => changePrincipal(i)}>
+            <ListItem key={principal.identity.principal} button onClick={() => changePrincipal(i)}>
               <ListItemAvatar>
                 <Avatar>
                   <Blockie address={principal.identity.principal ?? ''} />
@@ -176,6 +180,15 @@ function Settings(props) {
                     <>{identityTypes[principal.identity.type]}</>
                   </>
                 } />
+                <ListItemSecondaryAction>
+            <IconButton href={"https://ic.rocks/principal/"+principal.identity.principal} target="_blank" edge="end" aria-label="search">
+              <LaunchIcon />
+            </IconButton>
+            { principals.length > 1 ?
+            <IconButton onClick={() => deletePrincipal(i)} edge="end" aria-label="search">
+              <DeleteIcon />
+            </IconButton> : "" }
+          </ListItemSecondaryAction>
             </ListItem>) 
           })}
         </List>
@@ -196,7 +209,7 @@ function Settings(props) {
         <ListItem button onClick={clearWallet}>
           <ListItemText 
             primaryTypographyProps={{noWrap:true, color : "error"}} 
-            primary="Remove this wallet from this device"/>
+            primary="Remove all wallets from this device"/>
         </ListItem>
       </List>
       <WalletDialog alert={props.alert} initialRoute={initialRoute} cancel={cancel} submit={submit} />
