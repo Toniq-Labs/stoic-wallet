@@ -19,8 +19,8 @@ export default function ConnectList(props) {
           <AddIcon />
         </ListItemIcon>
         <ListItemText 
-          primary="Create a new Wallet" 
-          secondary="I want to create a new wallet by generating a random seed phrase" 
+          primary={props.add ? "Add a new Wallet" : "Create a new Wallet" }
+          secondary={props.add ? "I want to add a new wallet by generating a random seed phrase" : "I want to create a new wallet by generating a random seed phrase" }
         />
         
       </ListItem>
@@ -29,8 +29,8 @@ export default function ConnectList(props) {
           <GetAppIcon />
         </ListItemIcon>
         <ListItemText 
-          primary="Import an existing Wallet" 
-          secondary="I want to recover an existing wallet using a seed phrase"
+          primary={props.add ? "Add an existing Wallet" : "Import an existing Wallet" }
+          secondary={props.add ? "I want to recover and add an existing wallet using a seed phrase, or as a read-only wallet" : "I want to recover an existing wallet using a seed phrase"}
         />
       </ListItem>
       <ListItem button onClick={() => handleClick('link') }>
@@ -38,8 +38,8 @@ export default function ConnectList(props) {
           <AllInclusiveIcon />
         </ListItemIcon>
         <ListItemText 
-          primary="Link your Internet Identitiy" 
-          secondary="I want to link create a wallet using an Internet Identity" 
+          primary={props.add ? "Link your Internet Identitiy" : "Link your Internet Identitiy" }
+          secondary={props.add ? "I want to link another Wallet using an Internet Identity" : "I want to link a Wallet using an Internet Identity" }
         />
       </ListItem>
       <ListItem button onClick={() => handleClick('connect') }>
@@ -47,8 +47,8 @@ export default function ConnectList(props) {
           <UsbIcon />
         </ListItemIcon>
         <ListItemText 
-          primary="Connect Hardware Wallet" 
-          secondary="I want to import a wallet from my Ledger or Trezor device" 
+          primary={props.add ? "Connect Hardware Wallet" : "Connect Hardware Wallet" }
+          secondary={props.add ? "I want to import another Wallet from my Ledger or Trezor device" : "I want to import a wallet from my Ledger or Trezor device" }
         />
       </ListItem>
     </List>

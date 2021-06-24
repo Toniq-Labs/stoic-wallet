@@ -110,7 +110,7 @@ export default function WalletDialog(props) {
     <>
       { route == 'tips' ?
       <>
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open>
+        <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Security Tips</DialogTitle>
           <DialogContent>
             <p><strong>Things to keep in mind to increase the security of your funds:</strong></p>
@@ -132,7 +132,7 @@ export default function WalletDialog(props) {
       </>:""}
       { route == 'import' ?
       <>
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open>
+        <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Select Import Type</DialogTitle>
           <DialogContent>
             <List component="nav" aria-label="secondary add principal">
@@ -164,7 +164,7 @@ export default function WalletDialog(props) {
       </>:""}
       { route == 'newMnemonic' ?
       <>
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open>
+        <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Write down your seed phrase</DialogTitle>
           <DialogContent>
             <p><strong>This is your 12 word seed phrase:</strong></p>
@@ -183,7 +183,7 @@ export default function WalletDialog(props) {
       </>:""}
       { route == 'confirmMnemonic' ?
       <>
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open>
+        <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Confirm your mnemonic seed</DialogTitle>
           <DialogContent>
             <p><strong>Please confirm your 12 word seed phrase:</strong></p>
@@ -205,7 +205,7 @@ export default function WalletDialog(props) {
       </>:""}
       { route == 'address' ?
       <>
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open>
+        <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Enter the Principal to watch</DialogTitle>
           <DialogContent>
             <p><strong>Please enter a valid Principal (e.g. 4opr7-aaepd-uw2ok...)</strong></p>
@@ -226,10 +226,18 @@ export default function WalletDialog(props) {
       </>:""}
       { route == 'passwords' ?
       <>
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open>
+        <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Enter a password</DialogTitle>
           <DialogContent>
-            <p><strong>This password is used to further encrypt your private data on your device.</strong></p>
+            <p><strong>This password is used to further encrypt your private data on your device. Passwords must contain:</strong></p>
+            <p>
+              <ul>
+                <li>At least 8 characters</li>
+                <li>At least one uppercase letter</li>
+                <li>At least one lowercase letter</li>
+                <li>At least one number</li>
+              </ul>
+            </p>
             <TextField
               id="standard-textarea"
               label="Enter Password"

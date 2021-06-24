@@ -41,7 +41,15 @@ const StoicIdentity = {
           localStorage.setItem('_m', optdata.mnemonic);
           var id = mnemonicToId(optdata.mnemonic);
           encrypt(optdata.mnemonic, id.getPrincipal().toString(), optdata.password).then(_em => {
-            localStorage.setItem('_em', _em);
+            var ems = localStorage.getItem('_em');
+            if (!ems) {
+              ems = {};
+              ems[id.getPrincipal().toString()] = _em;
+            } else {
+              ems = JSON.parse(ems);
+              ems[id.getPrincipal().toString()] = _em;
+            }
+            localStorage.setItem('_em', JSON.stringify(ems));
             resolve(processId(id, type));        
           });
         break;
@@ -101,8 +109,21 @@ const StoicIdentity = {
             break;
           case "private":
             var t = localStorage.getItem('_em');
-            if (!t) return reject("No encrypted data to decrypt");
-            decrypt(t, _id.principal, optdata.password).then(mnemonic => {
+            if (!t) return reject("No encrypted seed to decrypt");
+            var ems = JSON.parse(t);
+            var em;
+            if (ems.hasOwnProperty("iv") == true) {
+              //old format
+              //convert to new?
+              em = JSON.stringify(ems);
+              var nems = {};
+              nems[_id.principal] = em;
+              localStorage.setItem('_em', JSON.stringify(nems));
+            } else {
+              if (ems.hasOwnProperty(_id.principal) == false) reject("No encrypted seed to decrypt");
+              em = ems[_id.principal];
+            }
+            decrypt(em, _id.principal, optdata.password).then(mnemonic => {
               localStorage.setItem('_m', mnemonic);
               var id = mnemonicToId(mnemonic);
               resolve(processId(id, _id.type));
@@ -139,6 +160,21 @@ const StoicIdentity = {
           break;
       }
       resolve(true);
+    });
+  },
+  change : (_id, type, optdata) => {
+    return new Promise(async (resolve, reject) => {
+      switch(_id.type){
+        case "ii":
+            var auth = await AuthClient.create();
+            auth.logout();
+          break;
+        case "private":
+            localStorage.removeItem("_m");
+          break;
+      }
+      //setup new
+      StoicIdentity.setup(type, optdata).then(resolve).catch(reject);
     });
   },
   validatePrincipal : validatePrincipal,

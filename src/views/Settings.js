@@ -21,16 +21,63 @@ import IconButton from '@material-ui/core/IconButton';
 import LaunchIcon from '@material-ui/icons/Launch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { clipboardCopy, identityTypes } from '../utils';
+import {StoicIdentity} from '../ic/identity.js';
 
 import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
+import ConnectList from '../components/ConnectList';
+import WalletDialog from '../components/WalletDialog';
 
 function Settings(props) {
   const [assets, setAssets] = React.useState([]);
+  const [initialRoute, setInitialRoute] = React.useState('');
+  const dispatch = useDispatch()
   const currentPrincipal = useSelector(state => state.currentPrincipal)
   const accounts = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts : []));
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const principals = useSelector(state => state.principals);
+  const error = (e) => {
+    props.alert("There was an error", e);
+  }
+  const connectList = (t) => {  
+    switch(t) {
+      case "create":
+        setInitialRoute('tips');
+      break;
+      case "import":
+        setInitialRoute('import');
+      break;
+      case "link":
+        props.loader(true);
+        StoicIdentity.change(identity, "ii").then(identity => {
+          dispatch({ type: 'addwallet', payload : {identity : identity}});
+          props.loader(false);
+        }).catch(e => {
+          props.loader(false);
+        })
+      break;
+      case "connect":
+        //Show error
+        error("Hardware wallet support is coming soon!")
+      break;
+    }
+  }
+  const changePrincipal = (p) => {
+    dispatch({ type: 'currentPrincipal', payload : {index : p}});
+    props.lockWallet();
+  }
+  const submit = (type, optdata) => {
+    props.loader(true);
+    StoicIdentity.change(identity, type, optdata).then(identity => {
+      dispatch({ type: 'addwallet', payload : {identity : identity}});
+      props.loader(false);
+    }).catch(e => {
+      props.loader(false);
+    })
+  };
+  const cancel = (t) => {
+    setInitialRoute('');
+  };
   const makeAssets = () => {  
     var assets = ['ICP'];
     accounts.map(account => {
@@ -115,7 +162,7 @@ function Settings(props) {
           {principals.map((principal, i) => {
             if (i == currentPrincipal) return;
             return (
-            <ListItem button>
+            <ListItem button onClick={() => changePrincipal(i)}>
               <ListItemAvatar>
                 <Avatar>
                   <Blockie address={principal.identity.principal ?? ''} />
@@ -133,47 +180,10 @@ function Settings(props) {
           })}
         </List>
         <Divider /> </>: "" }
-        {/*
-      <List component="nav" aria-label="secondary add principal">
-        <ListItem button>
-          <ListItemIcon>
-            <AddIcon />
-          </ListItemIcon>
-          <ListItemText 
-            primary="Create Principal" 
-            secondary="I want to create a new account by generating a random seed phrase" 
-          />
-        </ListItem>
-        <ListItem button>
-          <ListItemIcon>
-            <GetAppIcon />
-          </ListItemIcon>
-          <ListItemText 
-            primary="Import Principal" 
-            secondary="I want to add an existing account using a seed phrase, or as a 'read-only' account" 
-          />
-        </ListItem>
-        <ListItem button>
-          <ListItemIcon>
-            <AllInclusiveIcon />
-          </ListItemIcon>
-          <ListItemText 
-            primary="Link Internet Identitiy" 
-            secondary="I want to link create an account using an Internet Identity" 
-          />
-        </ListItem>
-        <ListItem button>
-          <ListItemIcon>
-            <UsbIcon />
-          </ListItemIcon>
-          <ListItemText 
-            primary="Connect Hardware Wallet" 
-            secondary="I want to import an account from my Ledger or Trezor device" 
-          />
-        </ListItem>
-      </List>
+        
+      <ConnectList add handler={connectList} />
       <Divider />
-      */}
+      
       <List
         component="nav"
         aria-labelledby="settings-list"
@@ -189,6 +199,7 @@ function Settings(props) {
             primary="Remove this wallet from this device"/>
         </ListItem>
       </List>
+      <WalletDialog alert={props.alert} initialRoute={initialRoute} cancel={cancel} submit={submit} />
     </>
   );
 }

@@ -139,6 +139,34 @@ function rootReducer(state = appData, action) {
     case "createwallet":
       return newDb(action.payload.identity);
     break;
+    case "addwallet": //TODO
+      var cp = state.principals.length;
+      return saveDb({
+        ...state,
+        principals : [
+          ...state.principals,
+          {
+            accounts : [
+              {
+                name : "Main",
+                address : principalToAccountIdentifier(action.payload.identity.principal, 0),
+                tokens : [
+                  {
+                    id : "ryjl3-tyaaa-aaaaa-aaaba-cai",
+                    name : "Internet Computer",
+                    symbol : "ICP",
+                    decimals : 8,
+                    type : 'fungible',
+                  }
+                ]
+              }
+            ],
+            identity : action.payload.identity
+          },
+        ],
+        currentPrincipal : cp
+      });
+    break;
     case "currentPrincipal":
       return saveDb({
         ...state,
@@ -159,8 +187,6 @@ function rootReducer(state = appData, action) {
         ...state,
         currentToken : action.payload.index
       });
-    break;
-    case "principal/add": //TODO
     break;
     case "account/edit":
       return saveDb({

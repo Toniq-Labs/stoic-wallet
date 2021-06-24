@@ -72,7 +72,7 @@ function Connect(props) {
           <ConnectList handler={handleClick} />
         </DialogContent>
       </Dialog>
-      <WalletDialog alert={props.alert} initialRoute={initialRoute} cancel={cancel} submit={submit} />
+      <WalletDialog hideBackdrop alert={props.alert} initialRoute={initialRoute} cancel={cancel} submit={submit} />
     </>
   );
 }
