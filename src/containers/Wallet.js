@@ -88,6 +88,9 @@ function Wallet(props) {
       case "settings":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader, clearWallet : clearWallet, lockWallet : lockWallet})
       break;
+      case "neurons":
+        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
+      break;
       default:
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm})
       break;
