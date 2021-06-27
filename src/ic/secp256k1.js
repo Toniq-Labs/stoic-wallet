@@ -50,21 +50,20 @@ export class Secp256k1PublicKey {
     }
 }
 export class Secp256k1KeyIdentity extends SignIdentity {
-    // `fromRaw` and `fromDer` should be used for instantiation, not this constructor.
     constructor(publicKey, _privateKey) {
         super();
         this._privateKey = _privateKey;
         this._publicKey = Secp256k1PublicKey.fromRaw(publicKey);
     }
-    static generate(pem) {
+    static fromPem(pem) {
         let publicKey, secretKey;
         if (pem) {
           secretKey = PrivateKey.fromPem(pem);
         } else {
-          secretKey = PrivateKey.fromPem();
+          throw "Error";
         }
         publicKey = secretKey.publicKey();
-        return new this(Secp256k1PublicKey.fromDer(publicKey.toDer()), secretKey);
+        return new this(Secp256k1PublicKey.fromRaw(publicKey), secretKey);
     }
     static fromParsedJson(obj) {
         const [publicKeyDer, privateKeyDer] = obj;

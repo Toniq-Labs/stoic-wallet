@@ -17,6 +17,7 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Blockie from '../components/Blockie';
+import { useFilePicker } from 'use-file-picker';
 import { identityTypes } from '../utils';
 
 function Unlock(props) {
@@ -27,6 +28,25 @@ function Unlock(props) {
   const [changeDialog, setChangeDialog] = React.useState(false);
   const [password, setPassword] = React.useState('');
   const dispatch = useDispatch()
+  const [openFileSelector, fsobj] = useFilePicker({
+    accept: '.pem',
+    multiple: false,
+  });
+  React.useEffect(() => {
+    if (fsobj.filesContent.length > 0) {
+      var od = {
+        pem : fsobj.filesContent[0].content
+      }
+      fsobj.clear();
+      StoicIdentity.unlock(identity, od).then(r => {
+        props.login();
+      }).catch(e => {
+        console.log(e);
+      }).finally(() => {
+        setOpen(true)
+      });
+    }
+  }, [fsobj.filesContent]);
   const error = (e) => {
     props.alert("There was an error", e);
   }
@@ -58,20 +78,21 @@ function Unlock(props) {
     });
   }
   const pemLogin = () => {
+    openFileSelector();
     
   }
   const iiLogin = () => {
     props.loader(true);
     setOpen(false);
     
-    StoicIdentity.unlock(identity).then(r => {
-      props.login();
-    }).catch(e => {
-      console.log(e);
-    }).finally(() => {
-      setOpen(true)
-      props.loader(false)
-    });
+        StoicIdentity.unlock(identity).then(r => {
+          props.login();
+        }).catch(e => {
+          console.log(e);
+        }).finally(() => {
+          setOpen(true)
+          props.loader(false)
+        });
   };
   return (
     <>

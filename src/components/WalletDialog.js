@@ -17,7 +17,7 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
 import {StoicIdentity} from '../ic/identity.js';
-
+import { useFilePicker } from 'use-file-picker';
 const tips = [
   "When accessing this wallet, always type the URL into the browser address bar yourself or use a bookmark that you yourself created. Never trust links posted on social media, in search results, sent in emails or listed on other websites.",
   "If your browser gives you any sort of security warning about this web wallet, get in touch with us and report it. Do not ignore the warning nor enter your mnemonic secret!",
@@ -34,6 +34,19 @@ export default function WalletDialog(props) {
   const [password2, setPassword2] = React.useState('');
   const [address, setAddress] = React.useState('');
   const [tipsIndex, setTipsIndex] = React.useState(1);
+  const [openFileSelector, { filesContent, clear }] = useFilePicker({
+    accept: '.pem',
+    multiple: false,
+  });
+  React.useEffect(() => {
+    if (filesContent.length > 0) {
+      var od = {
+        pem : filesContent[0].content
+      }
+      clear();
+      props.submit("pem",od);
+    }
+  }, [filesContent]);
   React.useEffect(() => {
     setRoute(props.initialRoute);
   }, [props.initialRoute]);
@@ -67,10 +80,7 @@ export default function WalletDialog(props) {
     type = 'watch';
   }
   const showPem = () => {
-    return error("PEM file support is still being worked on!");
-    //todo file picker
-    //type = 'pem';
-    //submit();
+    openFileSelector();
     
   }
   const confirmAddress = () => {
@@ -95,9 +105,6 @@ export default function WalletDialog(props) {
         t = 'private';
         od.mnemonic = mnemonic;
         od.password = password;
-      break;
-      case "pem":
-        t = "pem";
       break;
       case "watch":
         t = 'watch';

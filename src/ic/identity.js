@@ -19,6 +19,9 @@ const processId = (id, type) => {
     type : type
   }
 }
+const isLoaded = (p) => {
+  return (identities.hasOwnProperty(p));
+};
 const StoicIdentity = {
   getIdentity : (principal) => {
     if (!identities.hasOwnProperty(principal)) return false;
@@ -55,7 +58,7 @@ const StoicIdentity = {
           });
         break;
         case "pem":
-          var id = Secp256k1KeyIdentity.generate(optdata.pem);
+          var id = Secp256k1KeyIdentity.fromPem(optdata.pem);
           resolve(processId(id, type));
         break;
         case "watch":
@@ -73,19 +76,33 @@ const StoicIdentity = {
         case "ii":
           var auth = await AuthClient.create();
           var id = await auth.getIdentity();
-          if (id.getPrincipal().toString() != '2vxsx-fae') {
-            resolve(processId(id, _id.type)); 
-          } else reject("Not logged in");
+          if (id.getPrincipal().toString() != _id.principal) reject("Logged in using the incorrect user");
+          if (id.getPrincipal().toString() == '2vxsx-fae') reject("Not logged in");
+          resolve(processId(id, _id.type)); 
         break;
         case "private":
-          var t = localStorage.getItem('_m');
-          if (!t){
-            reject("No seed");
+          if (!isLoaded(_id.principal)) { 
+            var t = localStorage.getItem('_m');
+            if (!t){
+              reject("No seed");
+            } else {
+              var mnemonic = t;
+              var id = mnemonicToId(mnemonic);
+              resolve(processId(id, _id.type));
+            }
           } else {
-            var mnemonic = t;
-            var id = mnemonicToId(mnemonic);
-            resolve(processId(id, _id.type));
+            resolve({
+              principal : _id.principal,
+              type : _id.type
+            });
           }
+        break;
+        case "pem":
+          if (!isLoaded(_id.principal)) reject(); 
+          resolve({
+            principal : _id.principal,
+            type : _id.type
+          });   
         break;
         case "watch":
           resolve({
@@ -108,6 +125,8 @@ const StoicIdentity = {
               identityProvider: "https://identity.ic0.app/",
               onSuccess: async () => {
                 var id = await auth.getIdentity()
+                if (id.getPrincipal() != _id.principal) reject("Logged in using the incorrect user");
+                if (id.getPrincipal().toString() == '2vxsx-fae') reject("Not logged in");
                 resolve(processId(id, _id.type));
               },
               onError : reject
@@ -136,7 +155,7 @@ const StoicIdentity = {
             }).catch(reject);
             break;
           case "pem":
-            var id = Secp256k1KeyIdentity.generate(optdata.pem);
+            var id = Secp256k1KeyIdentity.fromPem(optdata.pem);
             resolve(processId(id, _id.type));
           break;
         }
