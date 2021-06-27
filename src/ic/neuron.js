@@ -42,25 +42,20 @@ const getStakingAddress = (principal, nonce) => {
 class ICNeuron {
   //TODO add voting, proposals, disburse to neuron?
   //TODO deal with errors
-  _api = false;
-  _neuronid = 0;
+  #api = false;
+  #identity = false;
+  neuronid = 0;
   data = {};
   constructor(neuronid, neurondata, identity) {
     if (!neuronid) throw "NeuronID is required";
     if (!identity) throw "Identity is required";
-    this._neuronid = neuronid;
+    this.neuronid = neuronid;
+    this.#identity = identity;
     this.data = neurondata;
-    this._api = extjs.connect("https://boundary.ic0.app/", identity).canister('rrkah-fqaaa-aaaaa-aaaaq-cai');
-  };
-  isAlive() {
-    return (this.data.voting_power > 0n);
+    this.#api = extjs.connect("https://boundary.ic0.app/", this.#identity).canister('rrkah-fqaaa-aaaaa-aaaaq-cai');
   };
   async update() {
-    var ni = await this._api.get_neuron_info(this._neuronid);
-    if (ni.hasOwnProperty("Err")) {
-      throw "Error: " + JSON.stringify(ni.Error);
-    };
-    this.data = ni.Ok;
+    this.data = await NeuronManager.getData(this.neuronid, this.#identity);
     return this.data;
   };
   async spawn() { //TODO TEST
@@ -70,8 +65,8 @@ class ICNeuron {
     var cmdId = "Spawn";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
@@ -84,8 +79,8 @@ class ICNeuron {
     var cmdId = "Split";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
@@ -99,8 +94,8 @@ class ICNeuron {
     var cmdId = "Follow";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
@@ -113,8 +108,8 @@ class ICNeuron {
     var cmdId = "Configure";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
@@ -127,8 +122,8 @@ class ICNeuron {
     var cmdId = "Configure";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
@@ -143,11 +138,10 @@ class ICNeuron {
     var cmdId = "Configure";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    console.log(res);
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
     else return res.command[0][cmdId];
   };
@@ -160,8 +154,8 @@ class ICNeuron {
     var cmdId = "Configure";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
@@ -175,8 +169,8 @@ class ICNeuron {
     var cmdId = "Disburse";
     var cmdBody = {};
     cmdBody[cmdId] = commandArgs;
-    var res = await this._api.manage_neuron({
-      id : [{id : this._neuronid}],
+    var res = await this.#api.manage_neuron({
+      id : [{id : this.neuronid}],
       command : [cmdBody]
     });
     if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
@@ -184,34 +178,37 @@ class ICNeuron {
   };
 };
 const NeuronManager = {
-  nextId : 0,
-  setIndex : (index) => {
-    NeuronManager.nextId = index;
-  },
   scan : async (id) => {
-    var lastInd = 0;
-    var neurons = [];
-    while(true){
-      try {
-        var n = await NeuronManager.get(lastInd, id);
-        neurons.push(n);
-        lastInd++;
-      } catch (e) {
-        //dont throw we are expecting an error
-        break;
-      }
-    };
-    NeuronManager.nextId = lastInd;
-    return neurons;
+    var ns = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).list_neurons({
+      include_neurons_readable_by_caller  : true,
+      neuron_ids : []
+    })
+    var rns = []
+    ns.full_neurons.map((n, i) => {
+      var nid = n.id[0].id;
+      var nn = ns.neuron_infos.find(e => {
+        return (e[0] == nid);
+      })[1];
+      var ndata = {
+        age : nn.age_seconds,
+        created : nn.created_timestamp_seconds,
+        dissolve_delay : nn.dissolve_delay_seconds,
+        retreived : nn.retrieved_at_timestamp_seconds,
+        state : nn.state,
+        voting_power : nn.voting_power,
+        stake : n.cached_neuron_stake_e8s,
+        maturity : n.maturity_e8s_equivalent,
+        fees : n.neuron_fees_e8s,
+        operator : true,
+        address : principalToAccountIdentifier(GOVERNANCE_CANISTER, n.account),
+      };
+      rns.push(new ICNeuron(nid, ndata, id));
+    });
+    console.log(rns);
+    return rns;
   },
-  create : async (amount, id, sa) => { //new, takes next index
-    var index = NeuronManager.nextId;
-    var n = await NeuronManager.stake(index, amount, id, sa);
-    NeuronManager.nextId++;
-    return n;
-  },
-  stake : async (index, amount, id, sa) => { //stakes, can be new or existing index
-    if (index > 2**32) return false; //only 32bits for now/over 4 billion
+  create : async (amount, id, sa) => {
+    var index = Math.floor(Math.random()*4294967296);
     if (amount < 1) return false;
     var principal = id.getPrincipal();
     var nonce = Array(4).fill(0).concat(to32bits(index));
@@ -225,35 +222,57 @@ const NeuronManager = {
       "memo" : Number(memo), 
       "created_at_time" : []
     }
-    var bh = await extjs.connect("https://boundary.ic0.app/", id).canister(LEDGER_CANISTER_ID).send_dfx(args);
-    var n = await NeuronManager.get(index, id);
-    return n;
-  },
-  get : async (index, id) => {
-    if (index > 2**32) return false; //only 32bits for now
-    var principal = id.getPrincipal();
-    var nonce = Array(4).fill(0).concat(to32bits(index));
-    var memo = BigInt("0x"+toHexString(nonce));
     
+    //Call
+    var bh = await extjs.connect("https://boundary.ic0.app/", id).canister(LEDGER_CANISTER_ID).send_dfx(args);
     var args = {
       controller : [principal], 
       memo : Number(memo)
     };
+
+    //Call
     var nd = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).claim_or_refresh_neuron_from_account(args);
     if (nd.result[0].hasOwnProperty("Error")) {
       throw "Error: " + JSON.stringify(nd.result[0].Error);
     }
     var neuronid = nd.result[0].NeuronId.id;
-    
-    var ni = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).get_neuron_info(neuronid);
-    if (ni.hasOwnProperty("Err")) {
-      throw "Error: " + JSON.stringify(ni.Error);
-    };
-    var ndata = ni.Ok;
+    return await NeuronManager.get(neuronid, id);
+  },
+  get : async (neuronid, id) => {
+    var ndata = await NeuronManager.getData(neuronid, id);
+    console.log(ndata);
     return new ICNeuron(neuronid, ndata, id);
+  },
+  getData : async (neuronid, id) => {
+    var ns = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).list_neurons({
+      neuron_ids : [neuronid],
+      include_neurons_readable_by_caller  : false,
+    });
+    console.log(ns);
+    var ndata = {
+      operator : false,
+      age : ns.neuron_infos[0][1].age_seconds,
+      created : ns.neuron_infos[0][1].created_timestamp_seconds,
+      dissolve_delay : ns.neuron_infos[0][1].dissolve_delay_seconds,
+      retreived : ns.neuron_infos[0][1].retrieved_at_timestamp_seconds,
+      state : ns.neuron_infos[0][1].state,
+      voting_power : ns.neuron_infos[0][1].voting_power
+    };
+    if (ns.full_neurons.length == 1) {
+      ndata['stake'] = ns.full_neurons[0].cached_neuron_stake_e8s;
+      ndata['maturity'] = ns.full_neurons[0].maturity_e8s_equivalent;
+      ndata['fees'] = ns.full_neurons[0].neuron_fees_e8s;
+      ndata['operator'] = true;
+      ndata['address'] = principalToAccountIdentifier(GOVERNANCE_CANISTER, ns.full_neurons[0].account);
+    }
+    return ndata;
   },
   topics : topics
 };
 export default NeuronManager;
+
 window.NeuronManager = NeuronManager;
 window.StoicIdentity = StoicIdentity;
+window.extjs = extjs;
+
+
