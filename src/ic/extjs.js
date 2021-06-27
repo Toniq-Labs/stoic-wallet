@@ -5,11 +5,14 @@ import { principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex,
 import RosettaApi from './RosettaApi.js';
 
 import ledgerIDL from './candid/ledger.did.js';
+import governanceIDL from './candid/governance.did.js';
+import nnsIDL from './candid/nns.did.js';
 import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import extIDL from './candid/ext.did.js';
-import governanceIDL from './candid/governance.did.js';
 
 const LEDGER_CANISTER_ID = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+const GOVERNANCE_CANISTER_ID = "rrkah-fqaaa-aaaaa-aaaaq-cai";
+const NNS_CANISTER_ID = "qoctq-giaaa-aaaaa-aaaea-cai";
 const CYCLES_MINTING_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 
 const rosettaApi = new RosettaApi();
@@ -69,6 +72,7 @@ const _preloadedIdls = {
   'governance' : governanceIDL,
   'ledger' : ledgerIDL,
   'hzld' : hzldIDL,
+  'nns' : nnsIDL,
   'ext' : extIDL,
   'default' : extIDL,
 };
@@ -76,16 +80,24 @@ const _preloadedIdls = {
 class ExtConnection {
   //map known canisters to preloaded IDLs
   _mapIdls = {
-    "ryjl3-tyaaa-aaaaa-aaaba-cai" : _preloadedIdls['ledger'],
+    [LEDGER_CANISTER_ID] : _preloadedIdls['ledger'],
+    [GOVERNANCE_CANISTER_ID] : _preloadedIdls['governance'],
+    [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
-    "rrkah-fqaaa-aaaaa-aaaaq-cai" : _preloadedIdls['governance'],
   };
   _metadata = {
-    LEDGER_CANISTER_ID : {
+    [LEDGER_CANISTER_ID] : {
       name : "ICP",
       symbol : "ICP",
       decimals : 8,
-    }
+      type : 'fungible',
+    },
+    "qz7gu-giaaa-aaaaf-qaaka-cai" : {
+      name : "HZLD",
+      symbol : "HZLD",
+      decimals : 0,
+      type : 'fungible',
+    },
   };
   _identity = false;//new AnonymousIdentity();
   _host = false;
@@ -163,44 +175,32 @@ class ExtConnection {
       },
       getMetadata : () => {
         return new Promise((resolve, reject) => {
-          switch(tokenObj.canister) {
-            case LEDGER_CANISTER_ID:
-              resolve({
-                name : "Internet Computer",
-                symbol : "ICP",
-                type : 'fungible',
-                decimals : 8
-              });
-            break;
-            case "qz7gu-giaaa-aaaaf-qaaka-cai":
-              resolve({
-                name : "HZLD",
-                symbol : "HZLD",
-                decimals : 0,
-                type : 'fungible',
-              });
-            break;
-            default:
-              api.metadata(tokenObj.token).then(r => {
-                if (typeof r.ok != 'undefined') {
-                  if (typeof r.ok.fungible != 'undefined') {
-                    resolve({
-                      name : r.ok.fungible.name,
-                      symbol : r.ok.fungible.symbol,
-                      decimals : r.ok.fungible.decimals,
-                      metadata : r.ok.fungible.metadata,
-                      type : 'fungible'
-                    });
-                  } else {
-                    resolve({
-                      metadata : r.ok.nonfungible.metadata,
-                      type : 'nonfungible'
-                    });
-                  }
-                } else if (typeof r.err != 'undefined') reject(r.err)
-                else reject(r);
-              }).catch(reject);
-            break;
+          if (this._metadata.hasOwnProperty(tokenObj.canister)) {
+            resolve(this._metadata[tokenObj.canister]);
+          } else {
+            switch(tokenObj.canister) {
+              default:
+                api.metadata(tokenObj.token).then(r => {
+                  if (typeof r.ok != 'undefined') {
+                    if (typeof r.ok.fungible != 'undefined') {
+                      resolve({
+                        name : r.ok.fungible.name,
+                        symbol : r.ok.fungible.symbol,
+                        decimals : r.ok.fungible.decimals,
+                        metadata : r.ok.fungible.metadata,
+                        type : 'fungible'
+                      });
+                    } else {
+                      resolve({
+                        metadata : r.ok.nonfungible.metadata,
+                        type : 'nonfungible'
+                      });
+                    }
+                  } else if (typeof r.err != 'undefined') reject(r.err)
+                  else reject(r);
+                }).catch(reject);
+              break;
+            }
           }
         });
       },
@@ -372,8 +372,8 @@ class ExtConnection {
 };
 
 const extjs = {
-  connect : (identity, host) => new ExtConnection(identity, host)
+  connect : (host, identity) => new ExtConnection(host ?? "https://boundary.ic0.app/", identity)
 };
 export default extjs;
 
-
+window.tokenIdentifier = tokenIdentifier;

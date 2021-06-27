@@ -17,12 +17,17 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import EditIcon from '@material-ui/icons/Edit';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
+import EvStationIcon from '@material-ui/icons/EvStation';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
-
+import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
+import Tooltip from '@material-ui/core/Tooltip';
 import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
 import SendForm from '../components/SendForm';
+import TopupForm from '../components/TopupForm';
 import AddTokenCard from '../components/AddTokenCard';
 import Transactions from '../components/Transactions';
 import MainFab from '../components/MainFab';
@@ -41,6 +46,11 @@ function AccountDetail(props) {
   const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [tokens, setTokens] = React.useState(account.tokens);
+  const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
+
+  const handleMenuClick = (event) => {
+    setMenuAnchorEl(event.currentTarget);
+  };
   
   const dispatch = useDispatch()
   React.useEffect(() => {
@@ -102,8 +112,8 @@ function AccountDetail(props) {
             secondaryTypographyProps={{noWrap:true, variant:'subtitle1'}} 
             primary={account.name}
             secondary={
-              <>
-                {account.address}
+              <div style={{overflow: "hidden", textOverflow: "ellipsis"}}> 
+                {account.address.substr(0, 22)+"..."}
                 <SnackbarButton
                   message="Address Copied"
                   anchorOrigin={{
@@ -116,7 +126,7 @@ function AccountDetail(props) {
                     <FileCopyIcon style={{ fontSize: 18 }} />
                   </IconButton>
                 </SnackbarButton>
-              </>
+              </div>
             }              />
           <ListItemSecondaryAction>
             <InputForm
@@ -128,13 +138,17 @@ function AccountDetail(props) {
               defaultValue={account.name}
               buttonLabel="Save"
             >
-              <IconButton edge="end" aria-label="edit">
-                <EditIcon />
-              </IconButton>
+              <Tooltip title="Edit account name">
+                <IconButton edge="end" aria-label="edit">
+                  <EditIcon />
+                </IconButton>
+              </Tooltip>
             </InputForm>
-            <IconButton href={"https://ic.rocks/account/"+account.address} target="_blank" edge="end" aria-label="search">
-              <LaunchIcon />
-            </IconButton>
+            <Tooltip title="View in explorer (ic.rocks)">
+              <IconButton href={"https://ic.rocks/account/"+account.address} target="_blank" edge="end" aria-label="search">
+                <LaunchIcon />
+              </IconButton>
+            </Tooltip>
           </ListItemSecondaryAction>
         </ListItem>
       </List>
@@ -156,9 +170,11 @@ function AccountDetail(props) {
             content="Enter the Canister ID for the token you wish to add"
             buttonLabel="Add"
           >
-            <Fab style={{verticalAlign: 'center', marginRight:20}} color="primary" aria-label="add">
-              <AddIcon />
-            </Fab>
+            <Tooltip title="Add a new token to this account">
+              <Fab style={{marginLeft:10, top:"24px"}} color="primary" aria-label="add">
+                <AddIcon />
+              </Fab>
+            </Tooltip>
           </InputForm>
         </Grid>
       </div>
@@ -180,9 +196,15 @@ function AccountDetail(props) {
       </p>: ""}
       <Transactions data={account.tokens[currentToken]} address={account.address} />
       {idtype == 'watch' ? "" :
-        <SendForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
-          <MainFab color="primary" aria-label="send"><SendIcon /></MainFab>
-        </SendForm>
+        <>
+          { currentToken == 0 ?
+          <TopupForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
+              <MainFab style={{inset: "auto 12px 80px auto",position:"fixed"}} color="primary" aria-label="send"><EvStationIcon /></MainFab>
+          </TopupForm> : "" }
+          <SendForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
+            <MainFab color="primary" aria-label="send"><SendIcon /></MainFab>
+          </SendForm>
+        </>
       }
     </div>
   );

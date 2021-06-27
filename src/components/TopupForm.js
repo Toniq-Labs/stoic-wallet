@@ -16,17 +16,17 @@ import {validatePrincipal, validateAddress} from '../ic/utils.js';
 import {compressAddress} from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
 
-export default function SendForm(props) {
+export default function TopupForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
   const currentAccount = useSelector(state => state.currentAccount)
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const [open, setOpen] = React.useState(false);
   const [step, setStep] = React.useState(0);
   const [balance, setBalance] = React.useState(false);
+  const [rate, setRate] = React.useState(0);
 
   const [amount, setAmount] = React.useState(0);
   const [minFee, setMinFee] = React.useState(0);
-  const [fee, setFee] = React.useState(0);
   const [to, setTo] = React.useState('');
   
   const [advanced, setAdvanced] = React.useState(false);
@@ -34,27 +34,17 @@ export default function SendForm(props) {
   const [notify, setNotify] = React.useState(false);
   
   //cold API
+  const fee = 0.0002;
   const api = extjs.connect("https://boundary.ic0.app/");
 
   const error = (e) => {
     props.error(e);
   }
   const review = () => {
+    console.log((Number(amount)+Number(fee)))
     if (isNaN(amount)) return error("Please enter a valid amount to send");
-    if (isNaN(fee)) return error("Please enter a valid fee to use");
-    if (fee != minFee) return error("The fee must be " + minFee);
-    switch(props.data.symbol){
-      case "ICP":
-        if (!validateAddress(to)) return error("Please enter a valid address");      
-      break;
-      case "HZLD":
-        if (!validatePrincipal(to)) return error("Please enter a valid principal to send to");      
-      break;
-      default:
-        if (!validateAddress(to) && !validatePrincipal(to)) return error("Please enter a valid address to send to");      
-      break;
-    }
-    if ((amount+fee) > balance)  return error("You have insufficient " + props.data.symbol); 
+    if (!validatePrincipal(to)) return error("Please enter a valid canister ID");      
+    if ((Number(amount)+Number(fee)) > balance)  return error("You have insufficient ICP"); 
     setStep(1);
   }
   const submit = () => {
@@ -62,8 +52,8 @@ export default function SendForm(props) {
     var _from_principal = identity.principal;
     var _from_sa = currentAccount;
     var _to_user = to;
-    var _amount = BigInt(amount*(10**props.data.decimals));
-    var _fee = BigInt(fee*(10**props.data.decimals));
+    var _amount = BigInt(amount*(10**8));
+    var _fee = BigInt(0.0001*(10**8));
     var _memo = memo;
     var _notify = false;//hardcoded false for now
     
@@ -75,17 +65,17 @@ export default function SendForm(props) {
     handleClose();
     
     //hot api, will sign as identity - BE CAREFUL
-    extjs.connect("https://boundary.ic0.app/", id).token(props.data.id).transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(r => {
-      if (r) {
-        return props.alert("Transaction complete", "Your transfer was sent successfully");
-      } else {        
-        return error("Something went wrong with this transfer");
-      }
-    }).catch(e => {
-      return error("There was an error: " + e);
-    }).finally(() => {
-      props.loader(false);
-    });
+    // extjs.connect("https://boundary.ic0.app/", id).token().transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(r => {
+      // if (r) {
+        // return props.alert("Transaction complete", "Your transfer was sent successfully");
+      // } else {        
+        // return error("Something went wrong with this transfer");
+      // }
+    // }).catch(e => {
+      // return error("There was an error: " + e);
+    // }).finally(() => {
+      // props.loader(false);
+    // });
   };
   const handleClick = () => {
     setOpen(true);
@@ -94,21 +84,16 @@ export default function SendForm(props) {
     setOpen(false);
     setStep(0);
     setAmount(0);
-    setMinFee(0);
-    setFee(0);
     setBalance(false);
     setTo('');
-    setAdvanced(false);
-    setMemo('');
-    setNotify(false);
   };
   React.useEffect(() => {
-    api.token(props.data.id).fee().then(f => {
-      setMinFee(f/10**(props.data.decimals));
-      setFee(f/10**(props.data.decimals));
+    api.canister("qoctq-giaaa-aaaaa-aaaea-cai").get_icp_to_cycles_conversion_rate().then(b => {
+      setRate(Number(b/BigInt(10**10))/(10**2));
     });
-    api.token(props.data.id).getBalance(props.address, identity.principal).then(b => {
-      setBalance(Number(b)/(10**props.data.decimals));
+    
+    api.token().getBalance(props.address, identity.principal).then(b => {
+      setBalance(Number(b)/(10**8));
     });
   }, [props.data.id, open]);
 
@@ -116,27 +101,27 @@ export default function SendForm(props) {
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
       <Dialog open={open} onClose={handleClose}  maxWidth={'sm'} fullWidth >
-        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Send {props.data.name} Tokens ({props.data.symbol})</DialogTitle>
+        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Top-up your canister</DialogTitle>
         {step == 0 ?
           <DialogContent>
-            <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter the recipient address and amount that you wish to send below.</DialogContentText>
+            <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter the Canister ID and the amount of ICP you would like converted to cycles and added to the canister</DialogContentText>
             <>
               <TextField
                 autoFocus
                 margin="dense"
-                label="Address of the Recipient"
+                label="Canister ID"
                 value={to}
                 onChange={(e) => setTo(e.target.value)}
                 type="text"
-                fullWidth
+                style={{width:'49%', marginRight:'2%'}}
                 InputLabelProps={{
                   shrink: true,
                 }}
               />
               <TextField
-                style={{width:'49%', marginRight:'2%'}}
+                style={{width:'49%'}}
                 margin="dense"
-                label={"Amount of " + props.data.symbol + " to Send"}
+                label={"Amount of ICP to Send"}
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 type="text"
@@ -144,58 +129,19 @@ export default function SendForm(props) {
                   shrink: true,
                 }}
               />
-              { minFee > 0 ?
-              <TextField
-                style={{width:'49%'}}
-                margin="dense"
-                label="Fee"
-                value={fee}
-                onChange={(e) => setFee(e.target.value)}
-                type="text"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              /> : "" }
               <DialogContentText style={{fontSize:'small',textAlign:'center', marginTop:"20px"}}>
                 { balance !== false ? "Balance: "+balance+" "+props.data.symbol +" ": ""}
-                { minFee > 0 ? "Min Fee: "+minFee+" "+props.data.symbol : ""}
+                Min Fee: 0.0002<br />
+                <strong style={{color:"#00b894"}}>1ICP converts to ~{rate}T Cycles</strong>
               </DialogContentText>
-              { advanced ?
-                <a style={{cursor: 'pointer', fontWeight:'bold'}} onClick={() => setAdvanced(false)}>Hide Advanced Options</a>
-              :
-                <a style={{cursor: 'pointer', fontWeight:'bold'}} onClick={() => setAdvanced(true)}>Show Advanced Options</a>
-              }
             </>
-            { advanced ?
-            <>
-              <TextField
-                margin="dense"
-                multiline
-                rows='2'
-                rowsMax='4'
-                label="Optional Memo"
-                value={memo}
-                onChange={(e) => setMemo(e.target.value)}
-                type="text"
-                fullWidth
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-              {/*
-              <FormControlLabel
-                control={<Switch checked={notify} onChange={(event) => setNotify(event.target.checked)} name="notify" />}
-                label="Notify"
-              />*/}
-            </> : "" }
           </DialogContent>
         :
           <DialogContent>
             <DialogContentText style={{textAlign:'center'}}>
-            Please confirm that you are about to send <br />
-            <strong style={{color:'red'}}>{amount} {props.data.symbol}</strong><br /> 
+            Please confirm that you are about to send <strong style={{color:'red'}}>{amount} ICP</strong><br /> 
             from <strong style={{color:'red'}}>{compressAddress(props.address)}</strong><br />
-            to <strong style={{color:'red'}}>{compressAddress(to)}</strong><br />
+            to add ~{Math.round(rate*amount*100, 2)/100}T Cycles to <strong style={{color:'red'}}>{compressAddress(to)}</strong><br />
             { fee > 0 ? " using a fee of " + fee : ""} 
             </DialogContentText>
             <DialogContentText style={{textAlign:'center'}}>

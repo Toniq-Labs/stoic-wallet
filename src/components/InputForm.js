@@ -40,6 +40,9 @@ export default function InputForm(props) {
             value={value}
             onChange={(e) => setValue(e.target.value)}
             type="text"
+            InputLabelProps={{
+              shrink: true,
+            }}
             fullWidth
           />
           { props.secondaryInput ? 
@@ -49,6 +52,9 @@ export default function InputForm(props) {
               value={secondaryValue}
               onChange={(e) => setSecondaryValue(e.target.value)}
               type="text"
+              InputLabelProps={{
+                shrink: true,
+              }}
               fullWidth
             /> : "" }
         </DialogContent>

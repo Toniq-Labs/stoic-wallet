@@ -4,7 +4,6 @@ import {principalToAccountIdentifier} from './ic/utils.js';
 var appData = {
   principals : [],
   addresses : [],
-  neurons : [],
   currentPrincipal : 0,
   currentAccount : 0,
   currentToken : 0,
@@ -16,6 +15,7 @@ function initDb(){
     
     //db versioning
     var savenow = false;
+    savenow = true;
     if (!Array.isArray(db)) {
       db = [[db],[],[0,0,0]];
       console.log("Converting old DB to new");
@@ -23,50 +23,51 @@ function initDb(){
     }
     if (db.length == 2) {
       db[2] = [0,0,0];
-      db[3] = [];
       savenow = true;
     }
-    if (db.length == 3) {
-      db[3] = [];
-      savenow = true;
-    }
-    
-    appData.currentPrincipal = db[2][0];
-    appData.currentAccount = db[2][1];
-    appData.currentToken = db[2][2];
-    appData.addresses = db[1];
-    appData.neurons = db[3];
     db[0].map(principal => {
       var _principal = {
         accounts : [],
+        neurons : [],
         identity : principal.identity
       };
       principal.accounts.map((account, subaccount) => {
         //savenow = true;
         //if (subaccount >= 2) return;
-        var tokens = [];
-        tokens.push({
-          id : "ryjl3-tyaaa-aaaaa-aaaba-cai",
-          name : "Internet Computer",
-          symbol : "ICP",
-          decimals : 8,
-          type : 'fungible',
-        });
-        
-        var address = principalToAccountIdentifier(principal.identity.principal, subaccount);
-        account[1].map(token => {
-          tokens.push(token);
-          return true;
-        });
+        if (account.length == 2) account[2] = [];
         _principal.accounts.push({
           name : account[0],
-          address : address,
-          tokens : tokens
-        });
+          address : principalToAccountIdentifier(principal.identity.principal, subaccount),
+          tokens : [
+            {
+              id : "ryjl3-tyaaa-aaaaa-aaaba-cai",
+              name : "Internet Computer",
+              symbol : "ICP",
+              decimals : 8,
+            }, 
+            ...account[1]
+          ],
+          nfts : account[2]
+        });    
       });
+      /* Do we need to store neruons?
+      if (!principal.hasOwnProperty('neurons')) principal.neurons = [];
+      principal.neurons.map(neuronId => {
+        _principal.neurons.push({
+          id : neuronId,
+          data : false
+        });
+      });*/
       appData.principals.push(_principal);
     });
+    
+    appData.addresses = db[1];
+    appData.currentPrincipal = db[2][0];
+    appData.currentAccount = db[2][1];
+    appData.currentToken = db[2][2];
+    
     if (savenow) saveDb(appData);
+    console.log(appData);
     return appData;
   }
 }
@@ -75,12 +76,13 @@ function newDb(identity){
     {
       accounts : [
         ["Main", 
-          []
+          [], []
         ]
       ],
-      identity : identity
+      identity : identity,
+      /*neurons : []*/
     }
-  ],[],[0,0,0],[]];
+  ],[],[0,0,0]];
   localStorage.setItem('_db', JSON.stringify(tc));
   return initDb();
 }
@@ -89,7 +91,6 @@ function clearDb(){
   var clearState = {
     principals : [],
     addresses : [],
-    neurons : [],
     currentPrincipal : 0,
     currentAccount : 0,
     currentToken : 0,
@@ -98,27 +99,27 @@ function clearDb(){
   return clearState;
 }
 function saveDb(newState){
-  var updatedDb = [[], newState.addresses,[newState.currentPrincipal, newState.currentAccount, newState.currentToken], newState.neurons];
+  var updatedDb = [[], newState.addresses, [newState.currentPrincipal, newState.currentAccount, newState.currentToken]];
   
   newState.principals.map(principal => {
     var _p = {
       accounts : [],
+      neurons : [],
       identity : principal.identity
     };
     principal.accounts.map(account => {
-      var _a = [account.name, []];
+      var _a = [account.name, [], account.nfts];
       account.tokens.map((b, i) => {
-      if (i === 0) return false;
-        _a[1].push({
-          id : b.id,
-          name : b.name,
-          symbol : b.symbol,
-          decimals : b.decimals,
-        });
+        if (i === 0) return false;
+        _a[1].push(b);
         return true;      
       });
       _p.accounts.push(_a);
     });
+    /* Do we need to store?
+    principal.neurons.map(neuron => {
+      _p.neurons.push(neuron.id);
+    });*/
     updatedDb[0].push(_p);
   });
   localStorage.setItem('_db', JSON.stringify(updatedDb));
@@ -131,7 +132,20 @@ function rootReducer(state = appData, action) {
   switch(action.type){
     case "neuron/add": //TODO
     break;
-    case "neuron/update": //TODO
+    case "neuron/scan": //TODO
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i == state.currentPrincipal) {
+            return {
+              ...principal,
+              neurons : action.payload.neurons
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
     break;
     case "removewallet":
       return clearDb();
