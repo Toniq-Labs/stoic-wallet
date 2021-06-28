@@ -7,7 +7,7 @@ import AddIcon from '@material-ui/icons/Add';
 import GetAppIcon from '@material-ui/icons/GetApp';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import UsbIcon from '@material-ui/icons/Usb';
-
+import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 export default function ConnectList(props) {
   const handleClick = (t) => {
     props.handler(t);
@@ -42,6 +42,15 @@ export default function ConnectList(props) {
           secondary={props.add ? "I want to link another Wallet using an Internet Identity" : "I want to link a Wallet using an Internet Identity" }
         />
       </ListItem>
+      <ListItem button onClick={() => handleClick('3party') }>
+        <ListItemIcon>
+          <ExitToAppIcon />
+        </ListItemIcon>
+        <ListItemText 
+          primary={"Login using a trusted 3rd party via tor.us"}
+          secondary={"I want to login using a Google, Github, Facebook or Twitter account"}
+        />
+      </ListItem>
       <ListItem button onClick={() => handleClick('connect') }>
         <ListItemIcon>
           <UsbIcon />
@@ -54,4 +63,3 @@ export default function ConnectList(props) {
     </List>
   );
 }
-

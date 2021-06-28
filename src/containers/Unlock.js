@@ -17,6 +17,10 @@ import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Blockie from '../components/Blockie';
+import TwitterIcon from '@material-ui/icons/Twitter';
+import RedditIcon from '@material-ui/icons/Reddit';
+import FacebookIcon from '@material-ui/icons/Facebook';
+import GitHubIcon from '@material-ui/icons/GitHub';
 import { useFilePicker } from 'use-file-picker';
 import { identityTypes } from '../utils';
 
@@ -84,16 +88,19 @@ function Unlock(props) {
   const iiLogin = () => {
     props.loader(true);
     setOpen(false);
-    
-        StoicIdentity.unlock(identity).then(r => {
-          props.login();
-        }).catch(e => {
-          console.log(e);
-        }).finally(() => {
-          setOpen(true)
-          props.loader(false)
-        });
+    StoicIdentity.unlock(identity).then(r => {
+      props.login();
+    }).catch(e => {
+      //return error(e);
+    }).finally(() => {
+      setTimeout(() => {
+        setOpen(true)
+        props.loader(false)
+      }, 2000);
+    });
   };
+  const capitalizeFirstLetter = ([ first, ...rest ], locale = navigator.language) =>
+  first.toLocaleUpperCase(locale) + rest.join('')
   return (
     <>
     {changeDialog ?
@@ -138,7 +145,7 @@ function Unlock(props) {
                   <AllInclusiveIcon />
                 </ListItemIcon>
                 <ListItemText 
-                  primary="Re-authenticate" 
+                  primary="Re-authenticate your Internet Identity" 
                   secondary="We need to authenticate your Internet Identity" 
                 />
               </ListItem>
@@ -194,6 +201,31 @@ function Unlock(props) {
             </DialogActions>
           </Dialog>
         : ""}
+        {['google', 'twitter', 'facebook', 'github'].indexOf(identity.type) >= 0 ?
+        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
+          <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
+          <DialogContent>
+            <List component="nav" aria-label="secondary add principal">
+              <ListItem button onClick={iiLogin}>
+                <ListItemIcon>
+                  {identity.type == 'google' ? <RedditIcon /> : ""}
+                  {identity.type == 'twitter' ? <TwitterIcon /> : ""}
+                  {identity.type == 'facebook' ? <FacebookIcon /> : ""}
+                  {identity.type == 'github' ? <GitHubIcon /> : ""}
+                </ListItemIcon>
+                <ListItemText 
+                  primary={"Login to your " + capitalizeFirstLetter(identity.type) + " account"} 
+                  secondary="We need to authenticate your account to continue" 
+                />
+              </ListItem>
+            </List> 
+              
+          </DialogContent>
+          <DialogActions>
+            { principals.length > 1 ? <Button onClick={change} color="primary">Change Account</Button> : "" }
+            <Button onClick={clear} color="primary">Clear Wallet</Button>
+          </DialogActions>
+        </Dialog>: ""}
       </> }
     </>
   );

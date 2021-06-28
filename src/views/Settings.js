@@ -22,7 +22,6 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { clipboardCopy, identityTypes } from '../utils';
 import {StoicIdentity} from '../ic/identity.js';
-
 import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
 import ConnectList from '../components/ConnectList';
@@ -55,6 +54,9 @@ function Settings(props) {
         }).catch(e => {
           props.loader(false);
         })
+      break;
+      case "3party":
+        setInitialRoute('3party');
       break;
       case "connect":
         //Show error

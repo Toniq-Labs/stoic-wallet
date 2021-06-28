@@ -9,7 +9,6 @@ import { makeStyles } from '@material-ui/core/styles';
 import {StoicIdentity} from './ic/identity.js';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
-import NeuronManager from './ic/neuron.js';
 
 const useStyles = makeStyles((theme) => ({
   backdrop: {
@@ -24,7 +23,7 @@ const emptyAlert = {
 export default function App() {
   const classes = useStyles();
   const [loaderOpen, setLoaderOpen] = React.useState(false);
-  const [appState, setAppState] = React.useState(0); //0 = nologin, 1 = locked, 2 = unlocked
+  const [appState, setAppState] = React.useState(false); //0 = nologin, 1 = locked, 2 = unlocked
   const principals = useSelector(state => state.principals)
   const currentPrincipal = useSelector(state => state.currentPrincipal)
   const dispatch = useDispatch()
@@ -47,11 +46,13 @@ export default function App() {
     if (principals.length === 0) {
       setAppState(0);
     } else {
+      loader(true);
       StoicIdentity.load(principals[currentPrincipal].identity).then(i => {
         setAppState(2);
       }).catch(e => {
+        console.log(e);
         setAppState(1);
-      });
+      }).finally(() => loader(false));
     }    
   };
   const logout = () => {
@@ -99,9 +100,11 @@ export default function App() {
   
   React.useEffect(() => {
     login();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
     login();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPrincipal, principals]);
   
   const loader = (l) => {
@@ -111,11 +114,12 @@ export default function App() {
   return (
     <>
       {appState === 0 ?
-      <Connect alert={alert} confirm={confirm} login={login} loader={loader} /> :
-      (appState === 1 ?
-      <Unlock alert={alert} confirm={confirm} login={login} remove={remove} loader={loader} /> :
-      <Wallet alert={alert} confirm={confirm} logout={logout} remove={remove} loader={loader} /> )}
-      <Backdrop className={classes.backdrop} open={loaderOpen} onClick={() => loader(false)}>
+      <Connect alert={alert} confirm={confirm} login={login} loader={loader} /> : "" }
+      {appState === 1 ?
+      <Unlock alert={alert} confirm={confirm} login={login} remove={remove} loader={loader} /> : ""}
+      {appState === 2 ?
+      <Wallet alert={alert} confirm={confirm} logout={logout} remove={remove} loader={loader} /> : ""}
+      <Backdrop className={classes.backdrop} open={loaderOpen}>
         <CircularProgress color="inherit" />
       </Backdrop>
       <AlertDialog open={showAlert} title={alertData.title} message={alertData.message} buttonLabel={alertData.buttonLabel} handler={alertData.handler} />

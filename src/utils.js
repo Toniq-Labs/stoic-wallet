@@ -39,6 +39,11 @@ identityTypes = {
   'private' : "Mnemonic Key",
   'watch' : "Read-only",
   'pem' : "PEM Import",
+  'google' : "Google Account",
+  'twitter' : "Twitter Account",
+  'reddit' : "Reddit Account",
+  'github' : "Github Account",
+  'facebook' : "Facebook Account",
 },
 clipboardCopy = (text) => {
   if (!navigator.clipboard) {

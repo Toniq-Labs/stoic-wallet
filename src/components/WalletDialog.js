@@ -16,6 +16,12 @@ import VisibilityIcon from '@material-ui/icons/Visibility';
 import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
+import TwitterIcon from '@material-ui/icons/Twitter';
+import RedditIcon from '@material-ui/icons/Reddit';
+import FacebookIcon from '@material-ui/icons/Facebook';
+import GitHubIcon from '@material-ui/icons/GitHub';
+
+
 import {StoicIdentity} from '../ic/identity.js';
 import { useFilePicker } from 'use-file-picker';
 const tips = [
@@ -97,6 +103,10 @@ export default function WalletDialog(props) {
     if (!StoicIdentity.validatePassword(password)) return error("Password is invalid, please try again");
     submit();
   }
+  const directuath = (t) => {
+    props.submit(t,{});
+    clearState();
+  }
   const submit = () => {
     var od = {}, t = '';
     switch(type) {
@@ -112,7 +122,9 @@ export default function WalletDialog(props) {
       break;
     };
     props.submit(t,od);
-    //Clear
+    clearState();
+  };
+  const clearState = () => {
     type = '';
     setTipsIndex(1);
     setRoute("");
@@ -125,6 +137,57 @@ export default function WalletDialog(props) {
   
   return (
     <>
+      { route == '3party' ?
+      <>
+        <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'xs'} fullWidth open>
+          <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Select Login Provider</DialogTitle>
+          <DialogContent>
+            <List component="nav" aria-label="secondary add principal">
+              <ListItem button onClick={() => directuath('google')}>
+                <ListItemIcon>
+                  <RedditIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Google" 
+                  secondary="Login using your Google account" 
+                />
+                
+              </ListItem>
+              <ListItem button onClick={() => directuath('github')}>
+                <ListItemIcon>
+                  <GitHubIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Github" 
+                  secondary="Login using your Github account" 
+                />
+                
+              </ListItem>
+              <ListItem button onClick={() => directuath('twitter')}>
+                <ListItemIcon>
+                  <TwitterIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Twitter" 
+                  secondary="Login using your Twitter account" 
+                />
+              </ListItem>
+              <ListItem button onClick={() => directuath('facebook')}>
+                <ListItemIcon>
+                  <FacebookIcon />
+                </ListItemIcon>
+                <ListItemText 
+                  primary="Facebook" 
+                  secondary="Login using your Facebook account" 
+                />
+              </ListItem>
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={cancel} color="primary">Cancel</Button>
+          </DialogActions> 
+        </Dialog>
+      </>:""}
       { route == 'tips' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>

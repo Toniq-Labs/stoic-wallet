@@ -3,6 +3,7 @@ import { Principal } from "@dfinity/agent";
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { AuthClient } from "@dfinity/auth-client";
 import { Secp256k1KeyIdentity } from "./secp256k1.js";
+import OpenLogin from "@toruslabs/openlogin";
 import { 
   mnemonicToId, 
   validatePrincipal, 
@@ -11,6 +12,19 @@ import {
   fromHexString, 
   bip39 } from "./utils.js";
 var identities = {};
+var openlogin = false;
+const oauths = ['google', 'twitter', 'facebook', 'github'];
+const loadOpenLogin = async () => {
+  if (!openlogin) {
+    openlogin = new OpenLogin({
+      clientId: "BHGs7-pkZO-KlT_BE6uMGsER2N1PC4-ERfU_c7BKN1szvtUaYFBwZMC2cwk53yIOLhdpaOFz4C55v_NounQBOfU",
+      network: "mainnet",
+      uxMode : 'redirect',
+    });
+  }
+  await openlogin.init();
+  return openlogin;
+}
 const processId = (id, type) => {
   var p = id.getPrincipal().toString();
   identities[p] = id;
@@ -68,6 +82,19 @@ const StoicIdentity = {
           });   
         break;
       }
+        
+      if (oauths.indexOf(type) >= 0) {
+        const openlogin = await loadOpenLogin();
+        if (!openlogin.privKey) {
+          await openlogin.login({
+            loginProvider: type,
+          });
+        }
+        var id = Ed25519KeyIdentity.generate(new Uint8Array(fromHexString(openlogin.privKey)));
+        resolve(processId(id, type));
+      }
+      
+      reject("Cannot setup, invalid type: " + type);
     });
   },
   load : (_id) => {
@@ -110,6 +137,20 @@ const StoicIdentity = {
             type : _id.type
           });   
         break;
+      }
+      if (oauths.indexOf(_id.type) >= 0) {
+        const openlogin = await loadOpenLogin();
+        if (!openlogin.privKey || openlogin.privKey.length == 0) {
+          reject("Not logged in");
+        } else {
+          var id = Ed25519KeyIdentity.generate(new Uint8Array(fromHexString(openlogin.privKey)));
+          if (id.getPrincipal() != _id.principal) {
+            await openlogin.logout();
+            reject("Logged in using the incorrect user");
+          } else {
+            resolve(processId(id, _id.type)); 
+          }
+        }
       }
       reject();
     });
@@ -159,6 +200,27 @@ const StoicIdentity = {
             resolve(processId(id, _id.type));
           break;
         }
+        
+        if (oauths.indexOf(_id.type) >= 0) {
+          try {
+            const openlogin = await loadOpenLogin();
+            if (!openlogin.privKey) {
+              await openlogin.login({
+                loginProvider: _id.type,
+              });
+            }
+            var id = Ed25519KeyIdentity.generate(new Uint8Array(fromHexString(openlogin.privKey)));
+            if (id.getPrincipal() != _id.principal) {
+              await openlogin.logout();
+              reject("Logged in using the incorrect user");
+            } else {
+              resolve(processId(id, _id.type)); 
+            }
+          } catch (e) {
+            reject("Something happened");
+          }
+        }
+        //reject("Invalid login type");
       });
     });
   },
@@ -172,6 +234,10 @@ const StoicIdentity = {
         case "private":
             localStorage.removeItem("_m");
           break;
+      }
+      if (oauths.indexOf(_id.type) >= 0) {
+        const openlogin = await loadOpenLogin();
+        await openlogin.logout();
       }
       resolve(true);
     });
@@ -188,6 +254,10 @@ const StoicIdentity = {
             localStorage.removeItem("_em");
           break;
       }
+      if (oauths.indexOf(_id.type) >= 0) {
+        const openlogin = await loadOpenLogin();
+        await openlogin.logout();
+      }
       resolve(true);
     });
   },
@@ -201,6 +271,10 @@ const StoicIdentity = {
         case "private":
             localStorage.removeItem("_m");
           break;
+      }
+      if (oauths.indexOf(_id.type) >= 0) {
+        const openlogin = await loadOpenLogin();
+        await openlogin.logout();
       }
       //setup new
       StoicIdentity.setup(type, optdata).then(resolve).catch(reject);
