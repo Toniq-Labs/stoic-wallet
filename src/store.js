@@ -47,7 +47,7 @@ function initDb(){
             }, 
             ...account[1]
           ],
-          nfts : account[2]
+          nfts : account[2] ?? []
         });    
       });
       /* Do we need to store neruons?
@@ -67,7 +67,6 @@ function initDb(){
     appData.currentToken = db[2][2];
     
     if (savenow) saveDb(appData);
-    console.log(appData);
     return appData;
   }
 }
@@ -131,6 +130,22 @@ initDb();
 function rootReducer(state = appData, action) {
   switch(action.type){
     case "neuron/add": //TODO
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i == state.currentPrincipal) {
+            return {
+              ...principal,
+              neurons : [
+                ...principal.neurons,
+                action.payload.neuron
+              ]
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
     break;
     case "neuron/scan": //TODO
       return saveDb({
@@ -178,7 +193,8 @@ function rootReducer(state = appData, action) {
                     decimals : 8,
                     type : 'fungible',
                   }
-                ]
+                ],
+                nfts : []
               }
             ],
             identity : action.payload.identity
@@ -267,6 +283,30 @@ function rootReducer(state = appData, action) {
                   return {
                     ...account,
                     tokens : [...account.tokens, action.payload.metadata]
+                  }
+                } else {
+                  return account;
+                }
+              }),
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
+    break;
+    case "account/nft/add":
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i == state.currentPrincipal) {
+            return {
+              ...principal,
+              accounts : principal.accounts.map((account,ii) => {
+                if (ii == state.currentAccount) {
+                  return {
+                    ...account,
+                    nfts : [...account.nfts, action.payload.nft]
                   }
                 } else {
                   return account;

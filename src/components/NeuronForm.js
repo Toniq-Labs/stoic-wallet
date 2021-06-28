@@ -1,36 +1,30 @@
-/* global BigInt */
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
-import {validatePrincipal, validateAddress, principalToAccountIdentifier} from '../ic/utils.js';
+import { principalToAccountIdentifier} from '../ic/utils.js';
 import {compressAddress} from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
 import ListItemText from '@material-ui/core/ListItemText';
-import AddIcon from '@material-ui/icons/Add';
-import GetAppIcon from '@material-ui/icons/GetApp';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Blockie from '../components/Blockie';
+import NeuronManager from '../ic/neuron.js';
 
 const api = extjs.connect("https://boundary.ic0.app/");
 export default function NeuronForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
-  const currentAccount = useSelector(state => state.currentAccount)
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const accounts = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts : []))
+  const dispatch = useDispatch()
 
   const [open, setOpen] = React.useState(false);
   const [step, setStep] = React.useState(0);
@@ -44,6 +38,7 @@ export default function NeuronForm(props) {
         setBalance(Number(b)/(10**8));
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subaccount]);
   
   //cold API
@@ -53,12 +48,17 @@ export default function NeuronForm(props) {
   }
   const review = () => {
     if (isNaN(amount)) return error("Please enter a valid amount to send");
-    if ((amount+0.0001) > balance)  return error("You have insufficient ICP"); 
-    if (amount < 1)  return error("Min staking amount is 1 ICP"); 
+    if ((Number(amount)+Number(0.0001)) > balance)  return error("You have insufficient ICP"); 
+    if (Number(amount) < 1)  return error("Min staking amount is 1 ICP"); 
     setStep(2);
   }
   const submit = () => {
-
+    props.loader(true);
+    setOpen(false);
+    const id = StoicIdentity.getIdentity(identity.principal);
+    NeuronManager.create(amount, id, subaccount).then(n => {
+      dispatch({ type: 'neuron/add', payload : {neuron : n}});
+    }).finally(handleClose)
   };
   const handleClick = () => {
     if (accounts.length == 1) setStep(1);
@@ -66,6 +66,7 @@ export default function NeuronForm(props) {
   };
   const handleClose = () => {
     setOpen(false);
+    props.loader(false);
     setTimeout(() => {
       setStep(0);
       setBalance(false);
@@ -138,9 +139,9 @@ export default function NeuronForm(props) {
           <>
             <DialogContent>
               <DialogContentText style={{textAlign:'center'}}>
-              Please confirm that you are about to send <br />
+              Please confirm that you are about to stake <br />
               <strong style={{color:'red'}}>{amount} ICP</strong><br /> 
-              from <strong style={{color:'red'}}>{compressAddress(props.address)}</strong><br />
+              from <strong style={{color:'red'}}>{compressAddress(accounts[subaccount].address)}</strong><br />
               using a fee of 0.0001
               </DialogContentText>
               <DialogContentText style={{textAlign:'center'}}>
@@ -151,7 +152,7 @@ export default function NeuronForm(props) {
               <Button onClick={handleClose} color="primary">
                 Cancel
               </Button>
-              <Button onClick={submit} color="primary">Confirm Transaction</Button>
+              <Button onClick={submit} color="primary">Stake ICP</Button>
             </DialogActions>
           </>
         : "" }

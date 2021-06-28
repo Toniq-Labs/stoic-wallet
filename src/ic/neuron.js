@@ -1,6 +1,6 @@
 /* global BigInt */
 import { Actor, HttpAgent, Principal, AnonymousIdentity } from "@dfinity/agent";  
-import { principalToAccountIdentifier, toHexString, to32bits, getSubAccountArray, fromHexString } from "./utils.js";
+import { rosettaApi, amountToBigInt, principalToAccountIdentifier, toHexString, to32bits, getSubAccountArray, fromHexString } from "./utils.js";
 import extjs from "./extjs.js";
 import { sha256 as jsSha256 } from 'js-sha256';
 import { blobFromUint8Array } from '@dfinity/agent/lib/esm/types';
@@ -45,15 +45,35 @@ class ICNeuron {
   #api = false;
   #identity = false;
   neuronid = 0;
+  id = 0;
   data = {};
   constructor(neuronid, neurondata, identity) {
     if (!neuronid) throw "NeuronID is required";
     if (!identity) throw "Identity is required";
     this.neuronid = neuronid;
+    this.id = neuronid.toString();
     this.#identity = identity;
     this.data = neurondata;
     this.#api = extjs.connect("https://boundary.ic0.app/", this.#identity).canister('rrkah-fqaaa-aaaaa-aaaaq-cai');
   };
+  async topup(from_sa, amount) {
+    var args = {
+      "from_subaccount" : [getSubAccountArray(from_sa ?? 0)], 
+      "to" : this.data.address,
+      "amount" : { "e8s" : amountToBigInt(amount, 8) },
+      "fee" : { "e8s" : 10000n }, 
+      "memo" : 0, 
+      "created_at_time" : []
+    }
+    await extjs.connect("https://boundary.ic0.app/", this.#identity).canister(LEDGER_CANISTER_ID).send_dfx(args);
+    var memo = await rosettaApi.getTransactionsByAccount(this.data.address).then(rs => Number(rs.pop().memo));
+    args = {
+      controller : [], 
+      memo : memo
+    };
+    var nd = await extjs.connect("https://boundary.ic0.app/", this.#identity).canister(GOVERNANCE_CANISTER).claim_or_refresh_neuron_from_account(args);
+    return true;
+  }
   async update() {
     this.data = await NeuronManager.getData(this.neuronid, this.#identity);
     return this.data;
@@ -204,7 +224,6 @@ const NeuronManager = {
       };
       rns.push(new ICNeuron(nid, ndata, id));
     });
-    console.log(rns);
     return rns;
   },
   create : async (amount, id, sa) => {
@@ -217,7 +236,7 @@ const NeuronManager = {
     var args = {
       "from_subaccount" : [getSubAccountArray(sa ?? 0)], 
       "to" : stakingTo,
-      "amount" : { "e8s" : BigInt(amount) * BigInt(10**8) },
+      "amount" : { "e8s" : amountToBigInt(amount, 8) },
       "fee" : { "e8s" : 10000n }, 
       "memo" : Number(memo), 
       "created_at_time" : []
@@ -240,7 +259,6 @@ const NeuronManager = {
   },
   get : async (neuronid, id) => {
     var ndata = await NeuronManager.getData(neuronid, id);
-    console.log(ndata);
     return new ICNeuron(neuronid, ndata, id);
   },
   getData : async (neuronid, id) => {
@@ -248,7 +266,6 @@ const NeuronManager = {
       neuron_ids : [neuronid],
       include_neurons_readable_by_caller  : false,
     });
-    console.log(ns);
     var ndata = {
       operator : false,
       age : ns.neuron_infos[0][1].age_seconds,
@@ -271,6 +288,7 @@ const NeuronManager = {
 };
 export default NeuronManager;
 
+window.NeuronManager = NeuronManager;
 window.NeuronManager = NeuronManager;
 window.StoicIdentity = StoicIdentity;
 window.extjs = extjs;
