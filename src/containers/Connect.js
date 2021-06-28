@@ -5,7 +5,7 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 import ConnectList from '../components/ConnectList';
 import WalletDialog from '../components/WalletDialog';
 import {StoicIdentity} from '../ic/identity.js';
-import { useSelector, useDispatch } from 'react-redux'
+import {  useDispatch } from 'react-redux'
 
 function Connect(props) {
   const [open, setOpen] = React.useState(true);
@@ -62,6 +62,7 @@ function Connect(props) {
         error("Hardware wallet support is coming soon!")
         setOpen(true)
       break;
+      default: break;
     }
   };
   return (

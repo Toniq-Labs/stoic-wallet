@@ -2,14 +2,12 @@ import React from 'react';
 import { useTheme } from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import IconButton from '@material-ui/core/IconButton';
 import Avatar from '@material-ui/core/Avatar';
 import DeleteIcon from '@material-ui/icons/Delete';
-import ImageIcon from '@material-ui/icons/Image';
 import AddIcon from '@material-ui/icons/Add';
 import MainFab from '../components/MainFab';
 import InputForm from '../components/InputForm';
@@ -40,7 +38,7 @@ function AddressBook(props) {
     if (!name) return error("Please enter a valid contact name");
     if (name.length > 30) return error("Max length or contact names is 30 characters");
     if (!validateAddress(address) && !validatePrincipal(address)) return error("Please enter a valid address or principal");
-    var a = dispatch({ type: 'addresses/add', payload: {
+    dispatch({ type: 'addresses/add', payload: {
       name : name,
       address : address,
     }});

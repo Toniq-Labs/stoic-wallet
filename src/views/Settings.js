@@ -2,19 +2,11 @@ import React from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import Divider from '@material-ui/core/Divider';
-import InboxIcon from '@material-ui/icons/Inbox';
-import DraftsIcon from '@material-ui/icons/Drafts';
 import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
-import AddIcon from '@material-ui/icons/Add';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
-import UsbIcon from '@material-ui/icons/Usb';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import IconButton from '@material-ui/core/IconButton';
@@ -62,6 +54,7 @@ function Settings(props) {
         //Show error
         error("Hardware wallet support is coming soon!")
       break;
+      default: break;
     }
   }
   const changePrincipal = (p) => {
@@ -83,15 +76,6 @@ function Settings(props) {
   const cancel = (t) => {
     setInitialRoute('');
   };
-  const makeAssets = () => {  
-    var assets = ['ICP'];
-    accounts.map(account => {
-      account.tokens.map(token => {
-        if (assets.indexOf(token.symbol) < 0) assets.push(token.symbol);
-      });
-    });
-    setAssets(assets);
-  }
   const deletePrincipal = (i) => {
     props.confirm("Please confirm", "You are about to remove this Principal, which will remove all data regarding this wallet from this device. Are you sure you want to continue?").then(v => {
       dispatch({ type: 'deletewallet', payload : {index : i}});
@@ -103,7 +87,19 @@ function Settings(props) {
     });
   };
   React.useEffect(() => {
+    const makeAssets = () => {  
+      var assets = ['ICP'];
+      accounts.map(account => {
+        account.tokens.map(token => {
+          if (assets.indexOf(token.symbol) < 0) assets.push(token.symbol);
+          return true;
+        });
+        return true;
+      });
+      setAssets(assets);
+    }
     makeAssets();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPrincipal]);
   return (
     <>
@@ -166,7 +162,7 @@ function Settings(props) {
           }
         >
           {principals.map((principal, i) => {
-            if (i == currentPrincipal) return;
+            if (i === currentPrincipal) return "";
             return (
             <ListItem key={principal.identity.principal} button onClick={() => changePrincipal(i)}>
               <ListItemAvatar>

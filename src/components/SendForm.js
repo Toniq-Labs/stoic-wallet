@@ -2,19 +2,18 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
+//import FormControlLabel from '@material-ui/core/FormControlLabel';
+//import Switch from '@material-ui/core/Switch';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, validateAddress} from '../ic/utils.js';
 import {compressAddress} from '../utils.js';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 export default function SendForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
@@ -31,7 +30,7 @@ export default function SendForm(props) {
   
   const [advanced, setAdvanced] = React.useState(false);
   const [memo, setMemo] = React.useState('');
-  const [notify, setNotify] = React.useState(false);
+  //const [notify, setNotify] = React.useState(false);
   
   //cold API
   const api = extjs.connect("https://boundary.ic0.app/");
@@ -42,7 +41,7 @@ export default function SendForm(props) {
   const review = () => {
     if (isNaN(amount)) return error("Please enter a valid amount to send");
     if (isNaN(fee)) return error("Please enter a valid fee to use");
-    if (fee != minFee) return error("The fee must be " + minFee);
+    if (fee !== minFee) return error("The fee must be " + minFee);
     switch(props.data.symbol){
       case "ICP":
         if (!validateAddress(to)) return error("Please enter a valid address");      
@@ -100,7 +99,7 @@ export default function SendForm(props) {
     setTo('');
     setAdvanced(false);
     setMemo('');
-    setNotify(false);
+    //setNotify(false);
   };
   React.useEffect(() => {
     api.token(props.data.id).fee().then(f => {
@@ -110,6 +109,7 @@ export default function SendForm(props) {
     api.token(props.data.id).getBalance(props.address, identity.principal).then(b => {
       setBalance(Number(b)/(10**props.data.decimals));
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.data.id, open]);
 
   return (
@@ -117,7 +117,7 @@ export default function SendForm(props) {
       {React.cloneElement(props.children, {onClick: handleClick})}
       <Dialog open={open} onClose={handleClose}  maxWidth={'sm'} fullWidth >
         <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Send {props.data.name} Tokens ({props.data.symbol})</DialogTitle>
-        {step == 0 ?
+        {step === 0 ?
           <DialogContent>
             <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter the recipient address and amount that you wish to send below.</DialogContentText>
             <>
@@ -161,9 +161,9 @@ export default function SendForm(props) {
                 { minFee > 0 ? "Min Fee: "+minFee+" "+props.data.symbol : ""}
               </DialogContentText>
               { advanced ?
-                <a style={{cursor: 'pointer', fontWeight:'bold'}} onClick={() => setAdvanced(false)}>Hide Advanced Options</a>
+                <p style={{cursor: 'pointer', fontWeight:'bold'}} onClick={() => setAdvanced(false)}>Hide Advanced Options</p>
               :
-                <a style={{cursor: 'pointer', fontWeight:'bold'}} onClick={() => setAdvanced(true)}>Show Advanced Options</a>
+                <p href="#" style={{cursor: 'pointer', fontWeight:'bold'}} onClick={() => setAdvanced(true)}>Show Advanced Options</p>
               }
             </>
             { advanced ?
@@ -207,7 +207,7 @@ export default function SendForm(props) {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          {step == 0 ?
+          {step === 0 ?
             <Button onClick={review} color="primary">Review Transaction</Button>
             :
             <Button onClick={submit} color="primary">Confirm Transaction</Button>

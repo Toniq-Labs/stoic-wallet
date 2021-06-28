@@ -1,19 +1,12 @@
-/* global BigInt */
 import React from 'react';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import Typography from '@material-ui/core/Typography';
-import Slider from '@material-ui/core/Slider';
 import Button from '@material-ui/core/Button';
-import FormControl from '@material-ui/core/FormControl';
-import InputLabel from '@material-ui/core/InputLabel';
-import Select from '@material-ui/core/Select';
-import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -21,7 +14,7 @@ import Avatar from '@material-ui/core/Avatar';
 import ListItemText from '@material-ui/core/ListItemText';
 import Blockie from '../components/Blockie';
 import extjs from '../ic/extjs.js';
-import {validatePrincipal, validateAddress, principalToAccountIdentifier} from '../ic/utils.js';
+import { principalToAccountIdentifier} from '../ic/utils.js';
 const api = extjs.connect("https://boundary.ic0.app/");
 export default function NeuronDelayForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
@@ -38,12 +31,13 @@ export default function NeuronDelayForm(props) {
         setBalance(Number(b)/(10**8));
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subaccount]);
 
   return (
     <>
       <Dialog open={props.open} onClose={props.onClose}  maxWidth={'xs'} fullWidth >
-        {step == 0 ?
+        {step === 0 ?
           <>
             <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Choose an account to stake from</DialogTitle>
             <DialogContent>
@@ -68,7 +62,7 @@ export default function NeuronDelayForm(props) {
             </DialogContent> 
           </>
         : "" }
-        {step == 1 ?
+        {step === 1 ?
           <>
             <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Set the amount you want to stake</DialogTitle>
             <DialogContent>

@@ -1,30 +1,21 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux'
-import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
-import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import IconButton from '@material-ui/core/IconButton';
 import Avatar from '@material-ui/core/Avatar';
 import LaunchIcon from '@material-ui/icons/Launch';
-import ImageIcon from '@material-ui/icons/Image';
 import SendIcon from '@material-ui/icons/Send';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import EditIcon from '@material-ui/icons/Edit';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
-import Card from '@material-ui/core/Card';
-import CardActionArea from '@material-ui/core/CardActionArea';
-import CardContent from '@material-ui/core/CardContent';
 import EvStationIcon from '@material-ui/icons/EvStation';
-import Menu from '@material-ui/core/Menu';
-import MenuItem from '@material-ui/core/MenuItem';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
+import { useTheme } from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
@@ -50,15 +41,11 @@ function AccountDetail(props) {
   const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [tokens, setTokens] = React.useState(account.tokens);
-  const [menuAnchorEl, setMenuAnchorEl] = React.useState(null);
-
-  const handleMenuClick = (event) => {
-    setMenuAnchorEl(event.currentTarget);
-  };
   
   const dispatch = useDispatch()
   React.useEffect(() => {
     setTokens(account.tokens);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentToken, currentAccount, currentPrincipal]);
   
   const theme = useTheme();
@@ -93,7 +80,7 @@ function AccountDetail(props) {
     if (account.nfts.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
     props.loader(true);
     api.token(cid).getMetadata().then(md => {
-      if (md.type == 'fungible') {
+      if (md.type === 'fungible') {
         md.id = cid;
         dispatch({ type: 'account/token/add', payload: {
           metadata : md
@@ -179,9 +166,9 @@ function AccountDetail(props) {
           alignItems="flex-start"
         >
           {tokens.map((token, index) => {
-            return (<TokenCard key={account.address + token.symbol} address={account.address} data={token} onClick={() => changeToken(index)} selected={index == currentToken} />)
+            return (<TokenCard key={account.address + token.symbol} address={account.address} data={token} onClick={() => changeToken(index)} selected={index === currentToken} />)
           })}
-          { account.nfts.length > 0 ? <NFTCard address={account.address} onClick={() => changeToken('nft')} selected={currentToken == 'nft'} /> : "" }
+          { account.nfts.length > 0 ? <NFTCard address={account.address} onClick={() => changeToken('nft')} selected={currentToken === 'nft'} /> : "" }
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
             <InputForm
               onClick={addToken}
@@ -199,7 +186,7 @@ function AccountDetail(props) {
           </Grid>
         </Grid>
       </div>
-      {currentToken != 0 && currentToken != 'nft'?
+      {currentToken !== 0 && currentToken !== 'nft'?
       <div style={{marginLeft:'15px', color:'rgba(0, 0, 0, 0.54)'}}>
         <strong>Token ID:</strong> {account.tokens[currentToken].id}
         <SnackbarButton
@@ -215,15 +202,15 @@ function AccountDetail(props) {
           </IconButton>
         </SnackbarButton>
       </div>: ""}
-      {currentToken == 'nft' ? <NFTList /> : ""}
-      {currentToken != 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
-      {idtype == 'watch' ? "" :
+      {currentToken === 'nft' ? <NFTList /> : ""}
+      {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
+      {idtype === 'watch' ? "" :
         <>
-          { currentToken == 0 ?
+          { currentToken === 0 ?
           <TopupForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
               <MainFab style={{inset: "auto 12px 80px auto",position:"fixed"}} color="primary" aria-label="send"><EvStationIcon /></MainFab>
           </TopupForm> : "" }
-          {currentToken != 'nft' ? 
+          {currentToken !== 'nft' ? 
           <SendForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
             <MainFab color="primary" aria-label="send"><SendIcon /></MainFab>
           </SendForm> : "" }

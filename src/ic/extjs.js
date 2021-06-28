@@ -1,7 +1,6 @@
 /* global BigInt */
-import { Actor, HttpAgent, Principal, AnonymousIdentity } from "@dfinity/agent";  
-import { AuthClient } from "@dfinity/auth-client";
-import { getCyclesTopupAddress, getCyclesTopupSubAccount, rosettaApi, amountToBigInt,principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString } from "./utils.js";
+import { Actor, HttpAgent, Principal } from "@dfinity/agent";  
+import { getCyclesTopupSubAccount, rosettaApi, principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString } from "./utils.js";
 
 import ledgerIDL from './candid/ledger.did.js';
 import governanceIDL from './candid/governance.did.js';
@@ -16,7 +15,7 @@ const CYCLES_MINTING_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 
 
 const constructUser = (u) => {
-  if (isHex(u) && u.length == 64) {
+  if (isHex(u) && u.length === 64) {
     return { 'address' : u };
   } else {
     return { 'principal' : Principal.fromText(u) };
@@ -34,7 +33,7 @@ const tokenIdentifier = (principal, index) => {
 const decodeTokenId = (tid) => {
   var p = [...Principal.fromText(tid).toBlob()];
   var padding = p.splice(0, 4);
-  if (toHexString(padding) != toHexString(Buffer("\x0Atid"))) {
+  if (toHexString(padding) !== toHexString(Buffer("\x0Atid"))) {
     return {
       index : 0,
       canister : tid,
@@ -122,8 +121,7 @@ class ExtConnection {
       if (_preloadedIdls.hasOwnProperty(idl)) {
         idl = _preloadedIdls[idl];
       } else {
-        throw idl + " is not a preloaded IDL";
-        return false;
+        throw new Error(idl + " is not a preloaded IDL");
       }
     }
     if (!this._canisters.hasOwnProperty(cid)){
@@ -190,6 +188,7 @@ class ExtConnection {
       },
       getBalance : (address, princpal) => {
         return new Promise((resolve, reject) => {
+          var args;
           switch(tokenObj.canister) {
             case LEDGER_CANISTER_ID:
               rosettaApi.getAccountBalance(address).then(b => {       
@@ -197,16 +196,16 @@ class ExtConnection {
               });
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
-              var args = {
+              args = {
                 "user" : Principal.fromText(princpal)
               };
               api.getBalanceInsecure(args).then(b => {
-                var bal = b.length == 0 ? 0 : b[0];
+                var bal = b.length === 0 ? 0 : b[0];
                 resolve(bal);
               }).catch(reject);
             break;
             default:
-              var args = {
+              args = {
                 "user" : constructUser(address),
                 'token' : tokenObj.token
               };
@@ -227,8 +226,8 @@ class ExtConnection {
                 if (!Array.isArray(ts)) resolve([]);
                 var _ts = [];
                 ts.map(_t => {
-                  if (_t.type != "TRANSACTION") return;
-                  if (_t.status != "COMPLETED") return;
+                  if (_t.type !== "TRANSACTION") return false;
+                  if (_t.status !== "COMPLETED") return false;
                   _ts.push({
                     from : _t.account1Address,
                     to :  _t.account2Address,
@@ -238,6 +237,7 @@ class ExtConnection {
                     timestamp : _t.timestamp,
                     memo : Number(_t.memo),
                   });
+                  return true;
                 });
                 resolve(_ts);
               }).catch(reject);
@@ -260,9 +260,10 @@ class ExtConnection {
       */
       transfer : (from_principal, from_sa, to_user, amount, fee, memo, notify) => {
         return new Promise((resolve, reject) => {
+          var args;
           switch(tokenObj.canister) {
             case LEDGER_CANISTER_ID:
-              var args = {
+              args = {
                 "from_subaccount" : [getSubAccountArray(from_sa ?? 0)], 
                 "to" : to_user, //Should be an address
                 "amount" : { "e8s" : amount },
@@ -276,7 +277,7 @@ class ExtConnection {
               //Notify here
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
-              var args = {
+              args = {
                 "to" : Principal.fromText(to_user), 
                 "metadata" : [],
                 "from" : Principal.fromText(from_principal),
@@ -291,7 +292,7 @@ class ExtConnection {
               }).catch(reject);
             break;
             default:
-              var args = {
+              args = {
                 'token' : tid,
                 'from' : { 'address' : principalToAccountIdentifier(from_principal, from_sa ?? 0) },
                 'subaccount' : [getSubAccountArray(from_sa ?? 0)],

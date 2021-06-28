@@ -1,5 +1,4 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -46,7 +45,7 @@ export default function Transactions(props) {
     updateTransactions(props.data.id, props.address).then(txs => {
       //console.log("Fetched for " + txs[1]);
       //console.log("Current " + props.data.id);
-      if (txs[1] != props.data.id || txs[2] != props.address) return;
+      if (txs[1] !== props.data.id || txs[2] !== props.address) return;
       setTransactions(txs[0]);
     });
   };
@@ -55,16 +54,16 @@ export default function Transactions(props) {
     return () => {
       stopPoll();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
-    let canceled = false;
     
     stopPoll();
     setTimeout( () => {
       setTransactions(false);
       startPoll();
     }, 100);
-    return () => (canceled = true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.address, props.data.id]);
 
   return (
@@ -96,12 +95,12 @@ export default function Transactions(props) {
                     <Timestamp relative autoUpdate date={tx.timestamp} />
                   </TableCell>
                   <TableCell>
-                    {tx.from == props.address ?
-                      <>Sent <strong>{tx.amount} {props.data.symbol}</strong> to {tx.to} with a <strong>{tx.fee} {props.data.symbol}</strong> Fee<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank">View Transaction</a>)</> :
-                      <>Received <strong>{tx.amount} {props.data.symbol}</strong> from {tx.from}<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank">View Transaction</a>)</> }
+                    {tx.from === props.address ?
+                      <>Sent <strong>{tx.amount} {props.data.symbol}</strong> to {tx.to} with a <strong>{tx.fee} {props.data.symbol}</strong> Fee<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> :
+                      <>Received <strong>{tx.amount} {props.data.symbol}</strong> from {tx.from}<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> }
                   </TableCell>
                   <TableCell align="right">
-                    {tx.from == props.address ? 
+                    {tx.from === props.address ? 
                       <span style={{color:'red',fontWeight:'bold'}}>-{tx.amount + tx.fee}</span> : 
                       <span style={{color:'#00b894',fontWeight:'bold'}}>+{tx.amount}</span>
                     }

@@ -70,7 +70,7 @@ const toHexString = (byteArray)  =>{
   }).join('')
 }
 const fromHexString = (hex) => {
-  if (hex.substr(0,2) == "0x") hex = hex.substr(2);
+  if (hex.substr(0,2) === "0x") hex = hex.substr(2);
   for (var bytes = [], c = 0; c < hex.length; c += 2)
   bytes.push(parseInt(hex.substr(c, 2), 16));
   return bytes;
@@ -107,16 +107,20 @@ const isHex = (h) => {
   return regexp.test(h);
 };
 const validateAddress = (a) => {
-  return (isHex(a) && a.length == 64)
+  return (isHex(a) && a.length === 64)
 }
 const validatePrincipal = (p) => {
   try {
-    return (p == Principal.fromText(p).toText());
+    return (p === Principal.fromText(p).toText());
   } catch (e) {
     return false;
   }
 }
 export { 
+  LEDGER_CANISTER_ID, 
+  GOVERNANCE_CANISTER_ID, 
+  NNS_CANISTER_ID, 
+  CYCLES_MINTING_CANISTER_ID, 
   getCyclesTopupAddress, 
   getCyclesTopupSubAccount, 
   amountToBigInt, 

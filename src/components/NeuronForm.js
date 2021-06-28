@@ -61,7 +61,7 @@ export default function NeuronForm(props) {
     }).finally(handleClose)
   };
   const handleClick = () => {
-    if (accounts.length == 1) setStep(1);
+    if (accounts.length === 1) setStep(1);
     setOpen(true);
   };
   const handleClose = () => {
@@ -78,7 +78,7 @@ export default function NeuronForm(props) {
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
       <Dialog open={open} onClose={handleClose}  maxWidth={'xs'} fullWidth >
-        {step == 0 ?
+        {step === 0 ?
           <>
             <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Choose an account to stake from</DialogTitle>
             <DialogContent>
@@ -103,7 +103,7 @@ export default function NeuronForm(props) {
             </DialogContent> 
           </>
         : "" }
-        {step == 1 ?
+        {step === 1 ?
           <>
             <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Set the amount you want to stake</DialogTitle>
             <DialogContent>
@@ -135,7 +135,7 @@ export default function NeuronForm(props) {
             </DialogActions>
           </>
         : ""}
-        {step == 2 ?
+        {step === 2 ?
           <>
             <DialogContent>
               <DialogContentText style={{textAlign:'center'}}>

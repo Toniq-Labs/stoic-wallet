@@ -1,6 +1,6 @@
 /* global BigInt */
-import { Actor, HttpAgent, Principal, AnonymousIdentity } from "@dfinity/agent";  
-import { rosettaApi, amountToBigInt, principalToAccountIdentifier, toHexString, to32bits, getSubAccountArray, fromHexString } from "./utils.js";
+import { Principal } from "@dfinity/agent";  
+import { rosettaApi, amountToBigInt, principalToAccountIdentifier, toHexString, to32bits, getSubAccountArray } from "./utils.js";
 import extjs from "./extjs.js";
 import { sha256 as jsSha256 } from 'js-sha256';
 import { blobFromUint8Array } from '@dfinity/agent/lib/esm/types';
@@ -48,8 +48,8 @@ class ICNeuron {
   id = 0;
   data = {};
   constructor(neuronid, neurondata, identity) {
-    if (!neuronid) throw "NeuronID is required";
-    if (!identity) throw "Identity is required";
+    if (!neuronid) throw new Error("NeuronID is required");
+    if (!identity) throw new Error("Identity is required");
     this.neuronid = neuronid;
     this.id = neuronid.toString();
     this.#identity = identity;
@@ -71,7 +71,7 @@ class ICNeuron {
       controller : [], 
       memo : memo
     };
-    var nd = await extjs.connect("https://boundary.ic0.app/", this.#identity).canister(GOVERNANCE_CANISTER).claim_or_refresh_neuron_from_account(args);
+    await extjs.connect("https://boundary.ic0.app/", this.#identity).canister(GOVERNANCE_CANISTER).claim_or_refresh_neuron_from_account(args);
     return true;
   }
   async update() {
@@ -89,7 +89,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
   async split(amount) { //TODO TEST
@@ -103,7 +103,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
   async follow(topic, neuron) {
@@ -118,7 +118,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
   async startDissolving() {
@@ -132,7 +132,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
   async stopDissolving() {
@@ -146,7 +146,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
   async increaseDissolveDelay(seconds) {
@@ -162,7 +162,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
   async setDissolveTime(seconds) {//not really needed
@@ -178,7 +178,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
   async disburse() {
@@ -193,7 +193,7 @@ class ICNeuron {
       id : [{id : this.neuronid}],
       command : [cmdBody]
     });
-    if (res.command[0].hasOwnProperty('Error')) throw "Error:" + JSON.stringify(res.command[0].Error.error_message);
+    if (res.command[0].hasOwnProperty('Error')) throw new Error("Error:" + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   };
 };
@@ -207,7 +207,7 @@ const NeuronManager = {
     ns.full_neurons.map((n, i) => {
       var nid = n.id[0].id;
       var nn = ns.neuron_infos.find(e => {
-        return (e[0] == nid);
+        return (e[0] === nid);
       })[1];
       var ndata = {
         age : nn.age_seconds,
@@ -223,6 +223,7 @@ const NeuronManager = {
         address : principalToAccountIdentifier(GOVERNANCE_CANISTER, n.account),
       };
       rns.push(new ICNeuron(nid, ndata, id));
+      return true;
     });
     return rns;
   },
@@ -243,8 +244,8 @@ const NeuronManager = {
     }
     
     //Call
-    var bh = await extjs.connect("https://boundary.ic0.app/", id).canister(LEDGER_CANISTER_ID).send_dfx(args);
-    var args = {
+    await extjs.connect("https://boundary.ic0.app/", id).canister(LEDGER_CANISTER_ID).send_dfx(args);
+    args = {
       controller : [principal], 
       memo : Number(memo)
     };
@@ -252,7 +253,7 @@ const NeuronManager = {
     //Call
     var nd = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).claim_or_refresh_neuron_from_account(args);
     if (nd.result[0].hasOwnProperty("Error")) {
-      throw "Error: " + JSON.stringify(nd.result[0].Error);
+      throw new Error("Error: " + JSON.stringify(nd.result[0].Error));
     }
     var neuronid = nd.result[0].NeuronId.id;
     return await NeuronManager.get(neuronid, id);
@@ -275,7 +276,7 @@ const NeuronManager = {
       state : ns.neuron_infos[0][1].state,
       voting_power : ns.neuron_infos[0][1].voting_power
     };
-    if (ns.full_neurons.length == 1) {
+    if (ns.full_neurons.length === 1) {
       ndata['stake'] = ns.full_neurons[0].cached_neuron_stake_e8s;
       ndata['maturity'] = ns.full_neurons[0].maturity_e8s_equivalent;
       ndata['fees'] = ns.full_neurons[0].neuron_fees_e8s;

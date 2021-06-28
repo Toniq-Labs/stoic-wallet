@@ -2,19 +2,16 @@
 import React from 'react';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
-import Grid from '@material-ui/core/Grid';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-import FormControlLabel from '@material-ui/core/FormControlLabel';
-import Switch from '@material-ui/core/Switch';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
-import {validatePrincipal, validateAddress} from '../ic/utils.js';
+import {validatePrincipal} from '../ic/utils.js';
 import {compressAddress} from '../utils.js';
-import { useSelector, useDispatch } from 'react-redux'
+import { useSelector } from 'react-redux'
 
 export default function TopupForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
@@ -26,13 +23,8 @@ export default function TopupForm(props) {
   const [rate, setRate] = React.useState(0);
 
   const [amount, setAmount] = React.useState(0);
-  const [minFee, setMinFee] = React.useState(0);
   const [to, setTo] = React.useState('');
-  
-  const [advanced, setAdvanced] = React.useState(false);
-  const [memo, setMemo] = React.useState('');
-  const [notify, setNotify] = React.useState(false);
-  
+    
   //cold API
   const fee = 0.0002;
   const api = extjs.connect("https://boundary.ic0.app/");
@@ -88,6 +80,7 @@ export default function TopupForm(props) {
     api.token().getBalance(props.address, identity.principal).then(b => {
       setBalance(Number(b)/(10**8));
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.data.id, open]);
 
   return (
@@ -95,7 +88,7 @@ export default function TopupForm(props) {
       {React.cloneElement(props.children, {onClick: handleClick})}
       <Dialog open={open} onClose={handleClose}  maxWidth={'sm'} fullWidth >
         <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Top-up your canister</DialogTitle>
-        {step == 0 ?
+        {step === 0 ?
           <DialogContent>
             <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter the Canister ID and the amount of ICP you would like converted to cycles and added to the canister</DialogContentText>
             <>
@@ -146,7 +139,7 @@ export default function TopupForm(props) {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          {step == 0 ?
+          {step === 0 ?
             <Button onClick={review} color="primary">Review Transaction</Button>
             :
             <Button onClick={submit} color="primary">Confirm Transaction</Button>

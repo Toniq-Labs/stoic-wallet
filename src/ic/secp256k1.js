@@ -1,21 +1,11 @@
-import { blobFromHex, blobFromUint8Array, blobToHex, derBlobFromBlob, SignIdentity, blobFromBuffer, } from '@dfinity/agent';
+import { blobFromHex, blobFromUint8Array, blobToHex, SignIdentity, blobFromBuffer, } from '@dfinity/agent';
 import { Buffer } from 'buffer/';
-import * as tweetnacl from 'tweetnacl';
 import * as bigintConversion from 'bigint-conversion'
 const ellipticcurve = require("starkbank-ecdsa");
 
 const Ecdsa = ellipticcurve.Ecdsa;
 const PrivateKey = ellipticcurve.PrivateKey;
 const PublicKey = ellipticcurve.PublicKey;
-function base64ToArrayBuffer(base64) {
-    var binary_string = window.atob(base64);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++) {
-        bytes[i] = binary_string.charCodeAt(i);
-    }
-    return bytes.buffer;
-}
 function stringToBytes ( str ) {
   var ch, st, re = [];
   for (var i = 0; i < str.length; i++ ) {
@@ -60,7 +50,7 @@ export class Secp256k1KeyIdentity extends SignIdentity {
         if (pem) {
           secretKey = PrivateKey.fromPem(pem);
         } else {
-          throw "Error";
+          throw  new Error("Error");
         }
         publicKey = secretKey.publicKey();
         return new this(Secp256k1PublicKey.fromRaw(publicKey), secretKey);

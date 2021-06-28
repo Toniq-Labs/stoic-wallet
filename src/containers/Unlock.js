@@ -13,12 +13,11 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
 import {StoicIdentity} from '../ic/identity.js';
 import { useSelector, useDispatch } from 'react-redux'
-import ListSubheader from '@material-ui/core/ListSubheader';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
 import Blockie from '../components/Blockie';
 import TwitterIcon from '@material-ui/icons/Twitter';
-import RedditIcon from '@material-ui/icons/Reddit';
+import MailIcon from '@material-ui/icons/Mail';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { useFilePicker } from 'use-file-picker';
@@ -50,6 +49,7 @@ function Unlock(props) {
         setOpen(true)
       });
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fsobj.filesContent]);
   const error = (e) => {
     props.alert("There was an error", e);
@@ -135,7 +135,7 @@ function Unlock(props) {
       </Dialog>
     :
     <>
-      {identity.type == 'ii' ?
+      {identity.type === 'ii' ?
         <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
           <DialogContent>
@@ -157,7 +157,7 @@ function Unlock(props) {
             <Button onClick={clear} color="primary">Clear Wallet</Button>
           </DialogActions>
         </Dialog>: ""}
-        {identity.type == 'pem' ?
+        {identity.type === 'pem' ?
         <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
           <DialogContent>
@@ -179,7 +179,7 @@ function Unlock(props) {
             <Button onClick={clear} color="primary">Clear Wallet</Button>
           </DialogActions>
         </Dialog>: ""}
-        {identity.type == 'private' ?
+        {identity.type === 'private' ?
           <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
             <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
             <DialogContent>
@@ -208,10 +208,10 @@ function Unlock(props) {
             <List component="nav" aria-label="secondary add principal">
               <ListItem button onClick={iiLogin}>
                 <ListItemIcon>
-                  {identity.type == 'google' ? <RedditIcon /> : ""}
-                  {identity.type == 'twitter' ? <TwitterIcon /> : ""}
-                  {identity.type == 'facebook' ? <FacebookIcon /> : ""}
-                  {identity.type == 'github' ? <GitHubIcon /> : ""}
+                  {identity.type === 'google' ? <MailIcon /> : ""}
+                  {identity.type === 'twitter' ? <TwitterIcon /> : ""}
+                  {identity.type === 'facebook' ? <FacebookIcon /> : ""}
+                  {identity.type === 'github' ? <GitHubIcon /> : ""}
                 </ListItemIcon>
                 <ListItemText 
                   primary={"Login to your " + capitalizeFirstLetter(identity.type) + " account"} 

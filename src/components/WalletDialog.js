@@ -6,10 +6,6 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
-import AddIcon from '@material-ui/icons/Add';
-import GetAppIcon from '@material-ui/icons/GetApp';
-import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
-import UsbIcon from '@material-ui/icons/Usb';
 import DialogActions from '@material-ui/core/DialogActions';
 import Button from '@material-ui/core/Button';
 import VisibilityIcon from '@material-ui/icons/Visibility';
@@ -17,10 +13,9 @@ import VpnKeyIcon from '@material-ui/icons/VpnKey';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
 import TwitterIcon from '@material-ui/icons/Twitter';
-import RedditIcon from '@material-ui/icons/Reddit';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import GitHubIcon from '@material-ui/icons/GitHub';
-
+import MailIcon from '@material-ui/icons/Mail';
 
 import {StoicIdentity} from '../ic/identity.js';
 import { useFilePicker } from 'use-file-picker';
@@ -52,6 +47,7 @@ export default function WalletDialog(props) {
       clear();
       props.submit("pem",od);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [filesContent]);
   React.useEffect(() => {
     setRoute(props.initialRoute);
@@ -95,7 +91,7 @@ export default function WalletDialog(props) {
   }
   const confirmMnemonic = () => {
     if (!StoicIdentity.validateMnemonic(mnemonic)) return error("The mnemonic you entered is not valid"); //show error
-    if (type == 'create' && mnemonic !== newMnemonic) return error("The mnemonic you entered does not match the one displayed"); //show error
+    if (type === 'create' && mnemonic !== newMnemonic) return error("The mnemonic you entered does not match the one displayed"); //show error
     setRoute("passwords");
   };
   const confirmPasswords = () => {
@@ -120,6 +116,7 @@ export default function WalletDialog(props) {
         t = 'watch';
         od.principal = address;
       break;
+      default: break;
     };
     props.submit(t,od);
     clearState();
@@ -137,7 +134,7 @@ export default function WalletDialog(props) {
   
   return (
     <>
-      { route == '3party' ?
+      { route === '3party' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'xs'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Select Login Provider</DialogTitle>
@@ -145,7 +142,7 @@ export default function WalletDialog(props) {
             <List component="nav" aria-label="secondary add principal">
               <ListItem button onClick={() => directuath('google')}>
                 <ListItemIcon>
-                  <RedditIcon />
+                  <MailIcon />
                 </ListItemIcon>
                 <ListItemText 
                   primary="Google" 
@@ -188,7 +185,7 @@ export default function WalletDialog(props) {
           </DialogActions> 
         </Dialog>
       </>:""}
-      { route == 'tips' ?
+      { route === 'tips' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Security Tips</DialogTitle>
@@ -210,7 +207,7 @@ export default function WalletDialog(props) {
           </DialogActions> 
         </Dialog>
       </>:""}
-      { route == 'import' ?
+      { route === 'import' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Select Import Type</DialogTitle>
@@ -252,7 +249,7 @@ export default function WalletDialog(props) {
           </DialogActions> 
         </Dialog>
       </>:""}
-      { route == 'newMnemonic' ?
+      { route === 'newMnemonic' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Write down your seed phrase</DialogTitle>
@@ -271,7 +268,7 @@ export default function WalletDialog(props) {
           </DialogActions> 
         </Dialog>
       </>:""}
-      { route == 'confirmMnemonic' ?
+      { route === 'confirmMnemonic' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Confirm your mnemonic seed</DialogTitle>
@@ -293,7 +290,7 @@ export default function WalletDialog(props) {
           </DialogActions>
         </Dialog>
       </>:""}
-      { route == 'address' ?
+      { route === 'address' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Enter the Principal to watch</DialogTitle>
@@ -314,7 +311,7 @@ export default function WalletDialog(props) {
           </DialogActions>
         </Dialog>
       </>:""}
-      { route == 'passwords' ?
+      { route === 'passwords' ?
       <>
         <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Enter a password</DialogTitle>

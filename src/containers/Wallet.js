@@ -1,6 +1,5 @@
 import React from 'react';
-import { useSelector, useDispatch } from 'react-redux'
-import PropTypes from 'prop-types';
+import { useDispatch } from 'react-redux'
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import IconButton from '@material-ui/core/IconButton';
@@ -8,17 +7,15 @@ import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
-import Button from '@material-ui/core/Button';
 
 import AccountDrawer from '../components/AccountDrawer';
-import SnackbarButton from '../components/SnackbarButton';
 
 import AccountDetail from '../views/AccountDetail';
 import AddressBook from '../views/AddressBook';
 import Neurons from '../views/Neurons';
 import Settings from '../views/Settings';
 
-import { makeStyles, useTheme } from '@material-ui/core/styles';
+import { makeStyles } from '@material-ui/core/styles';
 
 const drawerWidth = 300;
 const useStyles = makeStyles((theme) => ({
@@ -48,7 +45,6 @@ const useStyles = makeStyles((theme) => ({
 }));
 
 
-var UNLOCKED = false, ACTIVE = false, INTV = false;
   const routes = {
     'accountDetail' : {
       title : "Account Details",
@@ -71,7 +67,6 @@ var UNLOCKED = false, ACTIVE = false, INTV = false;
 
 
 function Wallet(props) {
-  const theme = useTheme();
   const classes = useStyles();
   const [mobileOpen, setMobileOpen] = React.useState(false);
   const [route, setRoute] = React.useState('accountDetail');
@@ -87,13 +82,10 @@ function Wallet(props) {
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       case "settings":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader, clearWallet : clearWallet, lockWallet : lockWallet})
-      break;
       case "neurons":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
-      break;
       default:
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm})
-      break;
     }
   }
   const changeRoute = (r, i) => {
@@ -108,7 +100,6 @@ function Wallet(props) {
   const clearWallet = () => {
     props.remove();
   };
-  const wallet = {}; //Load in JS api?
   return (
     <div className={classes.root}>
       <CssBaseline />

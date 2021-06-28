@@ -1,15 +1,12 @@
-/* global BigInt */
 import React from 'react';
 import Grid from '@material-ui/core/Grid';
 import { useTheme } from '@material-ui/core/styles';
 import Typography from '@material-ui/core/Typography';
 import AddIcon from '@material-ui/icons/Add';
-import Button from '@material-ui/core/Button';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import NeuronForm from '../components/NeuronForm';
 import MainFab from '../components/MainFab';
 import Neuron from '../components/Neuron';
-import extjs from '../ic/extjs.js';
 import NeuronManager from '../ic/neuron.js';
 import NeuronDelayForm from '../components/NeuronDelayForm';
 import TopupNeuronForm from '../components/TopupNeuronForm';
@@ -19,7 +16,6 @@ import { useSelector, useDispatch } from 'react-redux'
 var cb = null;
 function Neurons(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
-  const currentAccount = useSelector(state => state.currentAccount)
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const neurons = useSelector(state => state.principals[currentPrincipal].neurons);
   const theme = useTheme();
@@ -49,7 +45,8 @@ function Neurons(props) {
     },
   };
   React.useEffect(() => {
-    if (neurons.length == 0) scanNeurons();
+    if (neurons.length === 0) scanNeurons();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   
   const scanNeurons = () => {
@@ -99,7 +96,7 @@ function Neurons(props) {
 
   return (
     <div style={styles.root}>
-      {neurons.length == 0 ? 
+      {neurons.length === 0 ? 
         <div style={styles.empty}>
           <Typography paragraph align="center">
             <AllInclusiveIcon style={styles.largeIcon} />
