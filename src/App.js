@@ -50,7 +50,6 @@ export default function App() {
       StoicIdentity.load(principals[currentPrincipal].identity).then(i => {
         setAppState(2);
       }).catch(e => {
-        console.log(e);
         setAppState(1);
       }).finally(() => loader(false));
     }    

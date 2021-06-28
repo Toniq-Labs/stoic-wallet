@@ -11,6 +11,7 @@ import {
   bip39 } from "./utils.js";
 var identities = {};
 var openlogin = false;
+var _iisessionInterval = false;
 const oauths = ['google', 'twitter', 'facebook', 'github'];
 const loadOpenLogin = async () => {
   if (!openlogin) {
@@ -104,8 +105,8 @@ const StoicIdentity = {
         case "ii":
           var auth = await AuthClient.create();
           id = await auth.getIdentity();
-          if (id.getPrincipal().toString() !== _id.principal) reject("Logged in using the incorrect user");
           if (id.getPrincipal().toString() === '2vxsx-fae') reject("Not logged in");
+          if (id.getPrincipal().toString() !== _id.principal) reject("Logged in using the incorrect user: " + id.getPrincipal().toString() + " but expecting " + _id.principal);
           resolve(processId(id, _id.type)); 
         break;
         case "private":
@@ -169,8 +170,8 @@ const StoicIdentity = {
               identityProvider: "https://identity.ic0.app/",
               onSuccess: async () => {
                 id = await auth.getIdentity()
-                if (id.getPrincipal() !== _id.principal) reject("Logged in using the incorrect user");
                 if (id.getPrincipal().toString() === '2vxsx-fae') reject("Not logged in");
+                if (id.getPrincipal().toString() !== _id.principal) reject("Logged in using the incorrect user: " + id.getPrincipal().toString() + " but expecting " + _id.principal);
                 resolve(processId(id, _id.type));
               },
               onError : reject

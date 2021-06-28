@@ -91,7 +91,6 @@ function Unlock(props) {
     StoicIdentity.unlock(identity).then(r => {
       props.login();
     }).catch(e => {
-      //return error(e);
     }).finally(() => {
       setTimeout(() => {
         setOpen(true)
