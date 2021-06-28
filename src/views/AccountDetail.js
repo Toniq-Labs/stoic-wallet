@@ -17,6 +17,9 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import EditIcon from '@material-ui/icons/Edit';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
+import Card from '@material-ui/core/Card';
+import CardActionArea from '@material-ui/core/CardActionArea';
+import CardContent from '@material-ui/core/CardContent';
 import EvStationIcon from '@material-ui/icons/EvStation';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
@@ -26,10 +29,11 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
+import NFTCard from '../components/NFTCard';
 import SendForm from '../components/SendForm';
 import TopupForm from '../components/TopupForm';
-import AddTokenCard from '../components/AddTokenCard';
 import Transactions from '../components/Transactions';
+import NFTList from '../components/NFTList';
 import MainFab from '../components/MainFab';
 import InputForm from '../components/InputForm';
 import extjs from '../ic/extjs.js';
@@ -85,16 +89,30 @@ function AccountDetail(props) {
   };
   const addToken = (cid) => {
     if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
-    if (account.tokens.findIndex(x => x.id === cid) >= 0) return error("Canister has already been added");
+    if (account.tokens.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
+    if (account.nfts.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
     props.loader(true);
     api.token(cid).getMetadata().then(md => {
-      if (md.type != 'fungible') return error("NFT's are not supported yet");
-      md.id = cid;
-      dispatch({ type: 'account/token/add', payload: {
-        metadata : md
-      }});
+      if (md.type == 'fungible') {
+        md.id = cid;
+        dispatch({ type: 'account/token/add', payload: {
+          metadata : md
+        }});
+        props.loader(false);
+        dispatch({ type: 'currentToken', payload: {index:account.tokens.length}});
+      } else {
+        var nft = {
+          id : cid,
+          metadata : md
+        };
+        dispatch({ type: 'account/nft/add', payload: {
+          nft : nft
+        }});
+        props.loader(false);
+        dispatch({ type: 'currentToken', payload: {index:'nft'}});
+      }
+    }).finally(() => {
       props.loader(false);
-      dispatch({ type: 'currentToken', payload: {index:account.tokens.length}});
     });
   };
   return (
@@ -163,23 +181,26 @@ function AccountDetail(props) {
           {tokens.map((token, index) => {
             return (<TokenCard key={account.address + token.symbol} address={account.address} data={token} onClick={() => changeToken(index)} selected={index == currentToken} />)
           })}
-          <InputForm
-            onClick={addToken}
-            title="Add token"
-            inputLabel="Canister ID"
-            content="Enter the Canister ID for the token you wish to add"
-            buttonLabel="Add"
-          >
-            <Tooltip title="Add a new token to this account">
-              <Fab style={{marginLeft:10, top:"24px"}} color="primary" aria-label="add">
-                <AddIcon />
-              </Fab>
-            </Tooltip>
-          </InputForm>
+          { account.nfts.length > 0 ? <NFTCard address={account.address} onClick={() => changeToken('nft')} selected={currentToken == 'nft'} /> : "" }
+          <Grid style={styles.root} item xl={2} lg={3} md={4}>
+            <InputForm
+              onClick={addToken}
+              title="Add token"
+              inputLabel="Canister ID"
+              content="Enter the Canister ID for the token you wish to add"
+              buttonLabel="Add"
+            >
+              <Tooltip title="Add a new token to this account">
+                <Fab color="primary" aria-label="add">
+                  <AddIcon />
+                </Fab>
+              </Tooltip>
+            </InputForm>
+          </Grid>
         </Grid>
       </div>
-      {currentToken != 0 ?
-      <p style={{marginLeft:'15px', color:'rgba(0, 0, 0, 0.54)'}}>
+      {currentToken != 0 && currentToken != 'nft'?
+      <div style={{marginLeft:'15px', color:'rgba(0, 0, 0, 0.54)'}}>
         <strong>Token ID:</strong> {account.tokens[currentToken].id}
         <SnackbarButton
           message="Token ID Copied"
@@ -193,17 +214,19 @@ function AccountDetail(props) {
             <FileCopyIcon style={{ fontSize: 14 }} />
           </IconButton>
         </SnackbarButton>
-      </p>: ""}
-      <Transactions data={account.tokens[currentToken]} address={account.address} />
+      </div>: ""}
+      {currentToken == 'nft' ? <NFTList /> : ""}
+      {currentToken != 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype == 'watch' ? "" :
         <>
           { currentToken == 0 ?
           <TopupForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
               <MainFab style={{inset: "auto 12px 80px auto",position:"fixed"}} color="primary" aria-label="send"><EvStationIcon /></MainFab>
           </TopupForm> : "" }
+          {currentToken != 'nft' ? 
           <SendForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
             <MainFab color="primary" aria-label="send"><SendIcon /></MainFab>
-          </SendForm>
+          </SendForm> : "" }
         </>
       }
     </div>
