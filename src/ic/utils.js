@@ -3,10 +3,32 @@ import { Principal } from "@dfinity/agent";
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { getCrc32 } from '@dfinity/agent/lib/esm/utils/getCrc';
 import { sha224 } from '@dfinity/agent/lib/esm/utils/sha224';
+import RosettaApi from './RosettaApi.js';
+const LEDGER_CANISTER_ID = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+const GOVERNANCE_CANISTER_ID = "rrkah-fqaaa-aaaaa-aaaaq-cai";
+const NNS_CANISTER_ID = "qoctq-giaaa-aaaaa-aaaea-cai";
+const CYCLES_MINTING_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
+const rosettaApi = new RosettaApi();
 const sjcl = require('sjcl')
 const bip39 = require('bip39')
 const pbkdf2 = require("pbkdf2");
 
+const getCyclesTopupAddress = (canisterId) => {
+  return principalToAccountIdentifier(CYCLES_MINTING_CANISTER_ID, getCyclesTopupSubAccount(canisterId));
+}
+const getCyclesTopupSubAccount = (canisterId) => {
+  var pb = Array.from(Principal.fromText(canisterId).toBlob());
+  return [pb.length, ...pb];
+}
+const amountToBigInt = (amount, decimals) => {
+  //decimals = decimals ?? 8;
+  if (amount < 1) {
+    amount = BigInt(amount*(10**decimals));
+  } else {
+    amount = BigInt(amount)*BigInt(10**decimals)
+  }
+  return amount;
+}
 const principalToAccountIdentifier = (p, s) => {
   const padding = Buffer("\x0Aaccount-id");
   const array = new Uint8Array([
@@ -95,6 +117,10 @@ const validatePrincipal = (p) => {
   }
 }
 export { 
+  getCyclesTopupAddress, 
+  getCyclesTopupSubAccount, 
+  amountToBigInt, 
+  rosettaApi, 
   Principal, 
   principalToAccountIdentifier, 
   getSubAccountArray, 

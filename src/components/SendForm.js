@@ -54,7 +54,7 @@ export default function SendForm(props) {
         if (!validateAddress(to) && !validatePrincipal(to)) return error("Please enter a valid address to send to");      
       break;
     }
-    if ((amount+fee) > balance)  return error("You have insufficient " + props.data.symbol); 
+    if ((Number(amount)+Number(fee)) > balance)  return error("You have insufficient " + props.data.symbol); 
     setStep(1);
   }
   const submit = () => {

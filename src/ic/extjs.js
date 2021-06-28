@@ -1,8 +1,7 @@
 /* global BigInt */
 import { Actor, HttpAgent, Principal, AnonymousIdentity } from "@dfinity/agent";  
 import { AuthClient } from "@dfinity/auth-client";
-import { principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString } from "./utils.js";
-import RosettaApi from './RosettaApi.js';
+import { getCyclesTopupAddress, getCyclesTopupSubAccount, rosettaApi, amountToBigInt,principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString } from "./utils.js";
 
 import ledgerIDL from './candid/ledger.did.js';
 import governanceIDL from './candid/governance.did.js';
@@ -15,7 +14,7 @@ const GOVERNANCE_CANISTER_ID = "rrkah-fqaaa-aaaaa-aaaaq-cai";
 const NNS_CANISTER_ID = "qoctq-giaaa-aaaaa-aaaea-cai";
 const CYCLES_MINTING_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 
-const rosettaApi = new RosettaApi();
+
 const constructUser = (u) => {
   if (isHex(u) && u.length == 64) {
     return { 'address' : u };
@@ -50,22 +49,7 @@ const decodeTokenId = (tid) => {
   }
 };
 
-const getCyclesTopupAddress = (canisterId) => {
-  return principalToAccountIdentifier(CYCLES_MINTING_CANISTER_ID, getCyclesTopupSubAccount(canisterId));
-}
-const getCyclesTopupSubAccount = (canisterId) => {
-  var pb = Array.from(Principal.fromText(canisterId).toBlob());
-  return [pb.length, ...pb];
-}
-const amountToBigInt = (amount, decimals) => {
-  //decimals = decimals ?? 8;
-  if (amount < 1) {
-    amount = BigInt(amount*(10**decimals));
-  } else {
-    amount = BigInt(amount)*BigInt(10**decimals)
-  }
-  return amount;
-}
+
 
 //Preload IDLS against a common name
 const _preloadedIdls = {
@@ -337,15 +321,15 @@ class ExtConnection {
               var args = {
                 "from_subaccount" : [getSubAccountArray(from_sa ?? 0)], 
                 "to" : _to, 
-                "fee" : { "e8s" : amountToBigInt(fee, 8) }, 
+                "fee" : { "e8s" : fee }, 
                 "memo" : Number(BigInt("0x50555054")), 
                 "created_at_time" : [], 
-                "amount" : { "e8s" : amountToBigInt(amount, 8) }
+                "amount" : { "e8s" : amount }
               };
               api.send_dfx(args).then(block => {
                 var args = {
                   "block_height" : block,
-                  "max_fee": {e8s: amountToBigInt(fee, 8)},
+                  "max_fee": {e8s: fee},
                   "from_subaccount": [getSubAccountArray(from_sa ?? 0)],
                   "to_subaccount": [getSubAccountArray(_to_sub)],
                   "to_canister": Principal.fromText(CYCLES_MINTING_CANISTER_ID)
@@ -353,7 +337,8 @@ class ExtConnection {
                 api.notify_dfx(args).then(resolve).catch(reject);
               }).catch(reject);
             break;
-            case "5ymop-yyaaa-aaaah-qaa4q-cai"://WTC
+            case "5ymop-yyaaa-aaaah-qaa4q-cai":
+              reject("WIP");
             break;
             default:
               reject("Cycle topup is not supported by this token");

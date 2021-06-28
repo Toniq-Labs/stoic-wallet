@@ -41,7 +41,7 @@ export default function TopupForm(props) {
     props.error(e);
   }
   const review = () => {
-    console.log((Number(amount)+Number(fee)))
+    console.log(amount, fee, amount+fee, (Number(amount)+Number(fee)))
     if (isNaN(amount)) return error("Please enter a valid amount to send");
     if (!validatePrincipal(to)) return error("Please enter a valid canister ID");      
     if ((Number(amount)+Number(fee)) > balance)  return error("You have insufficient ICP"); 
@@ -51,12 +51,9 @@ export default function TopupForm(props) {
     //Submit to blockchain here
     var _from_principal = identity.principal;
     var _from_sa = currentAccount;
-    var _to_user = to;
+    var _canister = to;
     var _amount = BigInt(amount*(10**8));
     var _fee = BigInt(0.0001*(10**8));
-    var _memo = memo;
-    var _notify = false;//hardcoded false for now
-    
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
@@ -65,17 +62,13 @@ export default function TopupForm(props) {
     handleClose();
     
     //hot api, will sign as identity - BE CAREFUL
-    // extjs.connect("https://boundary.ic0.app/", id).token().transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(r => {
-      // if (r) {
-        // return props.alert("Transaction complete", "Your transfer was sent successfully");
-      // } else {        
-        // return error("Something went wrong with this transfer");
-      // }
-    // }).catch(e => {
-      // return error("There was an error: " + e);
-    // }).finally(() => {
-      // props.loader(false);
-    // });
+    extjs.connect("https://boundary.ic0.app/", id).token().mintCycles(_from_principal, _from_sa, _canister, _amount, _fee).then(r => {
+      return props.alert("Transaction complete", "Your cycles have been minted and sent to your canister");
+    }).catch(e => {
+      return error("There was an error: " + e);
+    }).finally(() => {
+      props.loader(false);
+    });
   };
   const handleClick = () => {
     setOpen(true);
