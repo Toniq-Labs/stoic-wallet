@@ -1,18 +1,13 @@
 import React from 'react';
-import Container from '@material-ui/core/Container';
 import Divider from '@material-ui/core/Divider';
 import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
-import MailIcon from '@material-ui/icons/Mail';
-import IconButton from '@material-ui/core/IconButton';
-import InboxIcon from '@material-ui/icons/MoveToInbox';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
-import ImageIcon from '@material-ui/icons/Image';
 import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
@@ -100,14 +95,14 @@ export default function AccountDrawer(props) {
           <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
           <ListItemText primary="Neurons" />
         </ListItem>
-        {idtype == 'watch' ? "" :
+        {idtype === 'watch' ? "" :
         <ListItem button onClick={() => props.lockWallet()}>
           <ListItemIcon><LockIcon /></ListItemIcon>
           <ListItemText primary="Lock Wallet" />
         </ListItem> }
       </List>
       <div style={{width: drawerWidth-1, zIndex: 10, backgroundColor:'white', position:"fixed", bottom:0, textAlign:'center'}} className={classes.toolbar}>
-        <span style={{position:'absolute', bottom:'10px', left:'0', right:'0'}}>Connected to Mainnet - v0.1.0</span>
+        <span style={{position:'absolute', bottom:'10px', left:'0', right:'0'}}>Connected to Mainnet - v1.0.0</span>
       </div>
     </div>
   );
