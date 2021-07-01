@@ -221,7 +221,8 @@ function rootReducer(state = appData, action) {
                 nfts : []
               }
             ],
-            identity : action.payload.identity
+            identity : action.payload.identity,
+            neurons : []
           },
         ],
         currentPrincipal : cp
