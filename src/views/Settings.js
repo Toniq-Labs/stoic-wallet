@@ -59,26 +59,31 @@ function Settings(props) {
   }
   const changePrincipal = (p) => {
     props.confirm("Please confirm", "You are about to lock your current Principal and switch to another one. Are you sure you want to continue?").then(v => {
-      StoicIdentity.lock(principals[currentPrincipal].identity).then(r => {      
-        dispatch({ type: 'currentPrincipal', payload : {index : p}});
-      });
+      if (v) {
+        StoicIdentity.lock(principals[currentPrincipal].identity).then(r => {      
+          dispatch({ type: 'currentPrincipal', payload : {index : p}});
+        });
+      }
     });
   }
   const submit = (type, optdata) => {
     props.loader(true);
     StoicIdentity.change(identity, type, optdata).then(identity => {
       dispatch({ type: 'addwallet', payload : {identity : identity}});
-      props.loader(false);
     }).catch(e => {
+    }).finally(() => {      
       props.loader(false);
-    })
+      setInitialRoute('');
+    });
   };
   const cancel = (t) => {
     setInitialRoute('');
   };
   const deletePrincipal = (i) => {
     props.confirm("Please confirm", "You are about to remove this Principal, which will remove all data regarding this wallet from this device. Are you sure you want to continue?").then(v => {
-      dispatch({ type: 'deletewallet', payload : {index : i}});
+      if (v) {
+        dispatch({ type: 'deletewallet', payload : {index : i}});
+      }
     });
   };
   const clearWallet = () => {
@@ -172,21 +177,41 @@ function Settings(props) {
               </ListItemAvatar>
               <ListItemText 
                 primaryTypographyProps={{noWrap:true}} 
-                primary={principal.identity.principal}
+                primary={
+                  <>
+                    {principal.identity.principal}
+                      {/*<SnackbarButton
+                      message="Principal Copied"
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      }}
+                      onClick={() => clipboardCopy(principal.identity.principal)}
+                    >
+                      <IconButton size="small" edge="end" aria-label="edit">
+                        <FileCopyIcon  style={{ fontSize: 18 }} />
+                      </IconButton>
+                      </SnackbarButton>*/}
+                  </>
+                } 
                 secondary={
                   <>
                     <>{identityTypes[principal.identity.type]}</>
                   </>
-                } />
-                <ListItemSecondaryAction>
-            <IconButton href={"https://ic.rocks/principal/"+principal.identity.principal} target="_blank" edge="end" aria-label="search">
-              <LaunchIcon />
-            </IconButton>
-            { principals.length > 1 ?
-            <IconButton onClick={() => deletePrincipal(i)} edge="end" aria-label="search">
-              <DeleteIcon />
-            </IconButton> : "" }
-          </ListItemSecondaryAction>
+                } 
+              />
+              <ListItemSecondaryAction>
+                <IconButton onClick={() => clipboardCopy(principal.identity.principal)} edge="end">
+                  <FileCopyIcon />
+                </IconButton>
+                <IconButton href={"https://ic.rocks/principal/"+principal.identity.principal} target="_blank" edge="end" aria-label="search">
+                  <LaunchIcon />
+                </IconButton>
+                { principals.length > 1 ?
+                <IconButton onClick={() => deletePrincipal(i)} edge="end" aria-label="search">
+                  <DeleteIcon />
+                </IconButton> : "" }
+              </ListItemSecondaryAction>
             </ListItem>) 
           })}
         </List>
