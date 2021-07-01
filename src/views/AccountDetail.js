@@ -202,7 +202,7 @@ function AccountDetail(props) {
           </IconButton>
         </SnackbarButton>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList /> : ""}
+      {currentToken === 'nft' ? <NFTList error={error} confirm={props.confirm} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>
