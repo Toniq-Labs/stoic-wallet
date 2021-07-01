@@ -81,7 +81,7 @@ function newDb(identity){
         ]
       ],
       identity : identity,
-      /*neurons : []*/
+      neurons : []
     }
   ],[],[0,0,0]];
   localStorage.setItem('_db', JSON.stringify(tc));

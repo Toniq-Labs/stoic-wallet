@@ -16,7 +16,7 @@ window.ellipticcurve = ellipticcurve;
 
 var identities = {};
 var openlogin = false;
-var _iisessionInterval = false;
+//var _iisessionInterval = false;
 const oauths = ['google', 'twitter', 'facebook', 'github'];
 const loadOpenLogin = async () => {
   if (!openlogin) {

@@ -4,7 +4,7 @@ import { GOVERNANCE_CANISTER_ID, LEDGER_CANISTER_ID, rosettaApi, amountToBigInt,
 import extjs from "./extjs.js";
 import { sha256 as jsSha256 } from 'js-sha256';
 import { blobFromUint8Array } from '@dfinity/agent/lib/esm/types';
-import {StoicIdentity} from "./identity.js";
+//import {StoicIdentity} from "./identity.js";
 
 const topics = [
   ["All topics", 0],
