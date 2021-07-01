@@ -2,7 +2,6 @@ import { blobFromHex, blobFromUint8Array, blobToHex, SignIdentity, blobFromBuffe
 import { Buffer } from 'buffer/';
 import * as bigintConversion from 'bigint-conversion'
 const ellipticcurve = require("starkbank-ecdsa");
-
 const Ecdsa = ellipticcurve.Ecdsa;
 const PrivateKey = ellipticcurve.PrivateKey;
 const PublicKey = ellipticcurve.PublicKey;

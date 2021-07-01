@@ -1,13 +1,11 @@
 /* global BigInt */
 import { Principal } from "@dfinity/agent";  
-import { rosettaApi, amountToBigInt, principalToAccountIdentifier, toHexString, to32bits, getSubAccountArray } from "./utils.js";
+import { GOVERNANCE_CANISTER_ID, LEDGER_CANISTER_ID, rosettaApi, amountToBigInt, principalToAccountIdentifier, toHexString, to32bits, getSubAccountArray } from "./utils.js";
 import extjs from "./extjs.js";
 import { sha256 as jsSha256 } from 'js-sha256';
 import { blobFromUint8Array } from '@dfinity/agent/lib/esm/types';
 import {StoicIdentity} from "./identity.js";
 
-const GOVERNANCE_CANISTER = "rrkah-fqaaa-aaaaa-aaaaq-cai";
-const LEDGER_CANISTER_ID = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 const topics = [
   ["All topics", 0],
   ["Neuron Management", 1],
@@ -36,12 +34,10 @@ const getStakingAddress = (principal, nonce) => {
       ...nonce
   ]);
   const hash = sha256(array);
-  return principalToAccountIdentifier(GOVERNANCE_CANISTER, Array.from(hash));
+  return principalToAccountIdentifier(GOVERNANCE_CANISTER_ID, Array.from(hash));
 }
 
 class ICNeuron {
-  //TODO add voting, proposals, disburse to neuron?
-  //TODO deal with errors
   #api = false;
   #identity = false;
   neuronid = 0;
@@ -54,7 +50,7 @@ class ICNeuron {
     this.id = neuronid.toString();
     this.#identity = identity;
     this.data = neurondata;
-    this.#api = extjs.connect("https://boundary.ic0.app/", this.#identity).canister('rrkah-fqaaa-aaaaa-aaaaq-cai');
+    this.#api = extjs.connect("https://boundary.ic0.app/", this.#identity).canister(GOVERNANCE_CANISTER_ID);
   };
   async topup(from_sa, amount) {
     var args = {
@@ -71,7 +67,7 @@ class ICNeuron {
       controller : [], 
       memo : memo
     };
-    await extjs.connect("https://boundary.ic0.app/", this.#identity).canister(GOVERNANCE_CANISTER).claim_or_refresh_neuron_from_account(args);
+    await extjs.connect("https://boundary.ic0.app/", this.#identity).canister(GOVERNANCE_CANISTER_ID).claim_or_refresh_neuron_from_account(args);
     return true;
   }
   async update() {
@@ -199,7 +195,7 @@ class ICNeuron {
 };
 const NeuronManager = {
   scan : async (id) => {
-    var ns = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).list_neurons({
+    var ns = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER_ID).list_neurons({
       include_neurons_readable_by_caller  : true,
       neuron_ids : []
     })
@@ -220,7 +216,7 @@ const NeuronManager = {
         maturity : n.maturity_e8s_equivalent,
         fees : n.neuron_fees_e8s,
         operator : true,
-        address : principalToAccountIdentifier(GOVERNANCE_CANISTER, n.account),
+        address : principalToAccountIdentifier(GOVERNANCE_CANISTER_ID, n.account),
       };
       rns.push(new ICNeuron(nid, ndata, id));
       return true;
@@ -251,7 +247,7 @@ const NeuronManager = {
     };
 
     //Call
-    var nd = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).claim_or_refresh_neuron_from_account(args);
+    var nd = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER_ID).claim_or_refresh_neuron_from_account(args);
     if (nd.result[0].hasOwnProperty("Error")) {
       throw new Error("Error: " + JSON.stringify(nd.result[0].Error));
     }
@@ -263,7 +259,7 @@ const NeuronManager = {
     return new ICNeuron(neuronid, ndata, id);
   },
   getData : async (neuronid, id) => {
-    var ns = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER).list_neurons({
+    var ns = await extjs.connect("https://boundary.ic0.app/", id).canister(GOVERNANCE_CANISTER_ID).list_neurons({
       neuron_ids : [neuronid],
       include_neurons_readable_by_caller  : false,
     });
@@ -281,17 +277,11 @@ const NeuronManager = {
       ndata['maturity'] = ns.full_neurons[0].maturity_e8s_equivalent;
       ndata['fees'] = ns.full_neurons[0].neuron_fees_e8s;
       ndata['operator'] = true;
-      ndata['address'] = principalToAccountIdentifier(GOVERNANCE_CANISTER, ns.full_neurons[0].account);
+      ndata['address'] = principalToAccountIdentifier(GOVERNANCE_CANISTER_ID, ns.full_neurons[0].account);
     }
     return ndata;
   },
   topics : topics
 };
 export default NeuronManager;
-
-window.NeuronManager = NeuronManager;
-window.NeuronManager = NeuronManager;
-window.StoicIdentity = StoicIdentity;
-window.extjs = extjs;
-
 

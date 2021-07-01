@@ -1,18 +1,13 @@
 /* global BigInt */
 import { Actor, HttpAgent, Principal } from "@dfinity/agent";  
-import { getCyclesTopupSubAccount, rosettaApi, principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString } from "./utils.js";
+import { LEDGER_CANISTER_ID, GOVERNANCE_CANISTER_ID, NNS_CANISTER_ID, CYCLES_MINTING_CANISTER_ID, getCyclesTopupSubAccount, rosettaApi, principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString } from "./utils.js";
 
 import ledgerIDL from './candid/ledger.did.js';
 import governanceIDL from './candid/governance.did.js';
 import nnsIDL from './candid/nns.did.js';
 import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import extIDL from './candid/ext.did.js';
-
-const LEDGER_CANISTER_ID = "ryjl3-tyaaa-aaaaa-aaaba-cai";
-const GOVERNANCE_CANISTER_ID = "rrkah-fqaaa-aaaaa-aaaaq-cai";
-const NNS_CANISTER_ID = "qoctq-giaaa-aaaaa-aaaea-cai";
-const CYCLES_MINTING_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
-
+//import cronicsIDL from './candid/cronics.did.js';
 
 const constructUser = (u) => {
   if (isHex(u) && u.length === 64) {
@@ -67,6 +62,7 @@ class ExtConnection {
     [GOVERNANCE_CANISTER_ID] : _preloadedIdls['governance'],
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
+    //"e3izy-jiaaa-aaaah-qacbq-cai" : cronicsIDL,
   };
   _metadata = {
     [LEDGER_CANISTER_ID] : {
@@ -184,6 +180,15 @@ class ExtConnection {
               break;
             }
           }
+        });
+      },
+      getBearer : () => {
+        return new Promise((resolve, reject) => {
+          api.bearer(tokenObj.token).then(r => {
+            if (typeof r.ok != 'undefined') resolve(r.ok)
+            else if (typeof r.err != 'undefined') reject(r.err)
+            else reject(r);
+          }).catch(reject);    
         });
       },
       getBalance : (address, princpal) => {
@@ -349,6 +354,7 @@ class ExtConnection {
       }
     };
   }
+ 
   _makeAgent() {
     var args = {};
     if (this._identity) args['identity'] = this._identity;
@@ -358,8 +364,8 @@ class ExtConnection {
 };
 
 const extjs = {
-  connect : (host, identity) => new ExtConnection(host ?? "https://boundary.ic0.app/", identity)
+  connect : (host, identity) => new ExtConnection(host ?? "https://boundary.ic0.app/", identity),
+   decodeTokenId : decodeTokenId,
 };
 export default extjs;
 
-window.tokenIdentifier = tokenIdentifier;

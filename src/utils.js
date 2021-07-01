@@ -51,7 +51,7 @@ isHex = (h) => {
 },
 compressAddress = (a) => {
   if (!a) return "";
-  if (a.length === 64 && isHex(a)) return a.substr(0, 40) + "...";
+  if (a.length === 64 && isHex(a)) return a.substr(0, 16) + "...";
   else {
     var pp = a.split("-");
     if (pp.length <= 4) return a;

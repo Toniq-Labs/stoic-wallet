@@ -1,5 +1,5 @@
 import { createStore } from "redux";
-import {principalToAccountIdentifier} from './ic/utils.js';
+import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
 
 var appData = {
   principals : [],
@@ -40,7 +40,7 @@ function initDb(){
           address : principalToAccountIdentifier(principal.identity.principal, subaccount),
           tokens : [
             {
-              id : "ryjl3-tyaaa-aaaaa-aaaba-cai",
+              id : LEDGER_CANISTER_ID,
               name : "Internet Computer",
               symbol : "ICP",
               decimals : 8,
@@ -100,6 +100,7 @@ function clearDb(){
   return clearState;
 }
 function saveDb(newState){
+  //console.log(newState);
   var updatedDb = [[], newState.addresses, [newState.currentPrincipal, newState.currentAccount, newState.currentToken]];
   
   newState.principals.map(principal => {
@@ -164,6 +165,29 @@ function rootReducer(state = appData, action) {
           }
         }),
       });
+    case "account/nft/remove":
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i === state.currentPrincipal) {
+            return {
+              ...principal,
+              accounts : principal.accounts.map((account,ii) => {
+                if (ii === state.currentAccount) {
+                  return {
+                    ...account,
+                    nfts : account.nfts.filter(e => (e && e.id !== action.payload.id)),
+                  }
+                } else {
+                  return account;
+                }
+              }),
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
     case "removewallet":
       return clearDb();
     case "createwallet":
@@ -171,6 +195,7 @@ function rootReducer(state = appData, action) {
     case "deletewallet":
       return saveDb({
         ...state,
+        currentPrincipal : (state.currentPrincipal > action.payload.index ? state.currentPrincipal - 1 : state.currentPrincipal),
         principals : state.principals.filter((e,i) => i !== action.payload.index)
       });
     case "addwallet": //TODO
@@ -186,7 +211,7 @@ function rootReducer(state = appData, action) {
                 address : principalToAccountIdentifier(action.payload.identity.principal, 0),
                 tokens : [
                   {
-                    id : "ryjl3-tyaaa-aaaaa-aaaba-cai",
+                    id : LEDGER_CANISTER_ID,
                     name : "Internet Computer",
                     symbol : "ICP",
                     decimals : 8,
@@ -256,7 +281,8 @@ function rootReducer(state = appData, action) {
                   name : "Internet Computer",
                   symbol : "ICP",
                   decimals : 8,
-                }]
+                }],
+                nfts : []
               }]
             }
           } else {

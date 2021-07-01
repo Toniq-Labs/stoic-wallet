@@ -9,6 +9,11 @@ import {
   decrypt, 
   fromHexString, 
   bip39 } from "./utils.js";
+import * as tweetnacl from 'tweetnacl';
+const ellipticcurve = require("starkbank-ecdsa");
+window.tweetnacl = tweetnacl;
+window.ellipticcurve = ellipticcurve;
+
 var identities = {};
 var openlogin = false;
 var _iisessionInterval = false;
@@ -18,7 +23,7 @@ const loadOpenLogin = async () => {
     openlogin = new OpenLogin({
       clientId: "BHGs7-pkZO-KlT_BE6uMGsER2N1PC4-ERfU_c7BKN1szvtUaYFBwZMC2cwk53yIOLhdpaOFz4C55v_NounQBOfU",
       network: "mainnet",
-      uxMode : 'redirect',
+      uxMode : 'popup',
     });
   }
   await openlogin.init();
@@ -50,11 +55,11 @@ const StoicIdentity = {
             identityProvider: "https://identity.ic0.app/",
             onSuccess: async () => {
               id = await auth.getIdentity()
-              resolve(processId(id, type));
+              return resolve(processId(id, type));
             },
             onError : reject
           });
-        break;
+          return;
         case "private":
           localStorage.setItem('_m', optdata.mnemonic);
           id = mnemonicToId(optdata.mnemonic);
@@ -68,34 +73,33 @@ const StoicIdentity = {
               ems[id.getPrincipal().toString()] = _em;
             }
             localStorage.setItem('_em', JSON.stringify(ems));
-            resolve(processId(id, type));        
+            return resolve(processId(id, type));        
           });
-        break;
+          return;
         case "pem":
           id = Secp256k1KeyIdentity.fromPem(optdata.pem);
-          resolve(processId(id, type));
-        break;
+          return resolve(processId(id, type));
         case "watch":
-          resolve({
+          return resolve({
             principal : optdata.principal,
             type : type
           });   
-        break;
         default: break;
       }
         
       if (oauths.indexOf(type) >= 0) {
         const openlogin = await loadOpenLogin();
-        if (!openlogin.privKey) {
-          await openlogin.login({
-            loginProvider: type,
-          });
+        if (openlogin.privKey) {
+          await openlogin.logout();
         }
+        await openlogin.login({
+          loginProvider: type,
+        });
         id = Ed25519KeyIdentity.generate(new Uint8Array(fromHexString(openlogin.privKey)));
-        resolve(processId(id, type));
+        return resolve(processId(id, type));
       }
       
-      reject("Cannot setup, invalid type: " + type);
+      return reject("Cannot setup, invalid type: " + type);
     });
   },
   load : (_id) => {
@@ -105,78 +109,73 @@ const StoicIdentity = {
         case "ii":
           var auth = await AuthClient.create();
           id = await auth.getIdentity();
-          if (id.getPrincipal().toString() === '2vxsx-fae') reject("Not logged in");
-          if (id.getPrincipal().toString() !== _id.principal) reject("Logged in using the incorrect user: " + id.getPrincipal().toString() + " but expecting " + _id.principal);
-          resolve(processId(id, _id.type)); 
-        break;
+          if (id.getPrincipal().toString() === '2vxsx-fae') return reject("Not logged in");
+          if (id.getPrincipal().toString() !== _id.principal) return reject("Logged in using the incorrect user: " + id.getPrincipal().toString() + " but expecting " + _id.principal);
+          return resolve(processId(id, _id.type)); 
         case "private":
           if (!isLoaded(_id.principal)) { 
             var t = localStorage.getItem('_m');
             if (!t){
-              reject("No seed");
+              return reject("No seed");
             } else {
               var mnemonic = t;
               id = mnemonicToId(mnemonic);
-              resolve(processId(id, _id.type));
+              return resolve(processId(id, _id.type));
             }
           } else {
-            resolve({
+            return resolve({
               principal : _id.principal,
               type : _id.type
             });
           }
-        break;
         case "pem":
-          if (!isLoaded(_id.principal)) reject(); 
-          resolve({
+          if (!isLoaded(_id.principal)) return reject(); 
+          return resolve({
             principal : _id.principal,
             type : _id.type
           });   
-        break;
         case "watch":
-          resolve({
+          return resolve({
             principal : _id.principal,
             type : _id.type
           });   
-        break;
         default: break;
       }
       if (oauths.indexOf(_id.type) >= 0) {
         const openlogin = await loadOpenLogin();
         if (!openlogin.privKey || openlogin.privKey.length === 0) {
-          reject("Not logged in");
+          return reject("Not logged in");
         } else {
           id = Ed25519KeyIdentity.generate(new Uint8Array(fromHexString(openlogin.privKey)));
-          if (id.getPrincipal() !== _id.principal) {
+          if (id.getPrincipal().toString() !== _id.principal) {
             await openlogin.logout();
-            reject("Logged in using the incorrect user");
+            return reject("Logged in using the incorrect user " + id.getPrincipal().toString() + " expecting " + _id.principal);
           } else {
-            resolve(processId(id, _id.type)); 
+            return resolve(processId(id, _id.type)); 
           }
         }
       }
-      reject();
+      return reject();
     });
   },
   unlock : (_id, optdata) => {
     return new Promise(async (resolve, reject) => {
       StoicIdentity.load(_id).then(resolve).catch(async e => {
-        //Yup we should be here :-(
         var id;
-        switch(_id.type){
+        switch(_id.type) {
           case "ii":
             var auth = await AuthClient.create();
             auth.login({
               identityProvider: "https://identity.ic0.app/",
               onSuccess: async () => {
                 id = await auth.getIdentity()
-                if (id.getPrincipal().toString() === '2vxsx-fae') reject("Not logged in");
-                if (id.getPrincipal().toString() !== _id.principal) reject("Logged in using the incorrect user: " + id.getPrincipal().toString() + " but expecting " + _id.principal);
-                resolve(processId(id, _id.type));
+                if (id.getPrincipal().toString() === '2vxsx-fae') return reject("Not logged in");
+                if (id.getPrincipal().toString() !== _id.principal) return reject("Logged in using the incorrect user: " + id.getPrincipal().toString() + " but expecting " + _id.principal);
+                return resolve(processId(id, _id.type));
               },
               onError : reject
             });
-            break;
+            return;
           case "private":
             var t = localStorage.getItem('_em');
             if (!t) return reject("No encrypted seed to decrypt");
@@ -190,20 +189,19 @@ const StoicIdentity = {
               nems[_id.principal] = em;
               localStorage.setItem('_em', JSON.stringify(nems));
             } else {
-              if (ems.hasOwnProperty(_id.principal) === false) reject("No encrypted seed to decrypt");
+              if (ems.hasOwnProperty(_id.principal) === false) return reject("No encrypted seed to decrypt");
               em = ems[_id.principal];
             }
             decrypt(em, _id.principal, optdata.password).then(mnemonic => {
               localStorage.setItem('_m', mnemonic);
               id = mnemonicToId(mnemonic);
-              resolve(processId(id, _id.type));
+              return resolve(processId(id, _id.type));
             }).catch(reject);
-            break;
+            return;
           case "pem":
             id = Secp256k1KeyIdentity.fromPem(optdata.pem);
-            resolve(processId(id, _id.type));
-          break;
-        default: break;
+            return resolve(processId(id, _id.type));
+          default: break;
         }
         
         if (oauths.indexOf(_id.type) >= 0) {
@@ -215,14 +213,14 @@ const StoicIdentity = {
               });
             }
             id = Ed25519KeyIdentity.generate(new Uint8Array(fromHexString(openlogin.privKey)));
-            if (id.getPrincipal() !== _id.principal) {
+            if (id.getPrincipal().toString() !== _id.principal) {
               await openlogin.logout();
-              reject("Logged in using the incorrect user");
+              return reject("Logged in using the incorrect user " + id.getPrincipal().toString() + " expecting " + _id.principal);
             } else {
-              resolve(processId(id, _id.type)); 
+              return resolve(processId(id, _id.type)); 
             }
           } catch (e) {
-            reject("Something happened");
+            return reject("Something happened");
           }
         }
         //reject("Invalid login type");
@@ -242,10 +240,14 @@ const StoicIdentity = {
         default: break;
       }
       if (oauths.indexOf(_id.type) >= 0) {
-        const openlogin = await loadOpenLogin();
-        await openlogin.logout();
+        try {
+          const openlogin = await loadOpenLogin();
+          await openlogin.logout();
+        } catch (e) {
+          console.log(e);
+        }
       }
-      resolve(true);
+      return resolve(true);
     });
   },
   clear : (_id) => {
@@ -262,10 +264,14 @@ const StoicIdentity = {
         default: break;
       }
       if (oauths.indexOf(_id.type) >= 0) {
-        const openlogin = await loadOpenLogin();
-        await openlogin.logout();
+        try {
+          const openlogin = await loadOpenLogin();
+          await openlogin.logout();
+        } catch (e) {
+          console.log(e);
+        }
       }
-      resolve(true);
+      return resolve(true);
     });
   },
   change : (_id, type, optdata) => {
@@ -281,8 +287,12 @@ const StoicIdentity = {
         default: break;
       }
       if (oauths.indexOf(_id.type) >= 0) {
-        const openlogin = await loadOpenLogin();
-        await openlogin.logout();
+        try {
+          const openlogin = await loadOpenLogin();
+          await openlogin.logout();
+        } catch (e) {
+          console.log(e);
+        }
       }
       //setup new
       StoicIdentity.setup(type, optdata).then(resolve).catch(reject);
