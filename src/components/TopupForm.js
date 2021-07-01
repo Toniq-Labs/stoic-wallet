@@ -9,7 +9,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
-import {validatePrincipal} from '../ic/utils.js';
+import {validatePrincipal, NNS_CANISTER_ID} from '../ic/utils.js';
 import {compressAddress} from '../utils.js';
 import { useSelector } from 'react-redux'
 
@@ -73,7 +73,7 @@ export default function TopupForm(props) {
     setTo('');
   };
   React.useEffect(() => {
-    api.canister("qoctq-giaaa-aaaaa-aaaea-cai").get_icp_to_cycles_conversion_rate().then(b => {
+    api.canister(NNS_CANISTER_ID).get_icp_to_cycles_conversion_rate().then(b => {
       setRate(Number(b/BigInt(10**10))/(10**2));
     });
     

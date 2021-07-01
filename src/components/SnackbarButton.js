@@ -12,11 +12,11 @@ export default function SnackbarButton(props) {
   };
 
   const handleClose = (event, reason) => {
+    setOpen(false);
     if (reason === 'clickaway') {
       return;
     }
 
-    setOpen(false);
   };
 
   return (  

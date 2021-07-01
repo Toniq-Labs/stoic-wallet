@@ -15,15 +15,14 @@ function Connect(props) {
     props.loader(true);
     StoicIdentity.setup(type, optdata).then(identity => {
       dispatch({ type: 'createwallet', payload : {identity : identity}});
-      props.loader(false);
-      setOpen(true)
       props.login();
     }).catch(e => {
-      props.loader(false);
-      setOpen(true)
+      console.log(e);
     }).finally(() => {
-      setOpen(true)
-      props.loader(false)
+      setTimeout(() => {
+        setOpen(true);
+        props.loader(false)
+      }, 2000);
     });
   };
   const error = (e) => {
@@ -42,16 +41,18 @@ function Connect(props) {
       case "import":
         setInitialRoute('import');
       break;
+      case "3party":
+        setInitialRoute('3party');
+      break;
       case "link":
         props.loader(true);
         StoicIdentity.setup("ii").then(identity => {
           dispatch({ type: 'createwallet', payload : {identity : identity}});
-          props.loader(false);
-          setOpen(true)
           props.login();
-        }).catch(e => {
           props.loader(false);
           setOpen(true)
+        }).catch(e => {
+          console.log(e);
         }).finally(() => {
           setOpen(true)
           props.loader(false)

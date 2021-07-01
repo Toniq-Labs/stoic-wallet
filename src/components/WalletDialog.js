@@ -317,14 +317,12 @@ export default function WalletDialog(props) {
           <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Enter a password</DialogTitle>
           <DialogContent>
             <p><strong>This password is used to further encrypt your private data on your device. Passwords must contain:</strong></p>
-            <p>
               <ul>
                 <li>At least 8 characters</li>
                 <li>At least one uppercase letter</li>
                 <li>At least one lowercase letter</li>
                 <li>At least one number</li>
               </ul>
-            </p>
             <TextField
               id="standard-textarea"
               label="Enter Password"

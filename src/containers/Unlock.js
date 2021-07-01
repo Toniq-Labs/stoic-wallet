@@ -56,7 +56,10 @@ function Unlock(props) {
   }
   const clear = () => {
     props.confirm("Please confirm", "You are about to clear your wallet, which will remove all data from this device. Are you sure you want to continue?").then(v => {
-      if (v) props.remove();
+      if (v) {
+        setOpen(false);
+        props.remove();
+      }
     });
   };
   const changePrincipal = (p) => {
