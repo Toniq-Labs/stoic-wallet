@@ -369,3 +369,4 @@ const extjs = {
 };
 export default extjs;
 
+//window.extjs = extjs;

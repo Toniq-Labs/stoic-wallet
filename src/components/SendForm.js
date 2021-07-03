@@ -7,8 +7,8 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
-//import FormControlLabel from '@material-ui/core/FormControlLabel';
-//import Switch from '@material-ui/core/Switch';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Switch from '@material-ui/core/Switch';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, validateAddress} from '../ic/utils.js';
@@ -30,7 +30,7 @@ export default function SendForm(props) {
   
   const [advanced, setAdvanced] = React.useState(false);
   const [memo, setMemo] = React.useState('');
-  //const [notify, setNotify] = React.useState(false);
+  const [notify, setNotify] = React.useState(false);
   
   //cold API
   const api = extjs.connect("https://boundary.ic0.app/");
@@ -64,7 +64,7 @@ export default function SendForm(props) {
     var _amount = BigInt(amount*(10**props.data.decimals));
     var _fee = BigInt(fee*(10**props.data.decimals));
     var _memo = memo;
-    var _notify = false;//hardcoded false for now
+    var _notify = notify;
     
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
@@ -99,7 +99,7 @@ export default function SendForm(props) {
     setTo('');
     setAdvanced(false);
     setMemo('');
-    //setNotify(false);
+    setNotify(false);
   };
   React.useEffect(() => {
     api.token(props.data.id).fee().then(f => {
@@ -182,11 +182,11 @@ export default function SendForm(props) {
                   shrink: true,
                 }}
               />
-              {/*
+              
               <FormControlLabel
                 control={<Switch checked={notify} onChange={(event) => setNotify(event.target.checked)} name="notify" />}
-                label="Notify"
-              />*/}
+                label="Notify receiver?"
+              />
             </> : "" }
           </DialogContent>
         :

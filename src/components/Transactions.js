@@ -24,11 +24,8 @@ export default function Transactions(props) {
     },
   };
   const updateTransactions = (_id, _address) => {
-    //ugly set new code?
-    var id = JSON.parse(JSON.stringify(_id));
-    var address = JSON.parse(JSON.stringify(_address));
-    return api.token(id).getTransactions(address).then(txs => {
-      return [txs, id, address];
+    return api.token(_id).getTransactions(_address).then(txs => {
+      return [txs, _id, _address];
     });
   }
   const stopPoll = () => {
