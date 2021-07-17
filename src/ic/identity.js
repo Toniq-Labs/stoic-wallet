@@ -1,3 +1,4 @@
+/* global BigInt */
 import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { AuthClient } from "@dfinity/auth-client";
 import { Secp256k1KeyIdentity } from "./secp256k1.js";
@@ -52,6 +53,7 @@ const StoicIdentity = {
         case "ii":
           var auth = await AuthClient.create();
           auth.login({
+            maxTimeToLive : BigInt(24*60*60*1000000000),
             identityProvider: "https://identity.ic0.app/",
             onSuccess: async () => {
               id = await auth.getIdentity()
@@ -166,6 +168,7 @@ const StoicIdentity = {
           case "ii":
             var auth = await AuthClient.create();
             auth.login({
+              maxTimeToLive : BigInt(24*60*60*1000000000),
               identityProvider: "https://identity.ic0.app/",
               onSuccess: async () => {
                 id = await auth.getIdentity()
@@ -307,3 +310,4 @@ const StoicIdentity = {
   }
 }
 export {StoicIdentity};
+//window.StoicIdentity = StoicIdentity;

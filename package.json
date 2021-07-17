@@ -32,6 +32,7 @@
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
+    "prebuild": "react-scripts build && serve -s build",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -55,6 +56,7 @@
     ]
   },
   "devDependencies": {
-    "redux": "^4.1.0"
+    "redux": "^4.1.0",
+    "webpack": "4.44.2"
   }
 }

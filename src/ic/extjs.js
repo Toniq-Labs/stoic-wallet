@@ -7,6 +7,7 @@ import governanceIDL from './candid/governance.did.js';
 import nnsIDL from './candid/nns.did.js';
 import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import extIDL from './candid/ext.did.js';
+//import advancedIDL from './candid/advanced.did.js';
 //import cronicsIDL from './candid/cronics.did.js';
 
 const constructUser = (u) => {
@@ -63,6 +64,7 @@ class ExtConnection {
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
     //"e3izy-jiaaa-aaaah-qacbq-cai" : cronicsIDL,
+    //"kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
   };
   _metadata = {
     [LEDGER_CANISTER_ID] : {
@@ -368,5 +370,6 @@ const extjs = {
    decodeTokenId : decodeTokenId,
 };
 export default extjs;
-
 //window.extjs = extjs;
+//window.principalToAccountIdentifier = principalToAccountIdentifier;
+//window.fromHexString = fromHexString;
