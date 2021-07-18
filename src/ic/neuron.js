@@ -36,7 +36,6 @@ const getStakingAddress = (principal, nonce) => {
   const hash = sha256(array);
   return principalToAccountIdentifier(GOVERNANCE_CANISTER_ID, Array.from(hash));
 }
-
 class ICNeuron {
   #api = false;
   #identity = false;
@@ -62,7 +61,7 @@ class ICNeuron {
       "created_at_time" : []
     }
     await extjs.connect("https://boundary.ic0.app/", this.#identity).canister(LEDGER_CANISTER_ID).send_dfx(args);
-    var memo = await rosettaApi.getTransactionsByAccount(this.data.address).then(rs => Number(rs.pop().memo));
+    var memo = await rosettaApi.getTransactionsByAccount(this.data.address).then(rs => Number(rs[0].memo));
     args = {
       controller : [], 
       memo : memo

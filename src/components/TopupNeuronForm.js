@@ -32,7 +32,7 @@ export default function NeuronDelayForm(props) {
       });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [subaccount]);
+  }, [subaccount, props.open]);
 
   return (
     <>
