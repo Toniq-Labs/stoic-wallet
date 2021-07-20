@@ -28,21 +28,65 @@ import NFTList from '../components/NFTList';
 import MainFab from '../components/MainFab';
 import InputForm from '../components/InputForm';
 import extjs from '../ic/extjs.js';
+import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal} from '../ic/utils.js';
-
 import { clipboardCopy } from '../utils';
 
 
 const api = extjs.connect("https://boundary.ic0.app/");
 function AccountDetail(props) {
-  const currentToken = useSelector(state => state.currentToken)
-  const currentPrincipal = useSelector(state => state.currentPrincipal)
-  const currentAccount = useSelector(state => state.currentAccount)
+  const currentToken = useSelector(state => state.currentToken);
+  const currentPrincipal = useSelector(state => state.currentPrincipal);
+  const currentAccount = useSelector(state => state.currentAccount);
+  const principal = useSelector(state => state.principals[currentPrincipal].identity.principal);
+  const apps = useSelector(state => state.principals[currentPrincipal].apps);
   const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [tokens, setTokens] = React.useState(account.tokens);
   
   const dispatch = useDispatch()
+  
+  React.useEffect(() => {
+    const windowUrl = window.location.search;
+    const params = new URLSearchParams(windowUrl);
+    const authorizeApp = params.get('authorizeApp');
+    if (authorizeApp !== null) {
+      window.addEventListener('message', function(e) {
+        if (e.source === window.opener) {
+          if (e.data.action === 'requestAuthorization') {
+            var app = apps.find(a => a.host === e.origin);
+            var authResponse = {
+              action : "confirmAuthorization", 
+              principal : principal, 
+              key : StoicIdentity.getIdentity(principal).getPublicKey().toDer(), 
+              type : StoicIdentity.getIdentity(principal).constructor.name,
+            }
+            if (app && app.apikey === e.data.apikey) {
+              window.opener.postMessage(authResponse, "*");              
+            } else {
+              if (window.confirm("Do you want to authorize \"" + e.origin + "\" to access your princpal \""+principal+"\"?")) {
+                if (!app) {
+                  app = {
+                    host : e.origin,
+                    apikey : e.data.apikey
+                  };
+                  dispatch({ type: 'app/add', payload: {app:app}});
+                } else {
+                  app.apikey = e.data.apikey;
+                  dispatch({ type: 'app/edit', payload: {app:app}});
+                }
+                window.opener.postMessage(authResponse, "*");
+              } else {              
+                window.opener.postMessage({action : "rejectAuthorization"}, "*");
+              };
+            }
+          };
+        }
+      } , false);
+      window.opener.postMessage({action : "initiateStoicConnect"}, "*");
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   React.useEffect(() => {
     setTokens(account.tokens);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -220,4 +264,4 @@ function AccountDetail(props) {
   );
 }
 
-export default AccountDetail;
+export default  AccountDetail;

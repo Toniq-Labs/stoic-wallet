@@ -13,6 +13,7 @@ import AccountDrawer from '../components/AccountDrawer';
 import AccountDetail from '../views/AccountDetail';
 import AddressBook from '../views/AddressBook';
 import Neurons from '../views/Neurons';
+import Applications from '../views/Applications';
 import Settings from '../views/Settings';
 
 import { makeStyles } from '@material-ui/core/styles';
@@ -54,6 +55,10 @@ const useStyles = makeStyles((theme) => ({
       title : "Neuron Management",
       view : Neurons
     },
+    'applications' : {
+      title : "Applications",
+      view : Applications
+    },
     'addressBook' : {
       title : "Address Book",
       view : AddressBook
@@ -83,6 +88,8 @@ function Wallet(props) {
       case "settings":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader, clearWallet : clearWallet, lockWallet : lockWallet})
       case "neurons":
+        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
+      case "applications":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       default:
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm})

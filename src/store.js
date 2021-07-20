@@ -29,6 +29,7 @@ function initDb(){
       var _principal = {
         accounts : [],
         neurons : [],
+        apps : [],
         identity : principal.identity
       };
       principal.accounts.map((account, subaccount) => {
@@ -49,6 +50,11 @@ function initDb(){
           ],
           nfts : account[2] ?? []
         });    
+        return true;
+      });
+      if (!principal.hasOwnProperty('apps')) principal.apps = [];
+      principal.apps.map(app => {
+        _principal.apps.push(app);
         return true;
       });
       /* Do we need to store neruons?
@@ -81,7 +87,8 @@ function newDb(identity){
         ]
       ],
       identity : identity,
-      neurons : []
+      neurons : [],
+      apps : []
     }
   ],[],[0,0,0]];
   localStorage.setItem('_db', JSON.stringify(tc));
@@ -107,6 +114,7 @@ function saveDb(newState){
     var _p = {
       accounts : [],
       neurons : [],
+      apps : [],
       identity : principal.identity
     };
     principal.accounts.map(account => {
@@ -117,6 +125,10 @@ function saveDb(newState){
         return true;      
       });
       _p.accounts.push(_a);
+      return true;
+    });
+    principal.apps.map(app => {
+      _p.apps.push(app);
       return true;
     });
     /* Do we need to store?
@@ -134,6 +146,60 @@ function saveDb(newState){
 initDb();
 function rootReducer(state = appData, action) {
   switch(action.type){
+    case "app/edit":
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i === state.currentPrincipal) {
+            return {
+              ...principal,
+              apps : principal.apps.map((app) => {
+                if (app.host === action.payload.app.host) {
+                  return {
+                    ...app,
+                    apikey : action.payload.app.apikey
+                  }
+                } else {
+                  return app;
+                }
+              }),
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
+    case "app/add": //TODO
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i === state.currentPrincipal) {
+            return {
+              ...principal,
+              apps : [
+                ...principal.apps,
+                action.payload.app
+              ]
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
+    case "app/remove": //TODO
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i === state.currentPrincipal) {
+            return {
+              ...principal,
+              apps : principal.apps.filter(e => (e && e.host !== action.payload.host))
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
     case "neuron/add": //TODO
       return saveDb({
         ...state,
@@ -222,7 +288,8 @@ function rootReducer(state = appData, action) {
               }
             ],
             identity : action.payload.identity,
-            neurons : []
+            neurons : [],
+            apps : [],
           },
         ],
         currentPrincipal : cp

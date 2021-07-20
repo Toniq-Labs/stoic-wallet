@@ -250,6 +250,7 @@ const StoicIdentity = {
           console.log(e);
         }
       }
+      delete identities[_id.principal];
       return resolve(true);
     });
   },
@@ -274,6 +275,7 @@ const StoicIdentity = {
           console.log(e);
         }
       }
+      delete identities[_id.principal];
       return resolve(true);
     });
   },
@@ -298,6 +300,7 @@ const StoicIdentity = {
         }
       }
       //setup new
+      delete identities[_id.principal];
       StoicIdentity.setup(type, optdata).then(resolve).catch(reject);
     });
   },
@@ -310,4 +313,3 @@ const StoicIdentity = {
   }
 }
 export {StoicIdentity};
-//window.StoicIdentity = StoicIdentity;

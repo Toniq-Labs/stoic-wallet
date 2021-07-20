@@ -4,6 +4,7 @@ import Drawer from '@material-ui/core/Drawer';
 import Hidden from '@material-ui/core/Hidden';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
+import AppsIcon from '@material-ui/icons/Apps';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
@@ -94,6 +95,10 @@ export default function AccountDrawer(props) {
         <ListItem button onClick={() => props.changeRoute('neurons')}>
           <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
           <ListItemText primary="Neurons" />
+        </ListItem>
+        <ListItem button onClick={() => props.changeRoute('applications')}>
+          <ListItemIcon><AppsIcon /></ListItemIcon>
+          <ListItemText primary="Applications" />
         </ListItem>
         {idtype === 'watch' ? "" :
         <ListItem button onClick={() => props.lockWallet()}>
