@@ -308,7 +308,7 @@ const StoicIdentity = {
   validateMnemonic : bip39.validateMnemonic,
   generateMnemonic : bip39.generateMnemonic,
   validatePassword : (p) => {
-    var re = /^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/;
+    var re = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d\w\W]{8,}$/;
     return re.test(p);
   }
 }
