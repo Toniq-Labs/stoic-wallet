@@ -59,7 +59,7 @@ function AccountDetail(props) {
               action : "confirmAuthorization", 
               principal : principal, 
               key : StoicIdentity.getIdentity(principal).getPublicKey().toDer(), 
-              type : StoicIdentity.getIdentity(principal).constructor.name,
+              type : (StoicIdentity.getIdentity(principal).hasOwnProperty('_delegation') ? "DelegationIdentity" : "Standard"),
             }
             if (app && app.apikey === e.data.apikey) {
               window.opener.postMessage(authResponse, "*");              

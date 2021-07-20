@@ -69,7 +69,7 @@ if (params.get('stoicTunnel') !== null) {
                 var response = {
                   signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
                 };
-                if (id.constructor.name === "DelegationIdentity") {
+                if (id.hasOwnProperty('_delegation') ) {
                   response.chain = id.getDelegation().toJSON();
                 }
                 sendMessageToExtension(e, true, JSON.stringify(response));
