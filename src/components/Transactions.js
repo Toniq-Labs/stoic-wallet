@@ -37,6 +37,9 @@ export default function Transactions(props) {
     fetchTx();
     intervalId = setInterval(fetchTx, 10000);
   };
+  const formatNumber = n => {
+    return n.toFixed(8).replace(/0{1,6}$/, '');
+  };
   const fetchTx = () => {
     //console.log("Fetching for " + props.data.id);
     updateTransactions(props.data.id, props.address).then(txs => {
@@ -98,8 +101,8 @@ export default function Transactions(props) {
                   </TableCell>
                   <TableCell align="right">
                     {tx.from === props.address ? 
-                      <span style={{color:'red',fontWeight:'bold'}}>-{tx.amount + tx.fee}</span> : 
-                      <span style={{color:'#00b894',fontWeight:'bold'}}>+{tx.amount}</span>
+                      <span style={{color:'red',fontWeight:'bold'}}>-{formatNumber(tx.amount + tx.fee)}</span> : 
+                      <span style={{color:'#00b894',fontWeight:'bold'}}>+{formatNumber(tx.amount)}</span>
                     }
                   </TableCell>
                 </TableRow>

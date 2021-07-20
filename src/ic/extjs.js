@@ -44,8 +44,6 @@ const decodeTokenId = (tid) => {
   }
 };
 
-
-
 //Preload IDLS against a common name
 const _preloadedIdls = {
   'governance' : governanceIDL,
@@ -238,14 +236,15 @@ class ExtConnection {
                   _ts.push({
                     from : _t.account1Address,
                     to :  _t.account2Address,
-                    amount : Number(_t.amount)/(10**8),
-                    fee : Number(_t.fee)/(10**8),
+                    amount : Number(_t.amount/100000000),
+                    fee : Number(_t.fee/100000000),
                     hash : _t.hash,
                     timestamp : _t.timestamp,
                     memo : Number(_t.memo),
                   });
                   return true;
                 });
+                _ts.reverse();
                 resolve(_ts);
               }).catch(reject);
             break;
