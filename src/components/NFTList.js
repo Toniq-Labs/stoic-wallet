@@ -183,7 +183,7 @@ export default function NFTList(props) {
           </Table>
         </TableContainer>
       </>}
-      <SendNFTForm open={openNFTForm} close={closeNFTForm} loader={props.loader} error={error} nft={tokenNFT} />
+      <SendNFTForm alert={props.alert} open={openNFTForm} close={closeNFTForm} loader={props.loader} error={error} nft={tokenNFT} />
     </>
   );
 }
