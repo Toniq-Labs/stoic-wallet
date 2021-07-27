@@ -27,6 +27,7 @@ import Transactions from '../components/Transactions';
 import NFTList from '../components/NFTList';
 import MainFab from '../components/MainFab';
 import InputForm from '../components/InputForm';
+import AddTokenForm from '../components/AddTokenForm';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal} from '../ic/utils.js';
@@ -118,33 +119,52 @@ function AccountDetail(props) {
     if (name.length > 20) return error("Max length or account names is 20 characters");
     dispatch({ type: 'account/edit', payload: {name:name}});
   };
-  const addToken = (cid) => {
-    if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
-    if (account.tokens.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
-    if (account.nfts.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
-    props.loader(true);
-    api.token(cid).getMetadata().then(md => {
-      if (md.type === 'fungible') {
-        md.id = cid;
-        dispatch({ type: 'account/token/add', payload: {
-          metadata : md
-        }});
-        props.loader(false);
-        dispatch({ type: 'currentToken', payload: {index:account.tokens.length}});
-      } else {
-        var nft = {
-          id : cid,
-          metadata : md
-        };
-        dispatch({ type: 'account/nft/add', payload: {
-          nft : nft
-        }});
-        props.loader(false);
-        dispatch({ type: 'currentToken', payload: {index:'nft'}});
-      }
-    }).finally(() => {
-      props.loader(false);
+  const _addToken = (cid) => {
+    return new Promise(function(resolve, reject) { 
+      api.token(cid).getMetadata().then(md => {
+        if (md.type === 'fungible') {
+          md.id = cid;
+          dispatch({ type: 'account/token/add', payload: {
+            metadata : md
+          }});
+          resolve(account.tokens.length);
+        } else {
+          var nft = {
+            id : cid,
+            metadata : md
+          };
+          dispatch({ type: 'account/nft/add', payload: {
+            nft : nft
+          }});
+          resolve("nft");
+        }
+      }).catch(reject);
     });
+  };
+  const addToken = (cid, type) => {
+    if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
+    if (type === 'add') {
+      if (account.tokens.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
+      if (account.nfts.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
+      props.loader(true);
+      _addToken(cid).then(nt => {
+        dispatch({ type: 'currentToken', payload: {index:nt}});
+      }).finally(() => {
+        props.loader(false);
+      });
+    } else {
+      props.loader(true);
+      api.token(cid).getTokens(account.address).then(async tokens => {
+        tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map(async (ct,i) => {
+          return await _addToken(ct);
+        });
+        dispatch({ type: 'currentToken', payload: {index:"nft"}});
+      }).catch(e => {
+        return error("This canister does not support auto-discovery of tokens");
+      }).finally(() => {
+        props.loader(false);
+      });
+    };
   };
   return (
     <div style={styles.root}>
@@ -206,7 +226,7 @@ function AccountDetail(props) {
           container
           spacing={2}
           direction="row"
-          justify="flex-start"
+          justifyContent="flex-start"
           alignItems="flex-start"
         >
           {tokens.map((token, index) => {
@@ -214,19 +234,13 @@ function AccountDetail(props) {
           })}
           { account.nfts.length > 0 ? <NFTCard address={account.address} onClick={() => changeToken('nft')} selected={currentToken === 'nft'} /> : "" }
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
-            <InputForm
-              onClick={addToken}
-              title="Add token"
-              inputLabel="Canister ID"
-              content="Enter the Canister ID for the token you wish to add"
-              buttonLabel="Add"
-            >
+            <AddTokenForm onClick={addToken}>
               <Tooltip title="Add a new token to this account">
                 <Fab color="primary" aria-label="add">
                   <AddIcon />
                 </Fab>
               </Tooltip>
-            </InputForm>
+            </AddTokenForm>
           </Grid>
         </Grid>
       </div>
@@ -246,7 +260,7 @@ function AccountDetail(props) {
           </IconButton>
         </SnackbarButton>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList error={error} confirm={props.confirm} /> : ""}
+      {currentToken === 'nft' ? <NFTList alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

@@ -13,6 +13,7 @@ import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import LockIcon from '@material-ui/icons/Lock';
+import ListIcon from '@material-ui/icons/List';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -99,6 +100,10 @@ export default function AccountDrawer(props) {
         <ListItem button onClick={() => props.changeRoute('applications')}>
           <ListItemIcon><AppsIcon /></ListItemIcon>
           <ListItemText primary="Applications" />
+        </ListItem>
+        <ListItem button onClick={() => props.changeRoute('tokenregistry')}>
+          <ListItemIcon><ListIcon /></ListItemIcon>
+          <ListItemText primary="Token Registry" />
         </ListItem>
         {idtype === 'watch' ? "" :
         <ListItem button onClick={() => props.lockWallet()}>

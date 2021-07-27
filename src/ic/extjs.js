@@ -7,7 +7,7 @@ import governanceIDL from './candid/governance.did.js';
 import nnsIDL from './candid/nns.did.js';
 import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import extIDL from './candid/ext.did.js';
-//import advancedIDL from './candid/advanced.did.js';
+import advancedIDL from './candid/advanced.did.js';
 //import cronicsIDL from './candid/cronics.did.js';
 
 const constructUser = (u) => {
@@ -61,8 +61,8 @@ class ExtConnection {
     [GOVERNANCE_CANISTER_ID] : _preloadedIdls['governance'],
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
+    "kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
     //"e3izy-jiaaa-aaaah-qacbq-cai" : cronicsIDL,
-    //"kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
   };
   _metadata = {
     [LEDGER_CANISTER_ID] : {
@@ -109,8 +109,6 @@ class ExtConnection {
       if (this._mapIdls.hasOwnProperty(cid)) {
         idl = this._mapIdls[cid];
       } else {
-        //Resort to default IDLS
-        //todo: Look into loading IDLs on the fly
         idl = _preloadedIdls['default'];
       }
     } else if (typeof idl == 'string') {
@@ -149,6 +147,23 @@ class ExtConnection {
               resolve(0);
             break;
           }
+        });
+      },
+      getTokens : (aid) => {
+        return new Promise((resolve, reject) => {
+          if (typeof api.tokens == 'undefined') reject("Not supported");
+          else {
+            try {
+              api.tokens(aid).then(r => {
+                if (typeof r.ok != 'undefined') {
+                  resolve(r.ok.map(x => tokenIdentifier(tokenObj.canister, x)));
+                }else if (typeof r.err != 'undefined') reject(r.err)
+                else reject(r);
+              }).catch(reject);
+            } catch(e) {
+              reject(e);
+            };
+          };
         });
       },
       getMetadata : () => {
@@ -366,7 +381,8 @@ class ExtConnection {
 
 const extjs = {
   connect : (host, identity) => new ExtConnection(host ?? "https://boundary.ic0.app/", identity),
-   decodeTokenId : decodeTokenId,
+  decodeTokenId : decodeTokenId,
+  encodeTokenId : tokenIdentifier,
 };
 export default extjs;
 //window.extjs = extjs;

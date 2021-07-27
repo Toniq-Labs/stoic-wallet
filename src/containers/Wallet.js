@@ -13,6 +13,7 @@ import AccountDrawer from '../components/AccountDrawer';
 import AccountDetail from '../views/AccountDetail';
 import AddressBook from '../views/AddressBook';
 import Neurons from '../views/Neurons';
+import TokenRegistry from '../views/TokenRegistry';
 import Applications from '../views/Applications';
 import Settings from '../views/Settings';
 
@@ -59,6 +60,10 @@ const useStyles = makeStyles((theme) => ({
       title : "Applications",
       view : Applications
     },
+    'tokenregistry' : {
+      title : "Token Registry",
+      view : TokenRegistry
+    },
     'addressBook' : {
       title : "Address Book",
       view : AddressBook
@@ -90,6 +95,8 @@ function Wallet(props) {
       case "neurons":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       case "applications":
+        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
+      case "tokenregistry":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       default:
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm})

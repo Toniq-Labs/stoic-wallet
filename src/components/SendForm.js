@@ -8,6 +8,7 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Autocomplete from '@material-ui/lab/Autocomplete';
 import Switch from '@material-ui/core/Switch';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
@@ -16,7 +17,9 @@ import {compressAddress} from '../utils.js';
 import { useSelector } from 'react-redux'
 
 export default function SendForm(props) {
-  const currentPrincipal = useSelector(state => state.currentPrincipal)
+  const addresses = useSelector(state => state.addresses);
+  const principals = useSelector(state => state.principals);
+  const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount)
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const [open, setOpen] = React.useState(false);
@@ -27,10 +30,13 @@ export default function SendForm(props) {
   const [minFee, setMinFee] = React.useState(0);
   const [fee, setFee] = React.useState(0);
   const [to, setTo] = React.useState('');
+  const [toOption, setToOption] = React.useState('');
   
   const [advanced, setAdvanced] = React.useState(false);
   const [memo, setMemo] = React.useState('');
   const [notify, setNotify] = React.useState(false);
+  
+  const [contacts, setContacts] = React.useState([]);
   
   //cold API
   const api = extjs.connect("https://boundary.ic0.app/");
@@ -97,6 +103,7 @@ export default function SendForm(props) {
     setFee(0);
     setBalance(false);
     setTo('');
+    setToOption('');
     setAdvanced(false);
     setMemo('');
     setNotify(false);
@@ -109,6 +116,25 @@ export default function SendForm(props) {
     api.token(props.data.id).getBalance(props.address, identity.principal).then(b => {
       setBalance(Number(b)/(10**props.data.decimals));
     });
+    
+    var contacts = [];
+    addresses.forEach(el => {
+      contacts.push({
+        group : "Address Book",
+        name : el.name,
+        address : el.address,
+      });
+    });
+    principals.forEach(p => {
+      p.accounts.forEach(a => {
+        contacts.push({
+          group : p.identity.principal,
+          name : a.name,
+          address : a.address,
+        });
+      });
+    });
+    setContacts(contacts);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.data.id, open]);
 
@@ -121,18 +147,34 @@ export default function SendForm(props) {
           <DialogContent>
             <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter the recipient address and amount that you wish to send below.</DialogContentText>
             <>
-              <TextField
-                autoFocus
-                margin="dense"
-                label="Address of the Recipient"
-                value={to}
-                onChange={(e) => setTo(e.target.value)}
-                type="text"
-                fullWidth
-                InputLabelProps={{
-                  shrink: true,
+              <Autocomplete
+                freeSolo
+                value={toOption}
+                onChange={(e,v) => { if (v) {
+                    setTo(v.address) 
+                    setToOption(v.address) 
+                  }
                 }}
+                inputValue={to}
+                onInputChange={(e,v) => setTo(v)}
+                getOptionLabel={contact => contact.name || contact}
+                groupBy={(contact) => contact.group}
+                options={contacts}
+                renderInput={(params) => (
+                    <TextField
+                    {...params}
+                    autoFocus
+                    margin="dense"
+                    label="Address of the Recipient"
+                    type="text"
+                    fullWidth
+                    InputLabelProps={{
+                      shrink: true,
+                    }}
+                  />
+                )}
               />
+              
               <TextField
                 style={{width:'49%', marginRight:'2%'}}
                 margin="dense"

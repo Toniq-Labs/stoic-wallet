@@ -6,14 +6,19 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
+import Pagination from '@material-ui/lab/Pagination';
 import Typography from '@material-ui/core/Typography';
 import Timestamp from 'react-timestamp';
 import extjs from '../ic/extjs.js';
-
+const formatNumber = n => {
+  return n.toFixed(8).replace(/0{1,6}$/, '');
+};
 var intervalId = 0;
 const api = extjs.connect("https://boundary.ic0.app/");
+const perPage = 10;
 export default function Transactions(props) {
   const [transactions, setTransactions] = React.useState(false);
+  const [page, setPage] = React.useState(1);
   const styles = {
     empty : {
       maxWidth:400,
@@ -37,9 +42,7 @@ export default function Transactions(props) {
     fetchTx();
     intervalId = setInterval(fetchTx, 10000);
   };
-  const formatNumber = n => {
-    return n.toFixed(8).replace(/0{1,6}$/, '');
-  };
+  
   const fetchTx = () => {
     //console.log("Fetching for " + props.data.id);
     updateTransactions(props.data.id, props.address).then(txs => {
@@ -79,37 +82,42 @@ export default function Transactions(props) {
             No transactions available
           </Typography>
         </div> :
-        <TableContainer component={Paper}>
-          <Table style={styles.table} aria-label="simple table">
-            <TableHead>
-              <TableRow>
-                <TableCell>Date</TableCell>
-                <TableCell>Description</TableCell>
-                <TableCell align="right">Amount</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {transactions.map((tx, i) => (
-                <TableRow key={props.data.id + props.address + tx.hash + i}>
-                  <TableCell component="th" scope="row">
-                    <Timestamp relative autoUpdate date={tx.timestamp} />
-                  </TableCell>
-                  <TableCell>
-                    {tx.from === props.address ?
-                      <>Sent <strong>{tx.amount} {props.data.symbol}</strong> to {tx.to} with a <strong>{tx.fee} {props.data.symbol}</strong> Fee<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> :
-                      <>Received <strong>{tx.amount} {props.data.symbol}</strong> from {tx.from}<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> }
-                  </TableCell>
-                  <TableCell align="right">
-                    {tx.from === props.address ? 
-                      <span style={{color:'red',fontWeight:'bold'}}>-{formatNumber(tx.amount + tx.fee)}</span> : 
-                      <span style={{color:'#00b894',fontWeight:'bold'}}>+{formatNumber(tx.amount)}</span>
-                    }
-                  </TableCell>
+        <>
+          {transactions.length > perPage ?
+          <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(transactions.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
+          : ""}
+          <TableContainer component={Paper}>
+            <Table style={styles.table} aria-label="simple table">
+              <TableHead>
+                <TableRow>
+                  <TableCell>Date</TableCell>
+                  <TableCell>Description</TableCell>
+                  <TableCell align="right">Amount</TableCell>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>) }
+              </TableHead>
+              <TableBody>
+                {transactions.filter((tx,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((tx, i) => (
+                  <TableRow key={props.data.id + props.address + tx.hash + i}>
+                    <TableCell component="th" scope="row">
+                      <Timestamp relative autoUpdate date={tx.timestamp} />
+                    </TableCell>
+                    <TableCell>
+                      {tx.from === props.address ?
+                        <>Sent <strong>{tx.amount} {props.data.symbol}</strong> to {tx.to} with a <strong>{tx.fee} {props.data.symbol}</strong> Fee<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> :
+                        <>Received <strong>{tx.amount} {props.data.symbol}</strong> from {tx.from}<br />(<a href={"https://ic.rocks/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> }
+                    </TableCell>
+                    <TableCell align="right">
+                      {tx.from === props.address ? 
+                        <span style={{color:'red',fontWeight:'bold'}}>-{formatNumber(tx.amount + tx.fee)}</span> : 
+                        <span style={{color:'#00b894',fontWeight:'bold'}}>+{formatNumber(tx.amount)}</span>
+                      }
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </TableContainer>
+        </>) }
     </>
   );
 }

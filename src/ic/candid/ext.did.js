@@ -58,6 +58,10 @@ export default ({ IDL }) => {
   });
   const Metadata = Metadata_2;
   const Result_3 = IDL.Variant({ 'ok' : Metadata, 'err' : CommonError });
+  const Result_6 = IDL.Variant({
+    'ok' : IDL.Vec(TokenIndex),
+    'err' : CommonError,
+  });
   const MintRequest_2 = IDL.Record({
     'to' : User,
     'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)),
@@ -116,6 +120,7 @@ export default ({ IDL }) => {
     'setMinter' : IDL.Func([IDL.Principal], [], []),
     'supply' : IDL.Func([TokenIdentifier_2], [Result_2], ['query']),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
+    'tokens' : IDL.Func([AccountIdentifier_3], [Result_6], ['query']),
   });
   return erc721_token;
 };
