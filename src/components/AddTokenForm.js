@@ -30,7 +30,7 @@ export default function AddTokenForm(props) {
   return (
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
-      <Dialog maxWidth={'xs'} fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog maxWidth={'sm'} fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogContent>
           <div style={{marginBottom:"20px"}}>
             <Tabs
@@ -42,6 +42,7 @@ export default function AddTokenForm(props) {
             >
               <Tab value="add" label="Add Token" />
               <Tab value="find" label="Find Tokens" />
+              <Tab value="search" label="Search Collections" />
             </Tabs>
           </div>
           { tabValue === "add" ? 
@@ -59,7 +60,8 @@ export default function AddTokenForm(props) {
               }}
               fullWidth
             />
-          </div> :
+          </div> : "" }
+          { tabValue === "find" ? 
           <div>
             <DialogContentText>Enter the Canister ID of an NFT or Multi-token canister to attempt to find your tokens. You can enter an existing NFT Token ID to discover others from the same collection (if auto-discover is supported)</DialogContentText>
             <TextField
@@ -74,13 +76,19 @@ export default function AddTokenForm(props) {
               }}
               fullWidth
             />
-          </div> }
+          </div> : ""}
+          { tabValue === "search" ? 
+          <div>
+            <DialogContentText>Use this option to automatically search for tokens you own within trusted multi-token canisters, e.g. our Token Register or Cronics NFT</DialogContentText>
+          </div> : ""}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={submit} color="primary">Add</Button>
+          { tabValue === "add" ? <Button onClick={submit} color="primary">Add</Button> : ""}
+          { tabValue === "find" ? <Button onClick={submit} color="primary">Find</Button> : ""}
+          { tabValue === "search" ? <Button onClick={submit} color="primary">Search Trusted</Button> : ""}
         </DialogActions>
       </Dialog>
     </>

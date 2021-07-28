@@ -119,7 +119,7 @@ function AccountDetail(props) {
     if (name.length > 20) return error("Max length or account names is 20 characters");
     dispatch({ type: 'account/edit', payload: {name:name}});
   };
-  const _addToken = (cid) => {
+  const _addToken = (cid, checkBearer) => {
     return new Promise(function(resolve, reject) { 
       api.token(cid).getMetadata().then(md => {
         if (md.type === 'fungible') {
@@ -133,36 +133,68 @@ function AccountDetail(props) {
             id : cid,
             metadata : md
           };
+          if (checkBearer) {
+            api.token(cid).getBearer().then(b => {
+              if (b === account.address) {
+                dispatch({ type: 'account/nft/add', payload: {
+                  nft : nft
+                }});
+                resolve("nft");
+              } else {
+                reject(error("Sorry, you don't own this NFT"));
+              };
+            }).catch(reject);
+          } else {
           dispatch({ type: 'account/nft/add', payload: {
             nft : nft
           }});
           resolve("nft");
+          }
         }
       }).catch(reject);
     });
   };
   const addToken = (cid, type) => {
-    if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
     if (type === 'add') {
+      if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
       if (account.tokens.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
       if (account.nfts.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
       props.loader(true);
-      _addToken(cid).then(nt => {
+      _addToken(cid, true).then(nt => {
         dispatch({ type: 'currentToken', payload: {index:nt}});
       }).finally(() => {
         props.loader(false);
       });
-    } else {
+    } else if (type === 'find') {
+      if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
       props.loader(true);
       api.token(cid).getTokens(account.address).then(async tokens => {
-        tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map(async (ct,i) => {
-          return await _addToken(ct);
-        });
+        await Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
+          return _addToken(ct, false);
+        }));
         dispatch({ type: 'currentToken', payload: {index:"nft"}});
       }).catch(e => {
-        return error("This canister does not support auto-discovery of tokens");
+        console.log(e);
+        return error("This canister does not support auto-discovery of tokens or you do not have any available");
       }).finally(() => {
         props.loader(false);
+      });
+    } else if (type === 'search') {
+      props.loader(true);
+      let trustedCanisters = ["e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai"];
+      var ps = [];
+      for(var i = 0; i < trustedCanisters.length; i++) {
+        ps.push((async ccid => {
+          await api.token(ccid).getTokens(account.address).then(async tokens => {
+            await Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
+              return _addToken(ct, false);
+            }));
+          });
+        })(trustedCanisters[i]));
+      };
+      Promise.all(ps).then(() => {
+        dispatch({ type: 'currentToken', payload: {index:"nft"}});
+        props.loader(true);
       });
     };
   };

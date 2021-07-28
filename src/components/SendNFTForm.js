@@ -11,7 +11,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {compressAddress} from '../utils.js';
-import { useSelector } from 'react-redux'
+import { useSelector, useDispatch } from 'react-redux'
 
 export default function SendNFTForm(props) {
   const addresses = useSelector(state => state.addresses);
@@ -25,6 +25,8 @@ export default function SendNFTForm(props) {
   const [toOption, setToOption] = React.useState('');
     
   const [contacts, setContacts] = React.useState([]);
+  
+  const dispatch = useDispatch()
   
   const error = (e) => {
     props.error(e);
@@ -50,9 +52,9 @@ export default function SendNFTForm(props) {
     handleClose();
     
     //hot api, will sign as identity - BE CAREFUL
-    console.log(props.nft);
     extjs.connect("https://boundary.ic0.app/", id).token(props.nft).transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(r => {
       if (r) {
+        dispatch({ type: 'account/nft/remove', payload: {id:props.nft}});
         return props.alert("Transaction complete", "Your transfer was sent successfully");
       } else {        
         return error("Something went wrong with this transfer");

@@ -20,18 +20,15 @@ import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
-const perPage = 10;
-const api = extjs.connect("https://boundary.ic0.app/");
+const perPage = 10
 const nftMap = {
   "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics"
 };
-const loadedBearers = {}
 export default function NFTList(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
   const currentAccount = useSelector(state => state.currentAccount)
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [nfts, setNfts] = React.useState([]);
-  const [bearers, setBearers] = React.useState({});
   const [page, setPage] = React.useState(1);
   const [openNFTForm, setOpenNFTForm] = React.useState(false);
   const [tokenNFT, setTokenNFT] = React.useState('');
@@ -58,13 +55,7 @@ export default function NFTList(props) {
   };
   const deleteNft = (id) => {
     props.confirm("Please confirm", "You are about to remove this NFT from your account? This does not affect the ownership of the NFT, and you can add it back again in future").then(v => {
-      dispatch({ type: 'account/nft/remove', payload: {id:id}});
-    });
-  };
-  const getBearer = (id) => {
-    api.token(id).getBearer().then(b => {
-      loadedBearers[id] = b;
-      setBearers(loadedBearers);
+      if (v) dispatch({ type: 'account/nft/remove', payload: {id:id}});
     });
   };
   const error = (e) => {
@@ -77,9 +68,7 @@ export default function NFTList(props) {
         id : nft.id,
         canister : extjs.decodeTokenId(nft.id).canister,
         metadata : toHexString(nft.metadata.metadata[0]),
-        bearer : false
       })
-      getBearer(nft.id);
       return false;
     });
     setNfts(_nfts);
@@ -106,9 +95,8 @@ export default function NFTList(props) {
               <TableRow>
                 <TableCell width="220" style={{fontWeight:'bold'}}>ID</TableCell>
                 <TableCell width="100" style={{fontWeight:'bold'}}>Preview</TableCell>
-                <TableCell width="220" style={{fontWeight:'bold'}}>Canister</TableCell>
+                <TableCell width="220" style={{fontWeight:'bold'}}>Collection/Canister</TableCell>
                 <TableCell style={{fontWeight:'bold'}}>Metadata</TableCell>
-                <TableCell width="190" style={{fontWeight:'bold'}}>Bearer</TableCell>
                 <TableCell width="150" align="right" style={{fontWeight:'bold'}}>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -142,7 +130,7 @@ export default function NFTList(props) {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    {nft.metadata.substr(0, 22)+"..."}
+                    {nft.metadata.substr(0, 32)+"..."}
                     <SnackbarButton
                       message="NFT Metadata Copied"
                       anchorOrigin={{
@@ -156,15 +144,6 @@ export default function NFTList(props) {
                       </IconButton>
                     </SnackbarButton>
                   </TableCell>
-                  <TableCell>{bearers[nft.id] ? (bearers[nft.id] === account.address ? <strong>{"Owned by You"}</strong> : 
-                  <>
-                    {compressAddress(bearers[nft.id])} 
-                    <Tooltip title="View on ic.rocks">
-                      <IconButton size="small" href={"https://ic.rocks/account/"+bearers[nft.id]} target="_blank" edge="end" aria-label="search">
-                        <LaunchIcon style={{ fontSize: 18 }} />
-                      </IconButton>
-                    </Tooltip>
-                  </>) : "Loading..."}</TableCell>
                   <TableCell align="right">
                     <Tooltip title="Remove from Stoic">
                       <IconButton onClick={() => deleteNft(nft.id)}>
