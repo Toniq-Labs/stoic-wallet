@@ -79,7 +79,7 @@ export default function AddTokenForm(props) {
           </div> : ""}
           { tabValue === "search" ? 
           <div>
-            <DialogContentText>Use this option to automatically search for tokens you own within trusted multi-token canisters, e.g. our Token Register or Cronics NFT</DialogContentText>
+            <DialogContentText>Use this option to automatically search for tokens you own within trusted multi-token collections/canisters, e.g. our Token Registry or Cronics NFT</DialogContentText>
           </div> : ""}
         </DialogContent>
         <DialogActions>
