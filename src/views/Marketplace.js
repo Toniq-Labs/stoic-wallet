@@ -1,7 +1,6 @@
 /* global BigInt */
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
-import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
@@ -189,6 +188,8 @@ export default function Marketplace(props) {
                   return Number(b[1].price)-Number(a[1].price);
                 case "mint_number":
                   return a[0]-b[0];
+                default:
+                  return 0;
               };
             }).filter((token,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((listing, i) => {
               return (<Listing refreshListings={refreshListings} showListingBuyForm={showListingBuyForm} loader={props.loader} error={error} key={listing[0]} listing={listing} confirm={props.confirm} />)
