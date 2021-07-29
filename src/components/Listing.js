@@ -39,26 +39,24 @@ export default function Listing(props) {
   };
   const buy = async () => {
     try {
-      var answer = await props.confirm("Please confirm", "You are about to purchase this NFT for "+_showListingPrice(props.listing[1].price)+" ICP - all transactions are final and irreversible. Funds will be taken from your Main account, which is also where your purchase will be sent to. Are you sure you want to continue?");
+      var acc = await props.showListingBuyForm();
+      var answer = await props.confirm("Please confirm", "You are about to purchase this NFT for "+_showListingPrice(props.listing[1].price)+" ICP from your account labelled \""+accounts[acc].name+"\". This process may take over 30 seconds. Are you sure you want to continue?");
       if (!answer) {
         return props.loader(false);
       };
-      //var [address, sa] = await props.showListingBuyForm();
-      var acc = 0; //Change to 0
-      var [address, sa] = [accounts[acc].address, acc];
+      var address = accounts[acc].address;
       props.loader(true);
       const id = StoicIdentity.getIdentity(identity.principal);
       const api = extjs.connect("https://boundary.ic0.app/", id);
       var r = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").lock(tokenid, address, _getRandomBytes());
       if (r.hasOwnProperty("err")) throw r.err;
       var paytoaddress = r.ok;
-      await api.token().transfer(identity.principal, sa, paytoaddress, props.listing[1].price, 10000);
+      await api.token().transfer(identity.principal, acc, paytoaddress, props.listing[1].price, 10000);
       var r3 = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid);
       if (r3.hasOwnProperty("err")) {
         setTimeout(() => api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid), 1000);//Try again, emergency...
         throw r.err;
       }
-      //Add
       var md = await api.token(tokenid).getMetadata();
       var nft = {
         id : tokenid,
@@ -81,7 +79,7 @@ export default function Listing(props) {
         <Card>
           <CardContent>
             <Typography style={{fontSize: 14, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>
-              {"#"+props.listing[0]} <Tooltip title="View in browser">
+              {"#"+(props.listing[0]+1)} <Tooltip title="View in browser">
                 <IconButton size="small" href={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} target="_blank" edge="end" aria-label="search">
                   <LaunchIcon style={{ fontSize: 18 }} />
                 </IconButton>

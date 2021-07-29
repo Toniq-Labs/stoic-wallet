@@ -120,7 +120,6 @@ export default function NFTList(props) {
       })
     });
     setNfts(_nfts);
-    setPage(1);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount, account.nfts, tokenDetails]);
 

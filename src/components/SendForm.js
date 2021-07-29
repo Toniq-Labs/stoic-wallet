@@ -67,8 +67,8 @@ export default function SendForm(props) {
     var _from_principal = identity.principal;
     var _from_sa = currentAccount;
     var _to_user = to;
-    var _amount = BigInt(amount*(10**props.data.decimals));
-    var _fee = BigInt(fee*(10**props.data.decimals));
+    var _amount = BigInt(Math.round(amount*(10**props.data.decimals)));
+    var _fee = BigInt(Math.round(fee*(10**props.data.decimals)));
     var _memo = memo;
     var _notify = notify;
     
