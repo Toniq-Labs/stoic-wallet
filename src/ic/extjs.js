@@ -326,7 +326,6 @@ class ExtConnection {
                 "memo" : memo ? Number(BigInt(memo)) : 0, 
                 "created_at_time" : []
               };
-              console.log(args);
               api.send_dfx(args).then(bh => {
                 resolve(true);
               }).catch(reject);
