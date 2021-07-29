@@ -8,6 +8,7 @@ import AppsIcon from '@material-ui/icons/Apps';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
+import StorefrontIcon from '@material-ui/icons/Storefront';
 import Avatar from '@material-ui/core/Avatar';
 import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
@@ -97,13 +98,17 @@ export default function AccountDrawer(props) {
           <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
           <ListItemText primary="Neurons" />
         </ListItem>
-        <ListItem button onClick={() => props.changeRoute('applications')}>
-          <ListItemIcon><AppsIcon /></ListItemIcon>
-          <ListItemText primary="Applications" />
+        <ListItem button onClick={() => props.changeRoute('marketplace')}>
+          <ListItemIcon><StorefrontIcon /></ListItemIcon>
+          <ListItemText primary="Marketplace *BETA*" />
         </ListItem>
         <ListItem button onClick={() => props.changeRoute('tokenregistry')}>
           <ListItemIcon><ListIcon /></ListItemIcon>
           <ListItemText primary="Token Registry" />
+        </ListItem>
+        <ListItem button onClick={() => props.changeRoute('applications')}>
+          <ListItemIcon><AppsIcon /></ListItemIcon>
+          <ListItemText primary="Applications" />
         </ListItem>
         {idtype === 'watch' ? "" :
         <ListItem button onClick={() => props.lockWallet()}>

@@ -404,6 +404,30 @@ function rootReducer(state = appData, action) {
           }
         }),
       });
+      
+    case "account/nft/addToAccount":
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i === action.payload.principal) {
+            return {
+              ...principal,
+              accounts : principal.accounts.map((account,ii) => {
+                if (ii === action.payload.account) {
+                  return {
+                    ...account,
+                    nfts : [...account.nfts, action.payload.nft]
+                  }
+                } else {
+                  return account;
+                }
+              }),
+            }
+          } else {
+            return principal;
+          }
+        }),
+      });
     case "addresses/add":
       return saveDb({
         ...state,

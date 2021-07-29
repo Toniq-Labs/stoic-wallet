@@ -10,27 +10,42 @@ import IconButton from '@material-ui/core/IconButton';
 import LaunchIcon from '@material-ui/icons/Launch';
 import Paper from '@material-ui/core/Paper';
 import SendIcon from '@material-ui/icons/Send';
+import StorefrontIcon from '@material-ui/icons/Storefront';
 import Typography from '@material-ui/core/Typography';
 import DeleteIcon from '@material-ui/icons/Delete';
 import SnackbarButton from '../components/SnackbarButton';
 import Pagination from '@material-ui/lab/Pagination';
 import SendNFTForm from '../components/SendNFTForm';
+import ListingForm from '../components/ListingForm';
 import extjs from '../ic/extjs.js';
 import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
-const perPage = 10
+const perPage = 10;
+const api = extjs.connect("https://boundary.ic0.app/");
 const nftMap = {
   "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics"
 };
+const _showListingPrice = n => {
+  n = Number(n) / 100000000;
+  return n.toFixed(8).replace(/0{1,6}$/, '');
+};
+var allowedPrincipals = [
+  "sensj-ihxp6-tyvl7-7zwvj-fr42h-7ojjp-n7kxk-z6tvo-vxykp-umhfk-wqe",
+  "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
+  "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
+];
 export default function NFTList(props) {
-  const currentPrincipal = useSelector(state => state.currentPrincipal)
+  const currentPrincipal = useSelector(state => state.currentPrincipal);
+  const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const currentAccount = useSelector(state => state.currentAccount)
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [nfts, setNfts] = React.useState([]);
   const [page, setPage] = React.useState(1);
+  const [tokenDetails, setTokenDetails] = React.useState({});
   const [openNFTForm, setOpenNFTForm] = React.useState(false);
+  const [openListingForm, setOpenListingForm] = React.useState(false);
   const [tokenNFT, setTokenNFT] = React.useState('');
   
   const dispatch = useDispatch()
@@ -49,31 +64,65 @@ export default function NFTList(props) {
     setTokenNFT(id);
     setOpenNFTForm(true);
   }
+  const listNft = (id) => {
+    setTokenNFT(id);
+    setOpenListingForm(true);
+  }
   const closeNFTForm = () => {
     setOpenNFTForm(false);
     setTokenNFT('');
+  };
+  const handleRefresh = () => {
+    getTokenDetails(tokenNFT.id, true)
+  };
+  const closeListingForm = () => {
+    setOpenListingForm(false);
+    setTimeout(() => setTokenNFT(''), 300);
   };
   const deleteNft = (id) => {
     props.confirm("Please confirm", "You are about to remove this NFT from your account? This does not affect the ownership of the NFT, and you can add it back again in future").then(v => {
       if (v) dispatch({ type: 'account/nft/remove', payload: {id:id}});
     });
   };
+  const getTokenDetails = (id, refresh) => {
+    if (typeof tokenDetails[id] == 'undefined') {
+      tokenDetails[id] = false;
+      setTokenDetails(tokenDetails);
+      refresh = true;
+    };
+    if (refresh) {
+      api.token(id).getDetails().then(b => {
+        tokenDetails[id] = b;
+        const newDetails = {...tokenDetails};
+        setTokenDetails(newDetails);
+      });
+    }
+  };
   const error = (e) => {
     props.error(e);
   }
   React.useEffect(() => {
     var _nfts = [];
-    account.nfts.map(nft => {
+    account.nfts.forEach(nft => {
+        getTokenDetails(nft.id);
       _nfts.push({
         id : nft.id,
         canister : extjs.decodeTokenId(nft.id).canister,
         metadata : toHexString(nft.metadata.metadata[0]),
+        price : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
+        bearer : (tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
+        listing : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
+        listingText : (tokenDetails[nft.id] !== false ? (tokenDetails[nft.id][1].length === 0 ? "Not listed" : 
+          (tokenDetails[nft.id][1][0].locked.length === 0 ?
+            "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
+            "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
+        ) : "Loading..."),
       })
-      return false;
     });
     setNfts(_nfts);
     setPage(1);
-  }, [currentAccount, account.nfts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentAccount, account.nfts, tokenDetails]);
 
 
   return (
@@ -97,6 +146,7 @@ export default function NFTList(props) {
                 <TableCell width="100" style={{fontWeight:'bold'}}>Preview</TableCell>
                 <TableCell width="220" style={{fontWeight:'bold'}}>Collection/Canister</TableCell>
                 <TableCell style={{fontWeight:'bold'}}>Metadata</TableCell>
+                <TableCell width="200" style={{fontWeight:'bold'}}>Marketplace</TableCell>
                 <TableCell width="150" align="right" style={{fontWeight:'bold'}}>Actions</TableCell>
               </TableRow>
             </TableHead>
@@ -144,17 +194,38 @@ export default function NFTList(props) {
                       </IconButton>
                     </SnackbarButton>
                   </TableCell>
+                  <TableCell><strong>{nft.listingText}</strong></TableCell>
                   <TableCell align="right">
-                    <Tooltip title="Remove from Stoic">
-                      <IconButton onClick={() => deleteNft(nft.id)}>
-                        <DeleteIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Send">
-                      <IconButton onClick={() => sendNft(nft.id)}>
-                        <SendIcon  />
-                      </IconButton>
-                    </Tooltip>
+                    {nft.listing !== false ?
+                    <>
+                      {nft.bearer === account.address ?
+                      <>
+                        {allowedPrincipals.indexOf(identity.principal) >= 0 ?
+                        <Tooltip title="Manage Listing">
+                          <IconButton size="small" onClick={() => listNft(nft)}>
+                            <StorefrontIcon size="small" />
+                          </IconButton>
+                        </Tooltip> 
+                        : "" }
+                        <Tooltip title="Send">
+                          <IconButton size="small" onClick={() => sendNft(nft.id)}>
+                            <SendIcon size="small"  />
+                          </IconButton>
+                        </Tooltip>
+                      </> : ""}
+                       <Tooltip title="Remove from Stoic">
+                        <IconButton size="small" onClick={() => deleteNft(nft.id)}>
+                          <DeleteIcon size="small" />
+                        </IconButton>
+                      </Tooltip>
+                    </>
+                    : 
+                      <Tooltip title="Remove from Stoic">
+                        <IconButton size="small" onClick={() => deleteNft(nft.id)}>
+                          <DeleteIcon size="small" />
+                        </IconButton>
+                      </Tooltip>
+                    }
                   </TableCell>
                 </TableRow>)
               })}
@@ -162,6 +233,7 @@ export default function NFTList(props) {
           </Table>
         </TableContainer>
       </>}
+      <ListingForm alert={props.alert} handleRefresh={handleRefresh} open={openListingForm} close={closeListingForm} loader={props.loader} error={error} nft={tokenNFT} />
       <SendNFTForm alert={props.alert} open={openNFTForm} close={closeNFTForm} loader={props.loader} error={error} nft={tokenNFT} />
     </>
   );

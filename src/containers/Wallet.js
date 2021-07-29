@@ -16,6 +16,7 @@ import Neurons from '../views/Neurons';
 import TokenRegistry from '../views/TokenRegistry';
 import Applications from '../views/Applications';
 import Settings from '../views/Settings';
+import Marketplace from '../views/Marketplace';
 
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -64,6 +65,10 @@ const useStyles = makeStyles((theme) => ({
       title : "Token Registry",
       view : TokenRegistry
     },
+    'marketplace' : {
+      title : "Marketplace",
+      view : Marketplace
+    },
     'addressBook' : {
       title : "Address Book",
       view : AddressBook
@@ -95,6 +100,8 @@ function Wallet(props) {
       case "neurons":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       case "applications":
+        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
+      case "marketplace":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       case "tokenregistry":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})

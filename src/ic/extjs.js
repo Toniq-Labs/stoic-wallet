@@ -206,6 +206,15 @@ class ExtConnection {
           }).catch(reject);    
         });
       },
+      getDetails : () => {
+        return new Promise((resolve, reject) => {
+          api.details(tokenObj.token).then(r => {
+            if (typeof r.ok != 'undefined') resolve(r.ok)
+            else if (typeof r.err != 'undefined') reject(r.err)
+            else reject(r);
+          }).catch(reject);    
+        });
+      },
       getBalance : (address, princpal) => {
         return new Promise((resolve, reject) => {
           var args;
@@ -279,6 +288,31 @@ class ExtConnection {
         memo = data to be sent as text/hex/number
         notify = if we need to notify TODO
       */
+      list : (from_sa, price) => {
+        return new Promise((resolve, reject) => {
+          var args;
+          switch(tokenObj.canister) {
+            case LEDGER_CANISTER_ID:
+            case "qz7gu-giaaa-aaaaf-qaaka-cai":
+              reject("Not supported");
+            break;
+            default:
+              args = {
+                'token' : tid,
+                'from_subaccount' : [getSubAccountArray(from_sa ?? 0)],
+                'price' : (price === 0 ? [] : [price])
+              };
+              api.list(args).then(b => {
+                if (typeof b.ok != 'undefined') {
+                  resolve(true);
+                } else {
+                  reject(JSON.stringify(b.err));
+                }
+              }).catch(reject);
+            break;
+          }
+        });
+      },
       transfer : (from_principal, from_sa, to_user, amount, fee, memo, notify) => {
         return new Promise((resolve, reject) => {
           var args;
@@ -292,6 +326,7 @@ class ExtConnection {
                 "memo" : memo ? Number(BigInt(memo)) : 0, 
                 "created_at_time" : []
               };
+              console.log(args);
               api.send_dfx(args).then(bh => {
                 resolve(true);
               }).catch(reject);
@@ -383,6 +418,7 @@ const extjs = {
   connect : (host, identity) => new ExtConnection(host ?? "https://boundary.ic0.app/", identity),
   decodeTokenId : decodeTokenId,
   encodeTokenId : tokenIdentifier,
+  toAddress : principalToAccountIdentifier,
 };
 export default extjs;
 //window.extjs = extjs;

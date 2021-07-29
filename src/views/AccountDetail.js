@@ -184,17 +184,16 @@ function AccountDetail(props) {
       let trustedCanisters = ["e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai"];
       var ps = [];
       for(var i = 0; i < trustedCanisters.length; i++) {
-        ps.push((async ccid => {
-          await api.token(ccid).getTokens(account.address).then(async tokens => {
-            await Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
-              return _addToken(ct, false);
-            }));
-          });
-        })(trustedCanisters[i]));
+        ps.push(api.token(trustedCanisters[i]).getTokens(account.address).then(async tokens => {
+          return Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
+            return _addToken(ct, false);
+          }));
+        }));
       };
-      Promise.all(ps).then(() => {
+      Promise.all(ps.map(p => p.catch(e => e))).then(() => {
         dispatch({ type: 'currentToken', payload: {index:"nft"}});
-        props.loader(true);
+      }).finally(() => {
+        props.loader(false);
       });
     };
   };
