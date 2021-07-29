@@ -44,7 +44,7 @@ export default function Listing(props) {
         return props.loader(false);
       };
       //var [address, sa] = await props.showListingBuyForm();
-      var acc = 1; //Change to 0
+      var acc = 0; //Change to 0
       var [address, sa] = [accounts[acc].address, acc];
       props.loader(true);
       const id = StoicIdentity.getIdentity(identity.principal);
@@ -52,9 +52,12 @@ export default function Listing(props) {
       var r = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").lock(tokenid, address, _getRandomBytes());
       if (r.hasOwnProperty("err")) throw r.err;
       var paytoaddress = r.ok;
-      var r2 = await api.token().transfer(identity.principal, sa, paytoaddress, props.listing[1].price, 10000);
+      await api.token().transfer(identity.principal, sa, paytoaddress, props.listing[1].price, 10000);
       var r3 = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid);
-      if (r3.hasOwnProperty("err")) throw r.err;
+      if (r3.hasOwnProperty("err")) {
+        setTimeout(() => api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid), 1000);//Try again, emergency...
+        throw r.err;
+      }
       //Add
       var md = await api.token(tokenid).getMetadata();
       var nft = {
