@@ -55,10 +55,10 @@ export default function Listing(props) {
       await api.token().transfer(identity.principal, acc, paytoaddress, props.listing[1].price, 10000);
       var r3;
       while(true){
-        r3 = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid);
-        if (r3.hasOwnProperty("err")) {
-
-        } else break;
+        try {
+          r3 = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid);
+          if (r3.hasOwnProperty("ok")) break;
+        } catch (e) {}
       }
       var md = await api.token(tokenid).getMetadata();
       var nft = {

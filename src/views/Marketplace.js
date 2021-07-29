@@ -1,6 +1,10 @@
 /* global BigInt */
 import React from 'react';
 import Typography from '@material-ui/core/Typography';
+import InputLabel from '@material-ui/core/InputLabel';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
+import Select from '@material-ui/core/Select';
 import Grid from '@material-ui/core/Grid';
 import Button from '@material-ui/core/Button';
 import Pagination from '@material-ui/lab/Pagination';
@@ -29,6 +33,11 @@ export default function Marketplace(props) {
   const accounts = useSelector(state => state.principals[currentPrincipal].accounts)
   const [page, setPage] = React.useState(1);
   const [listingBuyFormOpen, setListingBuyFormOpen] = React.useState(false);
+  const [sort, setSort] = React.useState('price_asc');
+
+  const handleChange = (event) => {
+    setSort(event.target.value);
+  };
   
   const listingBuyFormSubmit = (d) => {
     listingBuyFormClose();
@@ -148,9 +157,22 @@ export default function Marketplace(props) {
           <Button onClick={() => {props.loader(true);refreshListings();}} variant="contained" color="primary">Refresh Listings</Button>
           
         </div>
-        {listings.length > perPage ?
-        <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(listings.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
-        : ""}
+        <div style={{marginLeft:"20px",marginTop:"10px"}}>
+          <FormControl >
+            <Select
+              value={sort}
+              onChange={handleChange}
+            >
+              <MenuItem value={"price_asc"}>Price Ascending</MenuItem>
+              <MenuItem value={"price_desc"}>Price Descending</MenuItem>
+              <MenuItem value={"mint_number"}>Minting #</MenuItem>
+            </Select>
+          </FormControl>
+          
+          {listings.length > perPage ?
+          <Pagination style={{float:"right",marginTop:"5px",marginBottom:"20px"}} size="small" count={Math.ceil(listings.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
+          : ""}
+        </div>
         <div style={styles.grid}>
           <Grid
             container
@@ -159,11 +181,23 @@ export default function Marketplace(props) {
             justifyContent="flex-start"
             alignItems="flex-start"
           >
-            {listings.slice().reverse().filter((token,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((listing, i) => {
+            {listings.slice().sort((a,b) => {
+              switch(sort) {
+                case "price_asc":
+                  return Number(a[1].price)-Number(b[1].price);
+                case "price_desc":
+                  return Number(b[1].price)-Number(a[1].price);
+                case "mint_number":
+                  return a[0]-b[0];
+              };
+            }).filter((token,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((listing, i) => {
               return (<Listing refreshListings={refreshListings} showListingBuyForm={showListingBuyForm} loader={props.loader} error={error} key={listing[0]} listing={listing} confirm={props.confirm} />)
             })}
           </Grid>
         </div>
+        {listings.length > perPage ?
+          <Pagination style={{float:"right",marginTop:"5px",marginBottom:"20px"}} size="small" count={Math.ceil(listings.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
+          : ""}
       </>
     }
     <ListingBuyForm open={listingBuyFormOpen} onSubmit={listingBuyFormSubmit} onClose={listingBuyFormClose} />
