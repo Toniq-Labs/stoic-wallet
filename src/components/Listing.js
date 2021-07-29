@@ -37,6 +37,7 @@ export default function Listing(props) {
     if (Date.now() >= Number(listing.locked[0]/1000000n)) return false;
     return true;
   };
+
   const buy = async () => {
     try {
       var acc = await props.showListingBuyForm();
@@ -52,10 +53,12 @@ export default function Listing(props) {
       if (r.hasOwnProperty("err")) throw r.err;
       var paytoaddress = r.ok;
       await api.token().transfer(identity.principal, acc, paytoaddress, props.listing[1].price, 10000);
-      var r3 = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid);
-      if (r3.hasOwnProperty("err")) {
-        setTimeout(() => api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid), 1000);//Try again, emergency...
-        throw r.err;
+      var r3;
+      while(true){
+        r3 = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").settle(tokenid);
+        if (r3.hasOwnProperty("err")) {
+
+        } else break;
       }
       var md = await api.token(tokenid).getMetadata();
       var nft = {

@@ -11,7 +11,7 @@ import { useTheme } from '@material-ui/core/styles';
 import ListingBuyForm from '../components/ListingBuyForm';
 import { useSelector } from 'react-redux'
 import Listing from '../components/Listing';
-const perPage = 18;
+const perPage = 30;
 const api = extjs.connect("https://boundary.ic0.app/");
 
 var cb = null;
