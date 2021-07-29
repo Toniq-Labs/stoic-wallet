@@ -2,6 +2,9 @@ import React from 'react';
 import Typography from '@material-ui/core/Typography';
 import TableContainer from '@material-ui/core/TableContainer';
 import Paper from '@material-ui/core/Paper';
+import SnackbarButton from '../components/SnackbarButton';
+import IconButton from '@material-ui/core/IconButton';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
 import Table from '@material-ui/core/Table';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
@@ -14,6 +17,7 @@ import ListIcon from '@material-ui/icons/List';
 import RegisterTokenForm from '../components/RegisterTokenForm';
 import extjs from '../ic/extjs.js';
 import { useSelector, useDispatch } from 'react-redux'
+import { compressAddress, clipboardCopy } from '../utils.js';
 import { useTheme } from '@material-ui/core/styles';
 const formatTokenBalance = (n, d) => {
   for (var i = 0; i < Number(d); i++) {
@@ -128,6 +132,7 @@ function TokenRegistry(props) {
             <TableHead>
               <TableRow>
                 <TableCell style={{fontWeight:'bold'}}>Name</TableCell>
+                <TableCell style={{fontWeight:'bold'}}>Token ID</TableCell>
                 <TableCell style={{fontWeight:'bold'}}>Symbol</TableCell>
                 <TableCell style={{fontWeight:'bold'}}>Total Supply</TableCell>
                 <TableCell width="100" style={{fontWeight:'bold'}}>Owners</TableCell>
@@ -137,6 +142,21 @@ function TokenRegistry(props) {
               {tokens.slice().reverse().filter((token,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((token, i) => {
                 return (<TableRow key={token[0]}>
                   <TableCell>{token[1].fungible.name}</TableCell>
+                  <TableCell>
+                    {compressAddress(extjs.encodeTokenId("kxh4l-cyaaa-aaaah-qadaq-cai", token[0]))}
+                    <SnackbarButton
+                      message="Token ID Copied"
+                      anchorOrigin={{
+                        vertical: 'bottom',
+                        horizontal: 'left',
+                      }}
+                      onClick={() => clipboardCopy(extjs.encodeTokenId("kxh4l-cyaaa-aaaah-qadaq-cai", token[0]))}
+                    >
+                      <IconButton size="small" edge="end" aria-label="copy">
+                        <FileCopyIcon  style={{ fontSize: 18 }} />
+                      </IconButton>
+                    </SnackbarButton>
+                  </TableCell>
                   <TableCell>{token[1].fungible.symbol}</TableCell>
                   <TableCell>{formatTokenBalance(token[2], token[1].fungible.decimals)}</TableCell>
                   <TableCell>{Number(token[3])}</TableCell>

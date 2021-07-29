@@ -174,7 +174,6 @@ function AccountDetail(props) {
         }));
         dispatch({ type: 'currentToken', payload: {index:"nft"}});
       }).catch(e => {
-        console.log(e);
         return error("This canister does not support auto-discovery of tokens or you do not have any available");
       }).finally(() => {
         props.loader(false);

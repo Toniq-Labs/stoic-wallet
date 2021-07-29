@@ -44,8 +44,8 @@ export default ({ IDL }) => {
     'InvalidToken' : TokenIdentifier,
     'Other' : IDL.Text,
   });
-  const Result_10 = IDL.Variant({ 'ok' : Balance, 'err' : CommonError_2 });
-  const BalanceResponse_2 = Result_10;
+  const Result_11 = IDL.Variant({ 'ok' : Balance, 'err' : CommonError_2 });
+  const BalanceResponse_2 = Result_11;
   const BalanceResponse = BalanceResponse_2;
   const SubAccount_2 = IDL.Vec(IDL.Nat8);
   const SubAccount = SubAccount_2;
@@ -54,8 +54,8 @@ export default ({ IDL }) => {
     'subaccount' : IDL.Opt(SubAccount_3),
     'orderId' : OrderId,
   });
-  const Result_9 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
-  const CancelOrderResponse = Result_9;
+  const Result_10 = IDL.Variant({ 'ok' : IDL.Null, 'err' : IDL.Text });
+  const CancelOrderResponse = Result_10;
   const Extension_2 = IDL.Text;
   const Extension = Extension_2;
   const LimitOrderRequest = IDL.Record({
@@ -65,7 +65,7 @@ export default ({ IDL }) => {
     'giveToken' : TokenIdentifier_2,
     'giveAmount' : Balance_2,
   });
-  const Result_8 = IDL.Variant({
+  const Result_9 = IDL.Variant({
     'ok' : IDL.Tuple(IDL.Opt(OrderId), Balance_2, Balance_2),
     'err' : IDL.Variant({
       'InsufficientBalance' : IDL.Null,
@@ -73,14 +73,14 @@ export default ({ IDL }) => {
       'Other' : IDL.Text,
     }),
   });
-  const LimitOrderResponse = Result_8;
+  const LimitOrderResponse = Result_9;
   const MarketOrderRequest = IDL.Record({
     'subaccount' : IDL.Opt(SubAccount_3),
     'getToken' : TokenIdentifier_2,
     'giveToken' : TokenIdentifier_2,
     'giveAmount' : Balance_2,
   });
-  const Result_7 = IDL.Variant({
+  const Result_8 = IDL.Variant({
     'ok' : IDL.Tuple(Balance_2, Balance_2),
     'err' : IDL.Variant({
       'InsufficientBalance' : IDL.Null,
@@ -88,21 +88,25 @@ export default ({ IDL }) => {
       'Other' : IDL.Text,
     }),
   });
-  const MarketOrderResponse = Result_7;
+  const MarketOrderResponse = Result_8;
   const CommonError = CommonError_2;
-  const Result_6 = IDL.Variant({ 'ok' : Metadata, 'err' : CommonError });
-  const Result_5 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : CommonError });
+  const Result_7 = IDL.Variant({ 'ok' : Metadata, 'err' : CommonError });
+  const Result_6 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : CommonError });
   const RegisterTokenRequest = IDL.Record({
     'owner' : AccountIdentifier_3,
     'metadata' : Metadata,
     'supply' : Balance_2,
   });
-  const Result_4 = IDL.Variant({ 'ok' : TokenIndex, 'err' : IDL.Text });
-  const Result_3 = IDL.Variant({
+  const Result_5 = IDL.Variant({ 'ok' : TokenIndex, 'err' : IDL.Text });
+  const Result_4 = IDL.Variant({
     'ok' : IDL.Vec(IDL.Tuple(AccountIdentifier_3, Balance_2)),
     'err' : CommonError,
   });
-  const Result_2 = IDL.Variant({ 'ok' : Balance_2, 'err' : CommonError });
+  const Result_3 = IDL.Variant({ 'ok' : Balance_2, 'err' : CommonError });
+  const Result_2 = IDL.Variant({
+    'ok' : IDL.Vec(TokenIndex),
+    'err' : CommonError,
+  });
   const Memo = IDL.Vec(IDL.Nat8);
   const TransferRequest_2 = IDL.Record({
     'to' : User,
@@ -168,21 +172,22 @@ export default ({ IDL }) => {
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
     'limitOrder' : IDL.Func([LimitOrderRequest], [LimitOrderResponse], []),
     'marketOrder' : IDL.Func([MarketOrderRequest], [MarketOrderResponse], []),
-    'metadata' : IDL.Func([TokenIdentifier_2], [Result_6], ['query']),
+    'metadata' : IDL.Func([TokenIdentifier_2], [Result_7], ['query']),
     'numberOfTokenHolders' : IDL.Func(
         [TokenIdentifier_2],
-        [Result_5],
+        [Result_6],
         ['query'],
       ),
     'numberOfTokens' : IDL.Func([], [IDL.Nat], ['query']),
-    'registerToken' : IDL.Func([RegisterTokenRequest], [Result_4], []),
-    'registry' : IDL.Func([TokenIdentifier_2], [Result_3], ['query']),
-    'supply' : IDL.Func([TokenIdentifier_2], [Result_2], ['query']),
+    'registerToken' : IDL.Func([RegisterTokenRequest], [Result_5], []),
+    'registry' : IDL.Func([TokenIdentifier_2], [Result_4], ['query']),
+    'supply' : IDL.Func([TokenIdentifier_2], [Result_3], ['query']),
     'tokenRegistry' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(TokenIndex, Metadata, Balance_2, IDL.Nat))],
         ['query'],
       ),
+    'tokens' : IDL.Func([AccountIdentifier_3], [Result_2], ['query']),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
   });
   return advanced_token;

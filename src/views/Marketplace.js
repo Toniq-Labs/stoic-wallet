@@ -50,6 +50,8 @@ export default function Marketplace(props) {
     const _api = extjs.connect("https://boundary.ic0.app/", id);
     var payments = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").payments();
     if (payments.length === 0) return;
+    if (payments[0].length === 0) return;
+    console.log("Payments found", payments[0]);
     payments[0].map(async payment => {
       var a = extjs.toAddress(identity.principal, payment);
       var b = Number(await api.token().getBalance(a));
