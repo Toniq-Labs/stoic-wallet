@@ -15,12 +15,12 @@ const perPage = 18;
 const api = extjs.connect("https://boundary.ic0.app/");
 
 var cb = null;
-var allowedPrincipals = [
-  "4opr7-aaepd-uw2ok-lpt52-bi5to-nguta-7r7gr-gx57i-tnzlw-ewjid-qae",
-  "sensj-ihxp6-tyvl7-7zwvj-fr42h-7ojjp-n7kxk-z6tvo-vxykp-umhfk-wqe",
-  "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
-  "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
-];
+// var allowedPrincipals = [
+  // "4opr7-aaepd-uw2ok-lpt52-bi5to-nguta-7r7gr-gx57i-tnzlw-ewjid-qae",
+  // "sensj-ihxp6-tyvl7-7zwvj-fr42h-7ojjp-n7kxk-z6tvo-vxykp-umhfk-wqe",
+  // "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
+  // "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
+// ];
 var intv = false;
 export default function Marketplace(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
@@ -47,6 +47,7 @@ export default function Marketplace(props) {
       if (b <= 10000) return;
       _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
     });
+    await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments(payments[0]);
   };
   const listingBuyFormClose = () => {    
     setListingBuyFormOpen(false);
@@ -125,8 +126,8 @@ export default function Marketplace(props) {
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-  if (allowedPrincipals.indexOf(identity.principal) < 0) return (<>IN TESTING</>);
-  else return (
+    
+  return (
     <div style={styles.root}>
     {listings.length === 0 ?
       <div style={styles.empty}>

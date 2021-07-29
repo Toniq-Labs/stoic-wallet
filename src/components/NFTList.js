@@ -31,15 +31,14 @@ const _showListingPrice = n => {
   n = Number(n) / 100000000;
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
-var allowedPrincipals = [
-  "4opr7-aaepd-uw2ok-lpt52-bi5to-nguta-7r7gr-gx57i-tnzlw-ewjid-qae",
-  "sensj-ihxp6-tyvl7-7zwvj-fr42h-7ojjp-n7kxk-z6tvo-vxykp-umhfk-wqe",
-  "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
-  "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
-];
+// var allowedPrincipals = [
+  // "4opr7-aaepd-uw2ok-lpt52-bi5to-nguta-7r7gr-gx57i-tnzlw-ewjid-qae",
+  // "sensj-ihxp6-tyvl7-7zwvj-fr42h-7ojjp-n7kxk-z6tvo-vxykp-umhfk-wqe",
+  // "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
+  // "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
+// ];
 export default function NFTList(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
-  const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const currentAccount = useSelector(state => state.currentAccount)
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [nfts, setNfts] = React.useState([]);
@@ -200,13 +199,11 @@ export default function NFTList(props) {
                     <>
                       {nft.bearer === account.address ?
                       <>
-                        {allowedPrincipals.indexOf(identity.principal) >= 0 ?
                         <Tooltip title="Manage Listing">
                           <IconButton size="small" onClick={() => listNft(nft)}>
                             <StorefrontIcon size="small" />
                           </IconButton>
                         </Tooltip> 
-                        : "" }
                         <Tooltip title="Send">
                           <IconButton size="small" onClick={() => sendNft(nft.id)}>
                             <SendIcon size="small"  />

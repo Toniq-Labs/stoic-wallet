@@ -414,9 +414,16 @@ function rootReducer(state = appData, action) {
               ...principal,
               accounts : principal.accounts.map((account,ii) => {
                 if (ii === action.payload.account) {
-                  return {
-                    ...account,
-                    nfts : [...account.nfts, action.payload.nft]
+                  if (account.nfts.find(nft => nft.id === action.payload.nft.id)) {
+                    return {
+                      ...account,
+                      nfts : account.nfts
+                    }
+                  } else {                    
+                    return {
+                      ...account,
+                      nfts : [...account.nfts, action.payload.nft]
+                    }
                   }
                 } else {
                   return account;

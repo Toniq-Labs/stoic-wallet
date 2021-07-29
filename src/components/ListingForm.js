@@ -54,7 +54,6 @@ export default function ListingForm(props) {
     props.close()
   };
   React.useEffect(() => {
-    console.log(props.nft)
     setPrice(props.nft.price ? Number(props.nft.price)/100000000 : 0);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [props.nft]);

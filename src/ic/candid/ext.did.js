@@ -52,6 +52,9 @@ export default ({ IDL }) => {
   const User_2 = User;
   const Extension_2 = IDL.Text;
   const Extension = Extension_2;
+  const SubAccount_2 = IDL.Vec(IDL.Nat8);
+  const SubAccount = SubAccount_2;
+  const SubAccount_3 = SubAccount;
   const HeaderField = IDL.Tuple(IDL.Text, IDL.Text);
   const HttpRequest = IDL.Record({
     'url' : IDL.Text,
@@ -65,9 +68,6 @@ export default ({ IDL }) => {
     'status_code' : IDL.Nat16,
   });
   const Result_7 = IDL.Variant({ 'ok' : TokenIndex, 'err' : CommonError });
-  const SubAccount_2 = IDL.Vec(IDL.Nat8);
-  const SubAccount = SubAccount_2;
-  const SubAccount_3 = SubAccount;
   const ListRequest = IDL.Record({
     'token' : TokenIdentifier_2,
     'from_subaccount' : IDL.Opt(SubAccount_3),
@@ -85,6 +85,12 @@ export default ({ IDL }) => {
   const Result_2 = IDL.Variant({
     'ok' : IDL.Vec(TokenIndex),
     'err' : CommonError,
+  });
+  const Transaction = IDL.Record({
+    'time' : Time,
+    'seller' : IDL.Principal,
+    'buyer' : AccountIdentifier_3,
+    'price' : IDL.Nat64,
   });
   const Memo = IDL.Vec(IDL.Nat8);
   const TransferRequest_2 = IDL.Record({
@@ -128,6 +134,11 @@ export default ({ IDL }) => {
     'disribute' : IDL.Func([User_2], [], []),
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
     'freeGift' : IDL.Func([AccountIdentifier_3], [IDL.Opt(TokenIndex)], []),
+    'getAllPayments' : IDL.Func(
+        [],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(SubAccount_3)))],
+        ['query'],
+      ),
     'getBuyers' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(AccountIdentifier_3, IDL.Vec(TokenIndex)))],
@@ -162,6 +173,7 @@ export default ({ IDL }) => {
     'metadata' : IDL.Func([TokenIdentifier_2], [Result_5], ['query']),
     'mintNFT' : IDL.Func([MintRequest], [TokenIndex], []),
     'payments' : IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount_3))], ['query']),
+    'removePayments' : IDL.Func([IDL.Vec(SubAccount_3)], [], []),
     'setMinter' : IDL.Func([IDL.Principal], [], []),
     'settle' : IDL.Func([TokenIdentifier_2], [Result_4], []),
     'settlements' : IDL.Func(
@@ -171,6 +183,7 @@ export default ({ IDL }) => {
       ),
     'supply' : IDL.Func([TokenIdentifier_2], [Result_3], ['query']),
     'tokens' : IDL.Func([AccountIdentifier_3], [Result_2], ['query']),
+    'transactions' : IDL.Func([], [IDL.Vec(Transaction)], ['query']),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
   });
   return erc721_token;
