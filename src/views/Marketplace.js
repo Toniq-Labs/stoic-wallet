@@ -10,6 +10,7 @@ import Pagination from '@material-ui/lab/Pagination';
 import StorefrontIcon from '@material-ui/icons/Storefront';
 import {StoicIdentity} from '../ic/identity.js';
 import extjs from '../ic/extjs.js';
+import Alert from '@material-ui/lab/Alert';
 import { useTheme } from '@material-ui/core/styles';
 import ListingBuyForm from '../components/ListingBuyForm';
 import { useSelector } from 'react-redux'
@@ -149,6 +150,7 @@ export default function Marketplace(props) {
         <Button onClick={() => {props.loader(true);refreshListings();}} variant="contained" color="primary">Refresh Listings</Button>
       </div> :
       <>
+      <Alert severity="error"><strong>WARNING - Use at your own risk! This marketplace is experimental and in BETA. We take no responsibility for any losses of NFTs or ICP.</strong></Alert>
         <div style={styles.empty}>
           <Typography paragraph style={{paddingTop:20,fontWeight:"bold"}} align="center">
             Buy and Sell NFTs from the Marketplace. You can list NFTs for sale directly from your wallet!
