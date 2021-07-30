@@ -78,7 +78,7 @@ export default function Listing(props) {
   };
   
   return (
-    <Grid style={{height:'100%'}} item xl={2} lg={2} md={3} sm={6} xs={4}>
+    <Grid style={{height:'100%'}} item xl={2} lg={2} md={3} sm={6} xs={6}>
         <Card>
           <CardContent>
             <Typography style={{fontSize: 14, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>

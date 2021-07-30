@@ -194,7 +194,13 @@ export default function Marketplace(props) {
                 case "mint_number":
                   return a[0]-b[0];
                 case "type":
-                  var d = (a[2].nonfungible.metadata[0][30]%41)-(b[2].nonfungible.metadata[0][30]%41);
+                  var _a = a[2].nonfungible.metadata[0][30]%41;
+                  var _b = b[2].nonfungible.metadata[0][30]%41;
+                  if (_a === 2) _a = 1;
+                  if (_a > 1) _a = 2;
+                  if (_b === 2) _b = 1;
+                  if (_b > 1) _b = 2;
+                  var d = _a-_b;
                   if (d === 0) {
                     if (Number(a[1].price)>Number(b[1].price)) return 1;
                     if (Number(a[1].price)<Number(b[1].price)) return -1;
