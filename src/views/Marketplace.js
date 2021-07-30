@@ -169,7 +169,7 @@ export default function Marketplace(props) {
               <MenuItem value={"price_asc"}>Price Ascending</MenuItem>
               <MenuItem value={"price_desc"}>Price Descending</MenuItem>
               <MenuItem value={"mint_number"}>Minting #</MenuItem>
-              <MenuItem value={"type"}>Type</MenuItem>
+              <MenuItem value={"type"}>Rare Type</MenuItem>
             </Select>
           </FormControl>
           
