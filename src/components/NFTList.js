@@ -107,6 +107,7 @@ export default function NFTList(props) {
         getTokenDetails(nft.id);
       _nfts.push({
         id : nft.id,
+        index : extjs.decodeTokenId(nft.id).index,
         canister : extjs.decodeTokenId(nft.id).canister,
         metadata : toHexString(nft.metadata.metadata[0]),
         price : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
@@ -141,6 +142,7 @@ export default function NFTList(props) {
           <Table style={styles.table} aria-label="simple table">
             <TableHead>
               <TableRow>
+                <TableCell width="70" style={{fontWeight:'bold'}}>#</TableCell>
                 <TableCell width="220" style={{fontWeight:'bold'}}>ID</TableCell>
                 <TableCell width="100" style={{fontWeight:'bold'}}>Preview</TableCell>
                 <TableCell width="220" style={{fontWeight:'bold'}}>Collection/Canister</TableCell>
@@ -152,6 +154,7 @@ export default function NFTList(props) {
             <TableBody>
               {nfts.filter((nft,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((nft, i) => {
                 return (<TableRow key={nft.id}>
+                  <TableCell style={{fontWeight:'bold'}}>{nft.index+1}</TableCell>
                   <TableCell style={{fontWeight:'bold'}}>
                     {compressAddress(nft.id)}
                     <SnackbarButton
