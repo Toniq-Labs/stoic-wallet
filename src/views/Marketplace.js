@@ -169,6 +169,7 @@ export default function Marketplace(props) {
               <MenuItem value={"price_asc"}>Price Ascending</MenuItem>
               <MenuItem value={"price_desc"}>Price Descending</MenuItem>
               <MenuItem value={"mint_number"}>Minting #</MenuItem>
+              <MenuItem value={"type"}>Type</MenuItem>
             </Select>
           </FormControl>
           
@@ -192,6 +193,8 @@ export default function Marketplace(props) {
                   return Number(b[1].price)-Number(a[1].price);
                 case "mint_number":
                   return a[0]-b[0];
+                case "type":
+                  return (a[2].nonfungible.metadata[0][30]%41)-(b[2].nonfungible.metadata[0][30]%41);
                 default:
                   return 0;
               };
