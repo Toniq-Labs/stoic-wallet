@@ -196,7 +196,15 @@ export default function NFTList(props) {
                       </IconButton>
                     </SnackbarButton>
                   </TableCell>
-                  <TableCell><strong>{nft.listingText}</strong></TableCell>
+                  <TableCell>
+                    {nft.listing !== false ?
+                      <>{nft.bearer === account.address ?
+                        <strong>{nft.listingText}</strong> :
+                        <strong>SOLD/SENT</strong> 
+                      }</> :
+                      <strong>Loading...</strong> 
+                    }
+                  </TableCell>
                   <TableCell align="right">
                     {nft.listing !== false ?
                     <>

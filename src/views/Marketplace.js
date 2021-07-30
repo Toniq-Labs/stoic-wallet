@@ -45,21 +45,7 @@ export default function Marketplace(props) {
     cb = null;
   }  
   
-  const _extractFunds = async () => {
-    const id = StoicIdentity.getIdentity(identity.principal);
-    const _api = extjs.connect("https://boundary.ic0.app/", id);
-    var payments = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").payments();
-    if (payments.length === 0) return;
-    if (payments[0].length === 0) return;
-    console.log("Payments found", payments[0]);
-    payments[0].map(async payment => {
-      var a = extjs.toAddress(identity.principal, payment);
-      var b = Number(await api.token().getBalance(a));
-      if (b <= 10000) return;
-      _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
-    });
-    await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments(payments[0]);
-  };
+  
   const listingBuyFormClose = () => {    
     setListingBuyFormOpen(false);
   };
@@ -118,6 +104,41 @@ export default function Marketplace(props) {
       height: 60,
     },
   };
+  const _updates = () => {
+    refreshListings();
+    processPayments();
+    processRefunds();
+  };
+  const processPayments = async () => {
+    const id = StoicIdentity.getIdentity(identity.principal);
+    const _api = extjs.connect("https://boundary.ic0.app/", id);
+    var payments = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").payments();
+    if (payments.length === 0) return;
+    if (payments[0].length === 0) return;
+    console.log("Payments found", payments[0]);
+    payments[0].map(async payment => {
+      var a = extjs.toAddress(identity.principal, payment);
+      var b = Number(await api.token().getBalance(a));
+      if (b <= 10000) return;
+      _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
+    });
+    await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments(payments[0]);
+  };
+  const processRefunds = async () => {
+    const id = StoicIdentity.getIdentity(identity.principal);
+    const _api = extjs.connect("https://boundary.ic0.app/", id);
+    var refunds = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").refunds();
+    if (refunds.length === 0) return;
+    if (refunds[0].length === 0) return;
+    refunds[0].map(async refund => {
+      var a = extjs.toAddress(identity.principal, refund);
+      var b = Number(await api.token().getBalance(a));
+      if (b <= 10000) return;
+      //Process refunds
+      _api.token().transfer(identity.principal, refund, "07ce335b2451bec20426497d97afb0352d89dc3f1286bf26909ecb90cf370c76", BigInt(b-10000), BigInt(10000));
+    });
+    await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removeRefunds(refunds[0]);
+  };
   const refreshListings = () => {
     api.canister("e3izy-jiaaa-aaaah-qacbq-cai").listings().then(listings => {
       setListings(listings);
@@ -130,10 +151,10 @@ export default function Marketplace(props) {
   };
   React.useEffect(() => {
     props.loader(true);
-    refreshListings();
-    _extractFunds();
+    
+    _updates();
     if (!intv) {
-      intv = setInterval(_extractFunds, 30 *1000);
+      intv = setInterval(_updates, 30 *1000);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
