@@ -1,12 +1,18 @@
 export default ({ IDL }) => {
-  const SubAccount_3 = IDL.Vec(IDL.Nat8);
-  const SubAccount_2 = SubAccount_3;
+  const SubAccount_2 = IDL.Vec(IDL.Nat8);
   const SubAccount = SubAccount_2;
+  const SubAccount_3 = SubAccount;
   const TokenIndex_2 = IDL.Nat32;
   const TokenIndex = TokenIndex_2;
-  const AccountIdentifier_3 = IDL.Text;
-  const AccountIdentifier_2 = AccountIdentifier_3;
+  const AccountIdentifier_2 = IDL.Text;
   const AccountIdentifier = AccountIdentifier_2;
+  const AccountIdentifier_3 = AccountIdentifier;
+  const Settlement = IDL.Record({
+    'subaccount' : SubAccount_3,
+    'seller' : IDL.Principal,
+    'buyer' : AccountIdentifier_3,
+    'price' : IDL.Nat64,
+  });
   const Metadata_2 = IDL.Variant({
     'fungible' : IDL.Record({
       'decimals' : IDL.Nat8,
@@ -20,7 +26,7 @@ export default ({ IDL }) => {
   const TokenIdentifier = IDL.Text;
   const User = IDL.Variant({
     'principal' : IDL.Principal,
-    'address' : AccountIdentifier_2,
+    'address' : AccountIdentifier,
   });
   const BalanceRequest_2 = IDL.Record({
     'token' : TokenIdentifier,
@@ -38,7 +44,7 @@ export default ({ IDL }) => {
   const TokenIdentifier_2 = TokenIdentifier;
   const CommonError = CommonError_2;
   const Result_6 = IDL.Variant({
-    'ok' : AccountIdentifier,
+    'ok' : AccountIdentifier_3,
     'err' : CommonError,
   });
   const Time_2 = IDL.Int;
@@ -49,7 +55,7 @@ export default ({ IDL }) => {
     'price' : IDL.Nat64,
   });
   const Result_8 = IDL.Variant({
-    'ok' : IDL.Tuple(AccountIdentifier, IDL.Opt(Listing)),
+    'ok' : IDL.Tuple(AccountIdentifier_3, IDL.Opt(Listing)),
     'err' : CommonError,
   });
   const User_2 = User;
@@ -70,7 +76,7 @@ export default ({ IDL }) => {
   const Result_7 = IDL.Variant({ 'ok' : TokenIndex, 'err' : CommonError });
   const ListRequest = IDL.Record({
     'token' : TokenIdentifier_2,
-    'from_subaccount' : IDL.Opt(SubAccount),
+    'from_subaccount' : IDL.Opt(SubAccount_3),
     'price' : IDL.Opt(IDL.Nat64),
   });
   const Result_4 = IDL.Variant({ 'ok' : IDL.Null, 'err' : CommonError });
@@ -90,7 +96,7 @@ export default ({ IDL }) => {
     'token' : TokenIdentifier_2,
     'time' : Time,
     'seller' : IDL.Principal,
-    'buyer' : AccountIdentifier,
+    'buyer' : AccountIdentifier_3,
     'price' : IDL.Nat64,
   });
   const Memo = IDL.Vec(IDL.Nat8);
@@ -100,42 +106,46 @@ export default ({ IDL }) => {
     'notify' : IDL.Bool,
     'from' : User,
     'memo' : Memo,
-    'subaccount' : IDL.Opt(SubAccount_2),
+    'subaccount' : IDL.Opt(SubAccount),
     'amount' : Balance,
   });
   const TransferRequest = TransferRequest_2;
   const Result = IDL.Variant({
     'ok' : Balance,
     'err' : IDL.Variant({
-      'CannotNotify' : AccountIdentifier_2,
+      'CannotNotify' : AccountIdentifier,
       'InsufficientBalance' : IDL.Null,
       'InvalidToken' : TokenIdentifier,
       'Rejected' : IDL.Null,
-      'Unauthorized' : AccountIdentifier_2,
+      'Unauthorized' : AccountIdentifier,
       'Other' : IDL.Text,
     }),
   });
   const TransferResponse_2 = Result;
   const TransferResponse = TransferResponse_2;
-  const Settlement = IDL.Record({
-    'subaccount' : SubAccount,
-    'seller' : IDL.Principal,
-    'buyer' : AccountIdentifier,
-    'price' : IDL.Nat64,
-  });
   const erc721_token = IDL.Service({
     'acceptCycles' : IDL.Func([], [], []),
     'addRefund' : IDL.Func(
-        [IDL.Text, IDL.Principal, SubAccount],
+        [IDL.Text, IDL.Principal, SubAccount_3],
         [],
         ['oneway'],
       ),
     'availableCycles' : IDL.Func([], [IDL.Nat], ['query']),
+    'backendRefundSettlement' : IDL.Func(
+        [IDL.Text],
+        [
+          IDL.Vec(IDL.Tuple(TokenIndex, Settlement)),
+          IDL.Vec(IDL.Tuple(AccountIdentifier_3, IDL.Principal, SubAccount_3)),
+          IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(SubAccount_3))),
+          IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(SubAccount_3))),
+        ],
+        ['query'],
+      ),
     'backup' : IDL.Func(
         [],
         [
-          IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier)),
-          IDL.Vec(IDL.Tuple(AccountIdentifier, IDL.Vec(TokenIndex))),
+          IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier_3)),
+          IDL.Vec(IDL.Tuple(AccountIdentifier_3, IDL.Vec(TokenIndex))),
           IDL.Vec(IDL.Tuple(TokenIndex, Metadata)),
         ],
         ['query'],
@@ -145,27 +155,22 @@ export default ({ IDL }) => {
     'details' : IDL.Func([TokenIdentifier_2], [Result_8], ['query']),
     'disribute' : IDL.Func([User_2], [], []),
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
-    'freeGift' : IDL.Func([AccountIdentifier], [IDL.Opt(TokenIndex)], []),
+    'freeGift' : IDL.Func([AccountIdentifier_3], [IDL.Opt(TokenIndex)], []),
     'getAllPayments' : IDL.Func(
         [],
-        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(SubAccount)))],
-        ['query'],
-      ),
-    'getAllRefunds' : IDL.Func(
-        [],
-        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(SubAccount)))],
+        [IDL.Vec(IDL.Tuple(IDL.Principal, IDL.Vec(SubAccount_3)))],
         ['query'],
       ),
     'getBuyers' : IDL.Func(
         [],
-        [IDL.Vec(IDL.Tuple(AccountIdentifier, IDL.Vec(TokenIndex)))],
+        [IDL.Vec(IDL.Tuple(AccountIdentifier_3, IDL.Vec(TokenIndex)))],
         ['query'],
       ),
     'getMinted' : IDL.Func([], [TokenIndex], ['query']),
     'getMinter' : IDL.Func([], [IDL.Principal], ['query']),
     'getRegistry' : IDL.Func(
         [],
-        [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier))],
+        [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier_3))],
         ['query'],
       ),
     'getSold' : IDL.Func([], [TokenIndex], ['query']),
@@ -183,35 +188,27 @@ export default ({ IDL }) => {
         ['query'],
       ),
     'lock' : IDL.Func(
-        [TokenIdentifier_2, AccountIdentifier, SubAccount],
+        [TokenIdentifier_2, AccountIdentifier_3, SubAccount_3],
         [Result_6],
         [],
       ),
     'metadata' : IDL.Func([TokenIdentifier_2], [Result_5], ['query']),
     'mintNFT' : IDL.Func([MintRequest], [TokenIndex], []),
-    'payments' : IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount))], ['query']),
-    'refunds' : IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount))], ['query']),
-    'removePayments' : IDL.Func([IDL.Vec(SubAccount)], [], []),
-    'removeReunfds' : IDL.Func([IDL.Vec(SubAccount)], [], []),
+    'payments' : IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount_3))], ['query']),
+    'refunds' : IDL.Func([], [IDL.Opt(IDL.Vec(SubAccount_3))], ['query']),
+    'removePayments' : IDL.Func([IDL.Vec(SubAccount_3)], [], []),
+    'removeRefunds' : IDL.Func([IDL.Vec(SubAccount_3)], [], []),
     'setMinter' : IDL.Func([IDL.Principal], [], []),
     'settle' : IDL.Func([TokenIdentifier_2], [Result_4], []),
     'settlements' : IDL.Func(
         [],
-        [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier, IDL.Nat64))],
+        [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier_3, IDL.Nat64))],
         ['query'],
       ),
     'supply' : IDL.Func([TokenIdentifier_2], [Result_3], ['query']),
-    'tokens' : IDL.Func([AccountIdentifier], [Result_2], ['query']),
+    'tokens' : IDL.Func([AccountIdentifier_3], [Result_2], ['query']),
     'transactions' : IDL.Func([], [IDL.Vec(Transaction2)], ['query']),
     'transfer' : IDL.Func([TransferRequest], [TransferResponse], []),
-    'used' : IDL.Func(
-        [IDL.Text],
-        [
-          IDL.Vec(IDL.Tuple(TokenIndex, Settlement)),
-          IDL.Vec(IDL.Tuple(AccountIdentifier, IDL.Principal, SubAccount)),
-        ],
-        ['query'],
-      ),
   });
   return erc721_token;
 };
