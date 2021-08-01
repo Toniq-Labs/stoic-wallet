@@ -260,7 +260,7 @@ function AccountDetail(props) {
           alignItems="flex-start"
         >
           {tokens.map((token, index) => {
-            return (<TokenCard key={account.address + token.symbol} address={account.address} data={token} onClick={() => changeToken(index)} selected={index === currentToken} />)
+            return (<TokenCard key={account.address + token.id} address={account.address} data={token} onClick={() => changeToken(index)} selected={index === currentToken} />)
           })}
           { account.nfts.length > 0 ? <NFTCard address={account.address} onClick={() => changeToken('nft')} selected={currentToken === 'nft'} /> : "" }
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
