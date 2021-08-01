@@ -79,6 +79,7 @@ const StoicIdentity = {
           });
           return;
         case "pem":
+          localStorage.setItem('_pem', optdata.pem);
           id = Secp256k1KeyIdentity.fromPem(optdata.pem);
           return resolve(processId(id, type));
         case "watch":
@@ -131,11 +132,20 @@ const StoicIdentity = {
             });
           }
         case "pem":
-          if (!isLoaded(_id.principal)) return reject(); 
-          return resolve({
-            principal : _id.principal,
-            type : _id.type
-          });   
+          if (!isLoaded(_id.principal)) {
+            var t = localStorage.getItem('_pem');
+            if (!t){
+              return reject("No pem stored");
+            } else {              
+              id = Secp256k1KeyIdentity.fromPem(t);
+              return resolve(processId(id, _id.type));   
+            }
+          } else {
+            return resolve({
+              principal : _id.principal,
+              type : _id.type
+            });
+          }
         case "watch":
           return resolve({
             principal : _id.principal,
@@ -203,6 +213,7 @@ const StoicIdentity = {
             return;
           case "pem":
             id = Secp256k1KeyIdentity.fromPem(optdata.pem);
+            localStorage.setItem('_pem', optdata.pem);
             return resolve(processId(id, _id.type));
           default: break;
         }
@@ -240,6 +251,9 @@ const StoicIdentity = {
         case "private":
             localStorage.removeItem("_m");
           break;
+        case "pem":
+            localStorage.removeItem("_pem");
+          break;
         default: break;
       }
       if (oauths.indexOf(_id.type) >= 0) {
@@ -265,6 +279,9 @@ const StoicIdentity = {
             localStorage.removeItem("_m");
             localStorage.removeItem("_em");
           break;
+        case "pem":
+            localStorage.removeItem("_pem");
+          break;
         default: break;
       }
       if (oauths.indexOf(_id.type) >= 0) {
@@ -288,6 +305,9 @@ const StoicIdentity = {
           break;
         case "private":
             localStorage.removeItem("_m");
+          break;
+        case "pem":
+            localStorage.removeItem("_pem");
           break;
         default: break;
       }
@@ -313,3 +333,4 @@ const StoicIdentity = {
   }
 }
 export {StoicIdentity};
+//window.StoicIdentity = StoicIdentity;

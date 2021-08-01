@@ -170,6 +170,21 @@ export default ({ IDL }) => {
     'changeAdmin' : IDL.Func([IDL.Principal], [], []),
     'clearDEX' : IDL.Func([], [], []),
     'extensions' : IDL.Func([], [IDL.Vec(Extension)], ['query']),
+    'getOrderBook' : IDL.Func(
+        [TokenIdentifier_2, TokenIdentifier_2],
+        [
+          IDL.Opt(
+            IDL.Tuple(
+              IDL.Vec(TokenIdentifier_2),
+              CurrencyPair,
+              IDL.Vec(Order),
+              IDL.Vec(Order),
+              IDL.Opt(Rate),
+            )
+          ),
+        ],
+        ['query'],
+      ),
     'limitOrder' : IDL.Func([LimitOrderRequest], [LimitOrderResponse], []),
     'marketOrder' : IDL.Func([MarketOrderRequest], [MarketOrderResponse], []),
     'metadata' : IDL.Func([TokenIdentifier_2], [Result_7], ['query']),
