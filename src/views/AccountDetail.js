@@ -65,21 +65,23 @@ function AccountDetail(props) {
             if (app && app.apikey === e.data.apikey) {
               window.opener.postMessage(authResponse, "*");              
             } else {
-              if (window.confirm("Do you want to authorize \"" + e.origin + "\" to access your princpal \""+principal+"\"?")) {
-                if (!app) {
-                  app = {
-                    host : e.origin,
-                    apikey : e.data.apikey
-                  };
-                  dispatch({ type: 'app/add', payload: {app:app}});
-                } else {
-                  app.apikey = e.data.apikey;
-                  dispatch({ type: 'app/edit', payload: {app:app}});
-                }
-                window.opener.postMessage(authResponse, "*");
-              } else {              
-                window.opener.postMessage({action : "rejectAuthorization"}, "*");
-              };
+              props.confirm("Authorize Application", "Do you want to authorize \"" + e.origin + "\" to access your princpal \""+principal+"\"?", "Reject", "Authorize").then(v => {
+                if (v) {
+                  if (!app) {
+                    app = {
+                      host : e.origin,
+                      apikey : e.data.apikey
+                    };
+                    dispatch({ type: 'app/add', payload: {app:app}});
+                  } else {
+                    app.apikey = e.data.apikey;
+                    dispatch({ type: 'app/edit', payload: {app:app}});
+                  }
+                  window.opener.postMessage(authResponse, "*");
+                } else {              
+                  window.opener.postMessage({action : "rejectAuthorization"}, "*");
+                };
+              });
             }
           };
         }
