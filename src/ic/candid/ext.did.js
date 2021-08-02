@@ -188,7 +188,7 @@ export default ({ IDL }) => {
         ['query'],
       ),
     'lock' : IDL.Func(
-        [TokenIdentifier_2, AccountIdentifier_3, SubAccount_3],
+        [TokenIdentifier_2, IDL.Nat64, AccountIdentifier_3, SubAccount_3],
         [Result_6],
         [],
       ),
@@ -200,6 +200,7 @@ export default ({ IDL }) => {
     'removeRefunds' : IDL.Func([IDL.Vec(SubAccount_3)], [], []),
     'setMinter' : IDL.Func([IDL.Principal], [], []),
     'settle' : IDL.Func([TokenIdentifier_2], [Result_4], []),
+    'settle_force' : IDL.Func([IDL.Text, TokenIdentifier_2], [], ['oneway']),
     'settlements' : IDL.Func(
         [],
         [IDL.Vec(IDL.Tuple(TokenIndex, AccountIdentifier_3, IDL.Nat64))],
