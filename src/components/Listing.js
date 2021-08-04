@@ -82,20 +82,22 @@ export default function Listing(props) {
         <Card>
           <CardContent>
             <Typography style={{fontSize: 14, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>
-              {"#"+(props.listing[0]+1)} <Tooltip title="View in browser">
-                <IconButton size="small" href={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} target="_blank" edge="end" aria-label="search">
-                  <LaunchIcon style={{ fontSize: 18 }} />
-                </IconButton>
-              </Tooltip>
+              <Tooltip title="View in browser"><a style={{color:"black",textDecoration: 'none' }} href={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} target="_blank">{"#"+(props.listing[0]+1)} <LaunchIcon style={{ fontSize: 12 }} /></a></Tooltip>
             </Typography>
+
             <a href={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} target="_blank" rel="noreferrer">
               <img alt={tokenid} style={{display:(imgLoaded ? "block" : "none")}} src={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} onLoad={() => setImgLoaded(true)} />
               <Skeleton style={{margin:"0 auto",display:(imgLoaded ? "none" : "block")}} variant="circle" width={120} height={120} />
             </a>
             
+            <Typography style={{fontSize: 14, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>
+              <Tooltip title="Genetic Rarity Index displays the color and trait rarity of a specific Cronic relative to others. Does not include Mint #, Twin Status or Animation within the index. Developed by a 3rd party."><a style={{color:"black",textDecoration: 'none' }} href={"https://nntkg-vqaaa-aaaad-qamfa-cai.ic.fleek.co/?tokenid=" + tokenid} target="_blank">GRI: {(props.gri*100).toFixed(1)}%  <LaunchIcon style={{ fontSize: 12 }} /></a></Tooltip>
+            </Typography>
+            
             <Typography style={{fontSize: 20, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>
               {_showListingPrice(props.listing[1].price)} ICP
             </Typography>
+            
             <Typography style={{fontSize: 14, textAlign:"center"}} color={"inherit"} gutterBottom>
               { _isLocked(props.listing[1]) ? 
                 <>Unlocks <Timestamp relative autoUpdate date={Number(props.listing[1].locked[0]/1000000000n)} /></>
