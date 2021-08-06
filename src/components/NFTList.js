@@ -114,7 +114,7 @@ export default function NFTList(props) {
         bearer : (tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
         listing : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
         listingText : (tokenDetails[nft.id] !== false ? (tokenDetails[nft.id][1].length === 0 ? "Not listed" : 
-          (tokenDetails[nft.id][1][0].locked.length === 0 ?
+          (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
             "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
             "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
         ) : "Loading..."),
