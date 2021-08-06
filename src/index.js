@@ -6,6 +6,7 @@ import App from './App';
 import { Provider } from 'react-redux'
 import store from './store'
 import {StoicIdentity} from './ic/identity.js';
+import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
 import theme from './theme';
 import '@fontsource/roboto';
 
@@ -55,44 +56,107 @@ if (params.get('stoicTunnel') !== null) {
       encdata
     );
   };
+  const loadDbFast = () => {
+    var db = localStorage.getItem('_db');
+    if (db){
+      var appData = {
+        principals : [],
+        addresses : [],
+        currentPrincipal : 0,
+        currentAccount : 0,
+        currentToken : 0,
+      };
+      db = JSON.parse(db);
+      //db versioning
+      if (!Array.isArray(db)) {
+        db = [[db],[],[0,0,0]];
+        console.log("Converting old DB to new");
+      }
+      if (db.length === 2) {
+        db[2] = [0,0,0];
+      }
+      db[0].map(principal => {
+        var _principal = {
+          accounts : [],
+          neurons : [],
+          apps : [],
+          identity : principal.identity
+        };
+        principal.accounts.map((account, subaccount) => {
+          if (account.length === 2) account[2] = [];
+          _principal.accounts.push({
+            name : account[0],
+            address : principalToAccountIdentifier(principal.identity.principal, subaccount),
+            tokens : [
+              {
+                id : LEDGER_CANISTER_ID,
+                name : "Internet Computer",
+                symbol : "ICP",
+                decimals : 8,
+              }, 
+              ...account[1]
+            ],
+            nfts : account[2] ?? []
+          });    
+          return true;
+        });
+        if (!principal.hasOwnProperty('apps')) principal.apps = [];
+        principal.apps.map(app => {
+          _principal.apps.push(app);
+          return true;
+        });
+        appData.principals.push(_principal);
+        return true;
+      });
+      appData.addresses = db[1];
+      appData.currentPrincipal = db[2][0];
+      appData.currentAccount = db[2][1];
+      appData.currentToken = db[2][2];
+      return appData;
+    } else return false;
+  }
   window.addEventListener("message", async function(e){
     if (e && e.data && e.data.target === 'STOIC-IFRAME') {
-      const state = store.getState();
-      const principal = state.principals[state.currentPrincipal];
-      if (principal.identity.principal === e.data.principal) {
-        if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
-          StoicIdentity.load(principal.identity).then(async () => {
-            var id = StoicIdentity.getIdentity(e.data.principal);
-            if (id) {
-              var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
-              if (verified) {
-                var response = {
-                  signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
-                };
-                if (id.hasOwnProperty('_delegation') ) {
-                  response.chain = id.getDelegation().toJSON();
-                }
-                sendMessageToExtension(e, true, JSON.stringify(response));
-                switch (e.data.action) {
-                  case 'sign':
-                  break;
-                  default:
-                  break;
-                }
-              } else {            
-                sendMessageToExtension(e, false, "Invalid signature for payload");
-              }
-            } else {        
-              sendMessageToExtension(e, false, "The principal is not unlocked");
-            }
-          }).catch(err => {            
-            sendMessageToExtension(e, false, err);
-          });
-        } else {
-          sendMessageToExtension(e, false, "API key is not valid for this principal");
-        }
+      const state = loadDbFast();
+      if (!state) {
+        sendMessageToExtension(e, false, "Error loading remote DB");
       } else {
-        sendMessageToExtension(e, false, "Incorrect Principal is logged in");
+        const principal = state.principals[state.currentPrincipal];
+        if (principal.identity.principal === e.data.principal) {
+          if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
+            StoicIdentity.load(principal.identity).then(async () => {
+              var id = StoicIdentity.getIdentity(e.data.principal);
+              if (id) {
+                var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
+                if (verified) {
+                  var response = {
+                    signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
+                  };
+                  if (id.hasOwnProperty('_delegation') ) {
+                    response.chain = id.getDelegation().toJSON();
+                  }
+                  sendMessageToExtension(e, true, JSON.stringify(response));
+                  switch (e.data.action) {
+                    case 'sign':
+                    break;
+                    default:
+                    break;
+                  }
+                } else {            
+                  sendMessageToExtension(e, false, "Invalid signature for payload");
+                }
+              } else {        
+                sendMessageToExtension(e, false, "The principal is not unlocked");
+              }
+            }).catch(err => {            
+              sendMessageToExtension(e, false, err);
+            });
+          } else {
+            sendMessageToExtension(e, false, "API key is not valid for this principal");
+          }
+        } else {
+          sendMessageToExtension(e, false, "Incorrect Principal is logged in");
+        }
       }
     }
   }, false);

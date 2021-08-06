@@ -12,7 +12,6 @@ function initDb(){
   var db = localStorage.getItem('_db');
   if (db){
     db = JSON.parse(db);
-    
     //db versioning
     var savenow = false;
     savenow = true;
@@ -76,6 +75,15 @@ function initDb(){
     
     if (savenow) saveDb(appData);
     return appData;
+  } else {
+    return {
+      principals : [],
+      addresses : [],
+      currentPrincipal : 0,
+      currentAccount : 0,
+      currentToken : 0,
+      freshInstall : true,
+    };
   }
 }
 function newDb(identity){
@@ -142,9 +150,7 @@ function saveDb(newState){
   appData = newState;
   return newState;
 }
-
-initDb();
-function rootReducer(state = appData, action) {
+function rootReducer(state = initDb(), action) {
   switch(action.type){
     case "app/edit":
       return saveDb({
