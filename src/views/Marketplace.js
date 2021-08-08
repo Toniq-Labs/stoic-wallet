@@ -115,14 +115,18 @@ export default function Marketplace(props) {
     var payments = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").payments();
     if (payments.length === 0) return;
     if (payments[0].length === 0) return;
-    console.log("Payments found", payments[0]);
-    payments[0].map(async payment => {
-      var a = extjs.toAddress(identity.principal, payment);
-      var b = Number(await api.token().getBalance(a));
-      if (b <= 10000) return;
-      _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
-    });
-    await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments(payments[0]);
+    var a, b, payment;
+    for(var i = 0; i < payments[0].length; i++) {
+      payment = payments[0][i];
+      a = extjs.toAddress(identity.principal, payment);
+      b = Number(await api.token().getBalance(a));
+      try {
+        if (b > 10000) {
+          await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
+        }
+        await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments([payment]);
+      } catch (e) {};
+    };
   };
   const processRefunds = async () => {
     const id = StoicIdentity.getIdentity(identity.principal);
@@ -134,7 +138,6 @@ export default function Marketplace(props) {
       var a = extjs.toAddress(identity.principal, refund);
       var b = Number(await api.token().getBalance(a));
       if (b <= 10000) return;
-      //Process refunds
       _api.token().transfer(identity.principal, refund, "07ce335b2451bec20426497d97afb0352d89dc3f1286bf26909ecb90cf370c76", BigInt(b-10000), BigInt(10000));
     });
     await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removeRefunds(refunds[0]);
