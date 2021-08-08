@@ -115,6 +115,7 @@ export default function Marketplace(props) {
     var payments = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").payments();
     if (payments.length === 0) return;
     if (payments[0].length === 0) return;
+    console.log("Payments found: " + payments[0].length);
     var a, b, payment;
     for(var i = 0; i < payments[0].length; i++) {
       payment = payments[0][i];
@@ -125,6 +126,7 @@ export default function Marketplace(props) {
           await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
         }
         await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments([payment]);
+        console.log("Payments removed successfully");
       } catch (e) {};
     };
   };
@@ -237,7 +239,7 @@ export default function Marketplace(props) {
                   return 0;
               };
             }).filter((token,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((listing, i) => {
-              return (<Listing gri={gridata[listing[0]]} refreshListings={refreshListings} showListingBuyForm={showListingBuyForm} loader={props.loader} error={error} key={listing[0]} listing={listing} confirm={props.confirm} />)
+              return (<Listing gri={gridata[listing[0]]} refreshListings={refreshListings} showListingBuyForm={showListingBuyForm} loader={props.loader} alert={props.alert} error={error} key={listing[0]} listing={listing} confirm={props.confirm} />)
             })}
           </Grid>
         </div>
