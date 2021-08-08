@@ -42,14 +42,16 @@ export default function Listing(props) {
       var acc = await props.showListingBuyForm();
       const id = StoicIdentity.getIdentity(identity.principal);
       const api = extjs.connect("https://boundary.ic0.app/", id);
+      props.loader(true);
       var bal = await api.token().getBalance(accounts[acc].address, identity.principal);
+      props.loader(false);
       if (bal < (props.listing[1].price + 10000n)) return error("You have insufficient funds for this transaction");
       var answer = await props.confirm("Please confirm", "You are about to purchase this NFT for "+_showListingPrice(props.listing[1].price)+" ICP from your account labelled \""+accounts[acc].name+"\". This process may take over 30 seconds. Are you sure you want to continue?");
       if (!answer) {
         return props.loader(false);
       };
-      var address = accounts[acc].address;
       props.loader(true);
+      var address = accounts[acc].address;
       var r = await api.canister("e3izy-jiaaa-aaaah-qacbq-cai").lock(tokenid, props.listing[1].price, address, _getRandomBytes());
       if (r.hasOwnProperty("err")) throw r.err;
       var paytoaddress = r.ok;
@@ -62,6 +64,7 @@ export default function Listing(props) {
         } catch (e) {}
       }
       var md = await api.token(tokenid).getMetadata();
+      props.alert("Transaction complete", "Your purchase was made successfully");
       var nft = {
         id : tokenid,
         metadata : md
@@ -72,7 +75,6 @@ export default function Listing(props) {
         nft : nft
       }});
       props.refreshListings();
-      return props.alert("Transaction complete", "Your purchase was made successfully");
     } catch (e) {
       props.loader(false);
       error(e);
