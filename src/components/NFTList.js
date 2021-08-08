@@ -25,8 +25,10 @@ import { useSelector, useDispatch } from 'react-redux'
 const perPage = 10;
 const api = extjs.connect("https://boundary.ic0.app/");
 const nftMap = {
-  "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics"
+  "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics",
+  "uzhxd-ziaaa-aaaah-qanaq-cai" : "ICP News",
 };
+const allowedForMarket = ["e3izy-jiaaa-aaaah-qacbq-cai"];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
   return n.toFixed(8).replace(/0{1,6}$/, '');
@@ -104,20 +106,22 @@ export default function NFTList(props) {
   React.useEffect(() => {
     var _nfts = [];
     account.nfts.forEach(nft => {
-        getTokenDetails(nft.id);
+      getTokenDetails(nft.id);
+      var dec = extjs.decodeTokenId(nft.id);
       _nfts.push({
         id : nft.id,
-        index : extjs.decodeTokenId(nft.id).index,
-        canister : extjs.decodeTokenId(nft.id).canister,
+        index : dec.index,
+        canister : dec.canister,
         metadata : toHexString(nft.metadata.metadata[0]),
         price : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
         bearer : (tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
+        allowedToList : allowedForMarket.indexOf(dec.canister) >= 0,
         listing : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
-        listingText : (tokenDetails[nft.id] !== false ? (tokenDetails[nft.id][1].length === 0 ? "Not listed" : 
+        listingText : (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : (tokenDetails[nft.id] !== false ? (tokenDetails[nft.id][1].length === 0 ? "Not listed" : 
           (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
             "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
             "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
-        ) : "Loading..."),
+        ) : "Loading...")),
       })
     });
     setNfts(_nfts);
@@ -210,11 +214,12 @@ export default function NFTList(props) {
                     <>
                       {nft.bearer === account.address ?
                       <>
+                        {nft.allowedToList ?
                         <Tooltip title="Manage Listing">
                           <IconButton size="small" onClick={() => listNft(nft)}>
                             <StorefrontIcon size="small" />
                           </IconButton>
-                        </Tooltip> 
+                        </Tooltip> : ""}
                         <Tooltip title="Send">
                           <IconButton size="small" onClick={() => sendNft(nft.id)}>
                             <SendIcon size="small"  />

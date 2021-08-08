@@ -6,7 +6,6 @@ import Typography from '@material-ui/core/Typography';
 import {StoicIdentity} from '../ic/identity.js';
 import Tooltip from '@material-ui/core/Tooltip';
 import { useSelector, useDispatch } from 'react-redux'
-import IconButton from '@material-ui/core/IconButton';
 import LaunchIcon from '@material-ui/icons/Launch';
 import Skeleton from '@material-ui/lab/Skeleton';
 import Button from '@material-ui/core/Button';
@@ -82,7 +81,7 @@ export default function Listing(props) {
         <Card>
           <CardContent>
             <Typography style={{fontSize: 14, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>
-              <Tooltip title="View in browser"><a style={{color:"black",textDecoration: 'none' }} href={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} target="_blank">{"#"+(props.listing[0]+1)} <LaunchIcon style={{ fontSize: 12 }} /></a></Tooltip>
+              <Tooltip title="View in browser"><a style={{color:"black",textDecoration: 'none' }} href={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} rel="noreferrer" target="_blank">{"#"+(props.listing[0]+1)} <LaunchIcon style={{ fontSize: 12 }} /></a></Tooltip>
             </Typography>
 
             <a href={"https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=" + tokenid} target="_blank" rel="noreferrer">
@@ -91,7 +90,7 @@ export default function Listing(props) {
             </a>
             
             <Typography style={{fontSize: 14, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>
-              <Tooltip title="Genetic Rarity Index displays the color and trait rarity of a specific Cronic relative to others. Does not include Mint #, Twin Status or Animation within the index. Developed by a 3rd party."><a style={{color:"black",textDecoration: 'none' }} href={"https://nntkg-vqaaa-aaaad-qamfa-cai.ic.fleek.co/?tokenid=" + tokenid} target="_blank">GRI: {(props.gri*100).toFixed(1)}%  <LaunchIcon style={{ fontSize: 12 }} /></a></Tooltip>
+              <Tooltip title="Genetic Rarity Index displays the color and trait rarity of a specific Cronic relative to others. Does not include Mint #, Twin Status or Animation within the index. Developed by a 3rd party."><a style={{color:"black",textDecoration: 'none' }} href={"https://nntkg-vqaaa-aaaad-qamfa-cai.ic.fleek.co/?tokenid=" + tokenid} rel="noreferrer" target="_blank">GRI: {(props.gri*100).toFixed(1)}%  <LaunchIcon style={{ fontSize: 12 }} /></a></Tooltip>
             </Typography>
             
             <Typography style={{fontSize: 20, textAlign:"center", fontWeight:"bold"}} color={"inherit"} gutterBottom>

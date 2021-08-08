@@ -62,7 +62,6 @@ class ExtConnection {
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
     "kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
-    //"e3izy-jiaaa-aaaah-qacbq-cai" : cronicsIDL,
   };
   _metadata = {
     [LEDGER_CANISTER_ID] : {
@@ -184,8 +183,10 @@ class ExtConnection {
                         type : 'fungible'
                       });
                     } else {
+                      var md = r.ok.nonfungible.metadata[0];
+                      if (md.length > 256) md = md.slice(0, 256);
                       resolve({
-                        metadata : r.ok.nonfungible.metadata,
+                        metadata : [md],
                         type : 'nonfungible'
                       });
                     }
@@ -420,6 +421,6 @@ const extjs = {
   toAddress : principalToAccountIdentifier,
 };
 export default extjs;
-//window.extjs = extjs;
+//window.extjs = extjs.connect;
 //window.principalToAccountIdentifier = principalToAccountIdentifier;
 //window.fromHexString = fromHexString;

@@ -133,11 +133,11 @@ const StoicIdentity = {
           }
         case "pem":
           if (!isLoaded(_id.principal)) {
-            var t = localStorage.getItem('_pem');
-            if (!t){
+            var tt = localStorage.getItem('_pem');
+            if (!tt){
               return reject("No pem stored");
             } else {              
-              id = Secp256k1KeyIdentity.fromPem(t);
+              id = Secp256k1KeyIdentity.fromPem(tt);
               return resolve(processId(id, _id.type));   
             }
           } else {
