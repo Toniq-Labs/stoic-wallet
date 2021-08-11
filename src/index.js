@@ -117,47 +117,49 @@ if (params.get('stoicTunnel') !== null) {
   }
   window.addEventListener("message", async function(e){
     if (e && e.data && e.data.target === 'STOIC-IFRAME') {
-      const state = loadDbFast();
-      if (!state) {
-        sendMessageToExtension(e, false, "Error loading remote DB");
-      } else {
-        const principal = state.principals[state.currentPrincipal];
-        if (principal.identity.principal === e.data.principal) {
-          if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
-            StoicIdentity.load(principal.identity).then(async () => {
-              var id = StoicIdentity.getIdentity(e.data.principal);
-              if (id) {
-                var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
-                if (verified) {
-                  var response = {
-                    signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
-                  };
-                  if (id.hasOwnProperty('_delegation') ) {
-                    response.chain = id.getDelegation().toJSON();
-                  }
-                  sendMessageToExtension(e, true, JSON.stringify(response));
-                  switch (e.data.action) {
-                    case 'sign':
-                    break;
-                    default:
-                    break;
-                  }
-                } else {            
-                  sendMessageToExtension(e, false, "Invalid signature for payload");
-                }
-              } else {        
-                sendMessageToExtension(e, false, "The principal is not unlocked");
-              }
-            }).catch(err => {            
-              sendMessageToExtension(e, false, err);
-            });
-          } else {
-            sendMessageToExtension(e, false, "API key is not valid for this principal");
-          }
+      setTimeout(() => {
+        const state = loadDbFast();
+        if (!state) {
+          sendMessageToExtension(e, false, "Error loading remote DB");
         } else {
-          sendMessageToExtension(e, false, "Incorrect Principal is logged in");
+          const principal = state.principals[state.currentPrincipal];
+          if (principal.identity.principal === e.data.principal) {
+            if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
+              StoicIdentity.load(principal.identity).then(async () => {
+                var id = StoicIdentity.getIdentity(e.data.principal);
+                if (id) {
+                  var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
+                  if (verified) {
+                    var response = {
+                      signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
+                    };
+                    if (id.hasOwnProperty('_delegation') ) {
+                      response.chain = id.getDelegation().toJSON();
+                    }
+                    sendMessageToExtension(e, true, JSON.stringify(response));
+                    switch (e.data.action) {
+                      case 'sign':
+                      break;
+                      default:
+                      break;
+                    }
+                  } else {            
+                    sendMessageToExtension(e, false, "Invalid signature for payload");
+                  }
+                } else {        
+                  sendMessageToExtension(e, false, "The principal is not unlocked");
+                }
+              }).catch(err => {            
+                sendMessageToExtension(e, false, err);
+              });
+            } else {
+              sendMessageToExtension(e, false, "API key is not valid for this principal");
+            }
+          } else {
+            sendMessageToExtension(e, false, "Incorrect Principal is logged in");
+          }
         }
-      }
+      }, 1000);
     }
   }, false);
 } else {
