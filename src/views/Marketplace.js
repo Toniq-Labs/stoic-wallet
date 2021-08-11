@@ -25,6 +25,9 @@ var cb = null;
   // "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
   // "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
 // ];
+const txfee = 10000;
+const txmin = 100000;
+const txcomm = 0.015;
 var intv = false;
 export default function Marketplace(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
@@ -116,14 +119,16 @@ export default function Marketplace(props) {
     if (payments.length === 0) return;
     if (payments[0].length === 0) return;
     console.log("Payments found: " + payments[0].length);
-    var a, b, payment;
+    var a, b, c, payment;
     for(var i = 0; i < payments[0].length; i++) {
       payment = payments[0][i];
       a = extjs.toAddress(identity.principal, payment);
       b = Number(await api.token().getBalance(a));
+      c = Math.round(b * txcomm);
       try {
-        if (b > 10000) {
-          await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
+        if (b > txmin) {
+          await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-(txfee + c)), BigInt(txfee));
+          await _api.token().transfer(identity.principal, payment, "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", BigInt(c-txfee), BigInt(txfee));
         }
         await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments([payment]);
         console.log("Payments removed successfully");
