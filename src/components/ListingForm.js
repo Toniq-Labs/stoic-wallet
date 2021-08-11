@@ -64,7 +64,7 @@ export default function ListingForm(props) {
         <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Marketplace Listing</DialogTitle>
         <DialogContent>
         {props.nft.price === 0 ?
-        <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter a price below to create a new marketplace listing. Once you save the listing, it becomes available to the public.</DialogContentText> : ""}
+        <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter a price below to create a new marketplace listing. Once you save the listing, it becomes available to the public. There is a 1.5% commission fee on all sales</DialogContentText> : ""}
          {props.nft.price > 0 ?
         <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Use the form to update the price of your listing, or Cancel the listing below</DialogContentText> : ""}
           <TextField
