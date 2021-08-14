@@ -120,10 +120,11 @@ export default function Marketplace(props) {
       height: 60,
     },
   };
-  const _updates = () => {
+  const _updates = async () => {
     refreshListings();
-    processPayments();
-    processRefunds();
+    await processPayments();
+    await processRefunds();
+    setTimeout(_updates, 30 *1000);
   };
   const processPayments = async () => {
     const id = StoicIdentity.getIdentity(identity.principal);
@@ -187,9 +188,7 @@ export default function Marketplace(props) {
     props.loader(true);
     
     _updates();
-    if (!intv) {
-      intv = setInterval(_updates, 30 *1000);
-    };
+    setTimeout(_updates, 30 *1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
     
