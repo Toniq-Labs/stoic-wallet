@@ -130,6 +130,7 @@ export default function Marketplace(props) {
     const _api = extjs.connect("https://boundary.ic0.app/", id);
     for(var j = 0; j < collections.length; j++){
       var payments = await _api.canister(collections[j].canister).payments();
+      console.log(collections[j].canister, payments);
       if (payments.length === 0) return;
       if (payments[0].length === 0) return;
       console.log("Payments found: " + payments[0].length);
