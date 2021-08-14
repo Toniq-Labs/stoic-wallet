@@ -156,6 +156,20 @@ function AccountDetail(props) {
       }).catch(reject);
     });
   };
+  const searchCollections = async () => {
+    let trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai"];
+    var ps = [];
+    for(var i = 0; i < trustedCanisters.length; i++) {
+      ps.push(api.token(trustedCanisters[i]).getTokens(account.address).then(async tokens => {
+        return Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
+          return _addToken(ct, false);
+        }));
+      }));
+    };
+    await Promise.all(ps.map(p => p.catch(e => e)));
+    dispatch({ type: 'currentToken', payload: {index:"nft"}});
+    return true;
+  };
   const addToken = (cid, type) => {
     if (type === 'add') {
       if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
@@ -182,18 +196,7 @@ function AccountDetail(props) {
       });
     } else if (type === 'search') {
       props.loader(true);
-      let trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai"];
-      var ps = [];
-      for(var i = 0; i < trustedCanisters.length; i++) {
-        ps.push(api.token(trustedCanisters[i]).getTokens(account.address).then(async tokens => {
-          return Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
-            return _addToken(ct, false);
-          }));
-        }));
-      };
-      Promise.all(ps.map(p => p.catch(e => e))).then(() => {
-        dispatch({ type: 'currentToken', payload: {index:"nft"}});
-      }).finally(() => {
+      searchCollections().finally(() => {
         props.loader(false);
       });
     };
@@ -292,7 +295,7 @@ function AccountDetail(props) {
           </IconButton>
         </SnackbarButton>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
+      {currentToken === 'nft' ? <NFTList searchCollections={searchCollections} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

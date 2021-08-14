@@ -1,4 +1,9 @@
+/* global BigInt */
 import React from 'react';
+import Divider from '@material-ui/core/Divider';
+import Menu from '@material-ui/core/Menu';
+import MenuItem from '@material-ui/core/MenuItem';
+import ListItemIcon from '@material-ui/core/ListItemIcon';
 import Table from '@material-ui/core/Table';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
@@ -8,6 +13,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import LaunchIcon from '@material-ui/icons/Launch';
+import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Paper from '@material-ui/core/Paper';
 import SendIcon from '@material-ui/icons/Send';
 import StorefrontIcon from '@material-ui/icons/Storefront';
@@ -18,6 +24,7 @@ import Pagination from '@material-ui/lab/Pagination';
 import SendNFTForm from '../components/SendNFTForm';
 import ListingForm from '../components/ListingForm';
 import extjs from '../ic/extjs.js';
+import {StoicIdentity} from '../ic/identity.js';
 import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
@@ -47,6 +54,7 @@ const _showListingPrice = n => {
 export default function NFTList(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount)
+  const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [nfts, setNfts] = React.useState([]);
   const [page, setPage] = React.useState(1);
@@ -54,7 +62,14 @@ export default function NFTList(props) {
   const [openNFTForm, setOpenNFTForm] = React.useState(false);
   const [openListingForm, setOpenListingForm] = React.useState(false);
   const [tokenNFT, setTokenNFT] = React.useState('');
+  const [anchorEl, setAnchorEl] = React.useState({});
   
+  const handleClick = (id, target) => {
+    setAnchorEl({id: id, target: target});
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
   const dispatch = useDispatch()
   
   const styles = {
@@ -66,7 +81,39 @@ export default function NFTList(props) {
       minWidth: 650,
     },
   };
-  
+  const nftAction = (tokenid, memo) => {
+    //Submit to blockchain here
+    var _from_principal = identity.principal;
+    var _from_sa = currentAccount;
+    var _to_user = account.address;
+    var _amount = BigInt(1);
+    var _fee = BigInt(0);
+    var _memo = "00";//TODO
+    var _notify = false;
+    
+    //Load signing ID
+    const id = StoicIdentity.getIdentity(identity.principal);
+    if (!id) return error("Something wrong with your wallet, try logging in again");
+    
+    props.loader(true);
+    //hot api, will sign as identity - BE CAREFUL
+    extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(async r => {
+      if (r !== false) {
+        //update img, adhoc
+        var el = document.getElementById("img-"+tokenid);     
+        el.src = el.src+"?t=" + new Date().getTime(); 
+        //Update here
+        await props.searchCollections();
+        return props.alert("You were successful!", "You completed an advanced NFT action!");
+      } else {        
+        return error("Something went wrong with this transfer");
+      }
+    }).catch(e => {
+      return error("There was an error: " + e);
+    }).finally(() => {
+      props.loader(false);
+    });
+  };
   const sendNft = (id) => {
     setTokenNFT(id);
     setOpenNFTForm(true);
@@ -180,7 +227,7 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    <a href={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} target="_blank" rel="noreferrer"><img alt={compressAddress(nft.id)} src={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} style={{width:64}} /></a>
+                    <a href={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} style={{width:64}} /></a>
                   </TableCell>
                   <TableCell>
                     
@@ -219,17 +266,36 @@ export default function NFTList(props) {
                     <>
                       {nft.bearer === account.address ?
                       <>
-                        {nft.allowedToList ?
-                        <Tooltip title="Manage Listing">
-                          <IconButton size="small" onClick={() => listNft(nft)}>
-                            <StorefrontIcon size="small" />
+                        <>
+                          <IconButton id={"more-"+nft.id} size="small" onClick={event => handleClick(nft.id, event.currentTarget)} edge="end">
+                            <MoreVertIcon />
                           </IconButton>
-                        </Tooltip> : ""}
-                        <Tooltip title="Send">
-                          <IconButton size="small" onClick={() => sendNft(nft.id)}>
-                            <SendIcon size="small"  />
-                          </IconButton>
-                        </Tooltip>
+                          <Menu
+                            anchorEl={anchorEl !== null && anchorEl.id === nft.id ? anchorEl.target : null}
+                            keepMounted
+                            open={(anchorEl !== null && anchorEl.id === nft.id)}
+                            onClose={handleClose}
+                          >
+                            <MenuItem onClick={() => {handleClose(); sendNft(nft.id)}}>
+                              <ListItemIcon>
+                                <SendIcon fontSize="small" />
+                              </ListItemIcon>
+                              <Typography variant="inherit">Transfer</Typography>
+                            </MenuItem>
+                            {nft.allowedToList ?
+                            <MenuItem onClick={() => {handleClose(); listNft(nft)}}>
+                              <ListItemIcon>
+                                <StorefrontIcon fontSize="small" />
+                              </ListItemIcon>
+                              <Typography variant="inherit">Manage Listing</Typography>
+                            </MenuItem> : ""}
+                            {nft.canister === "e3izy-jiaaa-aaaah-qacbq-cai" ?
+                            ([
+                              <Divider key={0} />,
+                              <MenuItem key={1} onClick={() => {handleClose(); nftAction(nft.id, 0)}}>Remove Wearables</MenuItem>
+                            ]): ""}
+                          </Menu>
+                        </>
                       </> : ""}
                        <Tooltip title="Remove from Stoic">
                         <IconButton size="small" onClick={() => deleteNft(nft.id)}>
