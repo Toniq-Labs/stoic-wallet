@@ -130,9 +130,8 @@ export default function Marketplace(props) {
     const _api = extjs.connect("https://boundary.ic0.app/", id);
     for(var j = 0; j < collections.length; j++){
       var payments = await _api.canister(collections[j].canister).payments();
-      console.log(collections[j].canister, payments);
-      if (payments.length === 0) return;
-      if (payments[0].length === 0) return;
+      if (payments.length === 0) continue;
+      if (payments[0].length === 0) continue;
       console.log("Payments found: " + payments[0].length);
       var a, b, c, payment;
       for(var i = 0; i < payments[0].length; i++) {
@@ -156,15 +155,22 @@ export default function Marketplace(props) {
     const _api = extjs.connect("https://boundary.ic0.app/", id);
     for(var j = 0; j < collections.length; j++){
       var refunds = await _api.canister(collections[j].canister).refunds();
-      if (refunds.length === 0) return;
-      if (refunds[0].length === 0) return;
-      refunds[0].map(async refund => {
-        var a = extjs.toAddress(identity.principal, refund);
-        var b = Number(await api.token().getBalance(a));
-        if (b <= 10000) return;
-        _api.token().transfer(identity.principal, refund, "07ce335b2451bec20426497d97afb0352d89dc3f1286bf26909ecb90cf370c76", BigInt(b-10000), BigInt(10000));
-      });
-      await _api.canister(collections[j].canister).removeRefunds(refunds[0]);
+      if (refunds.length === 0) continue;
+      if (refunds[0].length === 0) continue;
+      var a, b, refund;
+      for(var i = 0; i < refunds[0].length; i++) {
+        refund = refunds[0][i];
+        a = extjs.toAddress(identity.principal, refund);
+        b = Number(await api.token().getBalance(a));
+        try {
+          if (b > txfee) {
+            //Process refunds
+            await _api.token().transfer(identity.principal, refund, "07ce335b2451bec20426497d97afb0352d89dc3f1286bf26909ecb90cf370c76", BigInt(b-txfee), BigInt(txfee));
+          }
+          await _api.canister(collections[j].canister).removeRefunds([refund]);
+          console.log("Refund removed successfully");
+        } catch (e) {};
+      };
     };
   };
   const refreshListings = () => {
