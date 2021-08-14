@@ -189,7 +189,6 @@ export default function Marketplace(props) {
     props.loader(true);
     
     _updates();
-    setTimeout(_updates, 30 *1000);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
     
