@@ -121,6 +121,7 @@ export default function Marketplace(props) {
     },
   };
   const _updates = async () => {
+    console.log("poll");
     refreshListings();
     await processPayments();
     await processRefunds();
