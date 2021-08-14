@@ -38,7 +38,7 @@ const nftMap = {
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
-  // "uzhxd-ziaaa-aaaah-qanaq-cai",
+  "uzhxd-ziaaa-aaaah-qanaq-cai",
   // "tde7l-3qaaa-aaaah-qansa-cai",
 ];
 const _showListingPrice = n => {
