@@ -289,7 +289,7 @@ export default function NFTList(props) {
                               </ListItemIcon>
                               <Typography variant="inherit">Manage Listing</Typography>
                             </MenuItem> : ""}
-                            {nft.canister === "ae3izy-jiaaa-aaaah-qacbq-cai" ?
+                            {nft.canister === "e3izy-jiaaa-aaaah-qacbq-cai" ?
                             ([
                               <Divider key={0} />,
                               <MenuItem key={1} onClick={() => {handleClose(); nftAction(nft.id, 0)}}>Remove Wearables</MenuItem>
