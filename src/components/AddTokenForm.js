@@ -88,7 +88,7 @@ export default function AddTokenForm(props) {
           </Button>
           { tabValue === "add" ? <Button onClick={submit} color="primary">Add</Button> : ""}
           { tabValue === "find" ? <Button onClick={submit} color="primary">Find</Button> : ""}
-          { tabValue === "search" ? <Button onClick={submit} color="primary">Search Trusted</Button> : ""}
+          { tabValue === "search" ? <Button onClick={submit} color="primary">Search</Button> : ""}
         </DialogActions>
       </Dialog>
     </>

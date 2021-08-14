@@ -360,7 +360,7 @@ class ExtConnection {
               };
               api.transfer(args).then(b => {
                 if (typeof b.ok != 'undefined') {
-                  resolve(true);
+                  resolve(b.ok);
                 } else {
                   reject(JSON.stringify(b.err));
                 }

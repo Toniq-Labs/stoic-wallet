@@ -182,7 +182,7 @@ function AccountDetail(props) {
       });
     } else if (type === 'search') {
       props.loader(true);
-      let trustedCanisters = ["e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai"];
+      let trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai"];
       var ps = [];
       for(var i = 0; i < trustedCanisters.length; i++) {
         ps.push(api.token(trustedCanisters[i]).getTokens(account.address).then(async tokens => {

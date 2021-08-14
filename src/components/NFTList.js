@@ -27,8 +27,13 @@ const api = extjs.connect("https://boundary.ic0.app/");
 const nftMap = {
   "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics",
   "uzhxd-ziaaa-aaaah-qanaq-cai" : "ICP News",
+  "tde7l-3qaaa-aaaah-qansa-cai" : "Cronic Wearables",
 };
-const allowedForMarket = ["e3izy-jiaaa-aaaah-qacbq-cai"];
+const allowedForMarket = [
+  "e3izy-jiaaa-aaaah-qacbq-cai",
+  // "uzhxd-ziaaa-aaaah-qanaq-cai",
+  // "tde7l-3qaaa-aaaah-qansa-cai",
+];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
   return n.toFixed(8).replace(/0{1,6}$/, '');
