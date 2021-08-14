@@ -17,7 +17,20 @@ import { useSelector } from 'react-redux'
 import Listing from '../components/Listing';
 const perPage = 30;
 const api = extjs.connect("https://boundary.ic0.app/");
-
+const collections = [
+  {
+    canister : "e3izy-jiaaa-aaaah-qacbq-cai",
+    name : "Cronic Critters"
+  },
+  {
+    canister : "uzhxd-ziaaa-aaaah-qanaq-cai",
+    name : "ICP News"
+  },
+  {
+    canister : "tde7l-3qaaa-aaaah-qansa-cai",
+    name : "Cronic Wearables"
+  },
+];
 var cb = null;
 // var allowedPrincipals = [
   // "4opr7-aaepd-uw2ok-lpt52-bi5to-nguta-7r7gr-gx57i-tnzlw-ewjid-qae",
@@ -115,39 +128,43 @@ export default function Marketplace(props) {
   const processPayments = async () => {
     const id = StoicIdentity.getIdentity(identity.principal);
     const _api = extjs.connect("https://boundary.ic0.app/", id);
-    var payments = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").payments();
-    if (payments.length === 0) return;
-    if (payments[0].length === 0) return;
-    console.log("Payments found: " + payments[0].length);
-    var a, b, c, payment;
-    for(var i = 0; i < payments[0].length; i++) {
-      payment = payments[0][i];
-      a = extjs.toAddress(identity.principal, payment);
-      b = Number(await api.token().getBalance(a));
-      c = Math.round(b * txcomm);
-      try {
-        if (b > txmin) {
-          await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-(txfee + c)), BigInt(txfee));
-          await _api.token().transfer(identity.principal, payment, "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", BigInt(c-txfee), BigInt(txfee));
-        }
-        await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removePayments([payment]);
-        console.log("Payments removed successfully");
-      } catch (e) {};
+    for(var j = 0; j < collections.length; j++){
+      var payments = await _api.canister(collections[j].canister).payments();
+      if (payments.length === 0) return;
+      if (payments[0].length === 0) return;
+      console.log("Payments found: " + payments[0].length);
+      var a, b, c, payment;
+      for(var i = 0; i < payments[0].length; i++) {
+        payment = payments[0][i];
+        a = extjs.toAddress(identity.principal, payment);
+        b = Number(await api.token().getBalance(a));
+        c = Math.round(b * txcomm);
+        try {
+          if (b > txmin) {
+            await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-(txfee + c)), BigInt(txfee));
+            await _api.token().transfer(identity.principal, payment, "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", BigInt(c-txfee), BigInt(txfee));
+          }
+          await _api.canister(collections[j].canister).removePayments([payment]);
+          console.log("Payments removed successfully");
+        } catch (e) {};
+      };
     };
   };
   const processRefunds = async () => {
     const id = StoicIdentity.getIdentity(identity.principal);
     const _api = extjs.connect("https://boundary.ic0.app/", id);
-    var refunds = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").refunds();
-    if (refunds.length === 0) return;
-    if (refunds[0].length === 0) return;
-    refunds[0].map(async refund => {
-      var a = extjs.toAddress(identity.principal, refund);
-      var b = Number(await api.token().getBalance(a));
-      if (b <= 10000) return;
-      _api.token().transfer(identity.principal, refund, "07ce335b2451bec20426497d97afb0352d89dc3f1286bf26909ecb90cf370c76", BigInt(b-10000), BigInt(10000));
-    });
-    await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").removeRefunds(refunds[0]);
+    for(var j = 0; j < collections.length; j++){
+      var refunds = await _api.canister(collections[j].canister).refunds();
+      if (refunds.length === 0) return;
+      if (refunds[0].length === 0) return;
+      refunds[0].map(async refund => {
+        var a = extjs.toAddress(identity.principal, refund);
+        var b = Number(await api.token().getBalance(a));
+        if (b <= 10000) return;
+        _api.token().transfer(identity.principal, refund, "07ce335b2451bec20426497d97afb0352d89dc3f1286bf26909ecb90cf370c76", BigInt(b-10000), BigInt(10000));
+      });
+      await _api.canister(collections[j].canister).removeRefunds(refunds[0]);
+    };
   };
   const refreshListings = () => {
     api.canister("e3izy-jiaaa-aaaah-qacbq-cai").listings().then(listings => {
