@@ -117,49 +117,58 @@ if (params.get('stoicTunnel') !== null) {
   }
   window.addEventListener("message", async function(e){
     if (e && e.data && e.data.target === 'STOIC-IFRAME') {
-      setTimeout(() => {
-        const state = loadDbFast();
-        if (!state) {
-          sendMessageToExtension(e, false, "Error loading remote DB");
-        } else {
-          const principal = state.principals[state.currentPrincipal];
-          if (principal.identity.principal === e.data.principal) {
-            if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
-              StoicIdentity.load(principal.identity).then(async () => {
-                var id = StoicIdentity.getIdentity(e.data.principal);
-                if (id) {
-                  var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
-                  if (verified) {
-                    var response = {
-                      signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
-                    };
-                    if (id.hasOwnProperty('_delegation') ) {
-                      response.chain = id.getDelegation().toJSON();
-                    }
-                    sendMessageToExtension(e, true, JSON.stringify(response));
-                    switch (e.data.action) {
-                      case 'sign':
-                      break;
-                      default:
-                      break;
-                    }
-                  } else {            
-                    sendMessageToExtension(e, false, "Invalid signature for payload");
+      const state = loadDbFast();
+      if (!state) {
+        sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
+      } else {
+        const principal = state.principals[state.currentPrincipal];
+        if (principal.identity.principal === e.data.principal) {
+          if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
+            StoicIdentity.load(principal.identity).then(async () => {
+              var id = StoicIdentity.getIdentity(e.data.principal);
+              if (id) {
+                var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
+                if (verified) {
+                  switch (e.data.action) {
+                    case 'sign':
+                      var response = {
+                        signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
+                      };
+                      if (id.hasOwnProperty('_delegation') ) {
+                        response.chain = id.getDelegation().toJSON();
+                      }
+                      sendMessageToExtension(e, true, JSON.stringify(response));
+                    break;
+                    case 'accounts':
+                      var accs = [];
+                      for(var i = 0; i < principal.accounts.length; i++){
+                        accs.push({
+                          name : principal.accounts[i].name,
+                          address : principal.accounts[i].address,
+                        });
+                      }
+                      sendMessageToExtension(e, true, JSON.stringify(accs));
+                    break;
+                    default:
+                      sendMessageToExtension(e, false, "Error - nothing to do");
+                    break;
                   }
-                } else {        
-                  sendMessageToExtension(e, false, "The principal is not unlocked");
+                } else {            
+                  sendMessageToExtension(e, false, "Invalid signature for payload");
                 }
-              }).catch(err => {            
-                sendMessageToExtension(e, false, err);
-              });
-            } else {
-              sendMessageToExtension(e, false, "API key is not valid for this principal");
-            }
+              } else {        
+                sendMessageToExtension(e, false, "The principal is not unlocked, please go to StoicWallet and unlocl your wallet");
+              }
+            }).catch(err => {            
+              sendMessageToExtension(e, false, err);
+            });
           } else {
-            sendMessageToExtension(e, false, "Incorrect Principal is logged in");
+            sendMessageToExtension(e, false, "API key is not valid for this principal, please logout and login again.");
           }
+        } else {
+          sendMessageToExtension(e, false, "Incorrect Principal is logged in, please go to StoicWallet and ensure the correct Principal is active");
         }
-      }, 1000);
+      }
     }
   }, false);
 } else {
