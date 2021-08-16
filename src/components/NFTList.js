@@ -39,7 +39,7 @@ const nftMap = {
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
   "uzhxd-ziaaa-aaaah-qanaq-cai",
-  // "tde7l-3qaaa-aaaah-qansa-cai",
+  "tde7l-3qaaa-aaaah-qansa-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
@@ -256,7 +256,7 @@ export default function NFTList(props) {
                     {nft.listing !== false ?
                       <>{nft.bearer === account.address ?
                         <strong>{nft.listingText}</strong> :
-                        <strong>SOLD/SENT</strong> 
+                        <Tooltip title="This NFT was either sold via the marketplace, or was not removed after sending. In some cases, this may be here in error from previous versions of StoicWallet"><strong>SOLD<span style={{color:"red"}}>*</span></strong></Tooltip>
                       }</> :
                       <strong>Loading...</strong> 
                     }

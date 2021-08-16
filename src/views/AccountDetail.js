@@ -1,5 +1,7 @@
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux'
+import Alert from '@material-ui/lab/Alert';
+import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
@@ -170,6 +172,10 @@ function AccountDetail(props) {
     dispatch({ type: 'currentToken', payload: {index:"nft"}});
     return true;
   };
+  const refreshTokens = async () => {
+    props.loader(true);
+    searchCollections().finally(() => props.loader(false));
+  };
   const addToken = (cid, type) => {
     if (type === 'add') {
       if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
@@ -203,6 +209,7 @@ function AccountDetail(props) {
   };
   return (
     <div style={styles.root}>
+      <Alert severity="warning">If some of your NFTs are missing from your list then please use this to load your tokens <Button onClick={refreshTokens} variant="contained" size={"small"} color={"primary"}>Load Tokens</Button></Alert>
       <List>
         <ListItem>
           <ListItemAvatar>
