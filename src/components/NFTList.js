@@ -1,6 +1,9 @@
 /* global BigInt */
 import React from 'react';
 import Divider from '@material-ui/core/Divider';
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
 import Menu from '@material-ui/core/Menu';
 import MenuItem from '@material-ui/core/MenuItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
@@ -29,7 +32,7 @@ import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
-const perPage = 10;
+const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
 const nftMap = {
   "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics",
@@ -63,6 +66,14 @@ export default function NFTList(props) {
   const [openListingForm, setOpenListingForm] = React.useState(false);
   const [tokenNFT, setTokenNFT] = React.useState('');
   const [anchorEl, setAnchorEl] = React.useState({});
+  const [collection, setCollection] = React.useState(false);
+  const [collections, setCollections] = React.useState([]);
+  const [wearableFilter, setWearableFilter] = React.useState('all');
+
+  const changeWearableFilter = async (event) => {
+    setPage(1);
+    setWearableFilter(event.target.value);
+  };
   
   const handleClick = (id, target) => {
     setAnchorEl({id: id, target: target});
@@ -71,7 +82,10 @@ export default function NFTList(props) {
     setAnchorEl(null);
   };
   const dispatch = useDispatch()
-  
+  const changeCollection = (event) => {
+    setPage(1);
+    setCollection(event.target.value);
+  };
   const styles = {
     empty : {
       maxWidth:400,
@@ -155,30 +169,40 @@ export default function NFTList(props) {
   const error = (e) => {
     props.error(e);
   }
+  const wearableMap = ["accessories","hats","eyewear","pets"];
   React.useEffect(() => {
     var _nfts = [];
-    account.nfts.forEach(nft => {
-      getTokenDetails(nft.id);
+    var collectCollections = false;
+    if (collections == false) collectCollections = true;
+    var _collections = [];
+    var index = 0;
+    account.nfts.forEach((nft) => {
       var dec = extjs.decodeTokenId(nft.id);
+      if (collectCollections && _collections.indexOf(dec.canister) < 0) _collections.push(dec.canister);
+      if (collection !== false && dec.canister != collection) return;
+      if (collection !== false && collection ==  "tde7l-3qaaa-aaaah-qansa-cai" && wearableFilter !== "all" && wearableMap[nft.metadata.metadata[0][0]] !== wearableFilter) return;
+      if (index >= ((page-1)*perPage) && index < ((page)*perPage)) getTokenDetails(nft.id);
+      index++;
       _nfts.push({
         id : nft.id,
         index : dec.index,
         canister : dec.canister,
         metadata : toHexString(nft.metadata.metadata[0]),
-        price : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
-        bearer : (tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
+        price : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
+        bearer : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
         allowedToList : allowedForMarket.indexOf(dec.canister) >= 0,
-        listing : (tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
-        listingText : (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : (tokenDetails[nft.id] !== false ? (tokenDetails[nft.id][1].length === 0 ? "Not listed" : 
+        listing : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
+        listingText : (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? "Loading..." : (tokenDetails[nft.id][1].length === 0 ? "Not listed" : 
           (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
             "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
             "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
-        ) : "Loading...")),
+        ))),
       })
     });
     setNfts(_nfts);
+    if (collectCollections) setCollections(_collections);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount, account.nfts, tokenDetails]);
+  }, [wearableFilter,page, currentAccount, account.nfts, tokenDetails, collection]);
 
 
   return (
@@ -190,6 +214,33 @@ export default function NFTList(props) {
         </Typography>
       </div> :
       <>
+        <FormControl style={{marginRight:20}}>
+          <InputLabel>Collections</InputLabel>
+          <Select
+            value={collection}
+            onChange={changeCollection}
+          >
+          <MenuItem value={false}>All Collections</MenuItem>
+          {collections.map(col => {
+            return (<MenuItem key={col} value={col}>{nftMap.hasOwnProperty(col) ? nftMap[col] : col}</MenuItem>)
+          })}
+          </Select>
+        </FormControl>
+        {collection === "tde7l-3qaaa-aaaah-qansa-cai" ? 
+          <FormControl style={{minWidth:120}}>
+            <InputLabel>Wearable Type</InputLabel>
+            <Select
+              value={wearableFilter}
+              onChange={changeWearableFilter}
+            >
+              <MenuItem value={"all"}>All Wearables</MenuItem>
+              <MenuItem value={"pets"}>Pets</MenuItem>
+              <MenuItem value={"accessories"}>Accessories/Flags</MenuItem>
+              <MenuItem value={"hats"}>Hats/Hair</MenuItem>
+              <MenuItem value={"eyewear"}>Eyewear</MenuItem>
+            </Select>
+          </FormControl> : "" }
+         <span style={{marginLeft:20,lineHeight:"50px"}}>Showing {nfts.length}</span>
         {nfts.length > perPage ?
         <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(nfts.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
         : ""}

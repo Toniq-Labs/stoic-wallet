@@ -115,6 +115,9 @@ function AccountDetail(props) {
     props.alert(t, m);
   };
   
+  const removeToken = (i) => {
+    dispatch({ type: 'deleteToken'});
+  }
   const changeToken = (i) => {
     dispatch({ type: 'currentToken', payload: {index:i}});
   }
@@ -158,8 +161,9 @@ function AccountDetail(props) {
       }).catch(reject);
     });
   };
-  const searchCollections = async () => {
-    let trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai"];
+  const searchCollections = async (nftonly) => {
+    var trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai"];
+    if (nftonly) trustedCanisters  = ["e3izy-jiaaa-aaaah-qacbq-cai","uzhxd-ziaaa-aaaah-qanaq-cai","tde7l-3qaaa-aaaah-qansa-cai"];
     var ps = [];
     for(var i = 0; i < trustedCanisters.length; i++) {
       ps.push(api.token(trustedCanisters[i]).getTokens(account.address).then(async tokens => {
@@ -174,7 +178,7 @@ function AccountDetail(props) {
   };
   const refreshTokens = async () => {
     props.loader(true);
-    searchCollections().finally(() => props.loader(false));
+    searchCollections(true).finally(() => props.loader(false));
   };
   const addToken = (cid, type) => {
     if (type === 'add') {
@@ -301,8 +305,9 @@ function AccountDetail(props) {
             <FileCopyIcon style={{ fontSize: 14 }} />
           </IconButton>
         </SnackbarButton>
+        <Button onClick={removeToken} color={"primary"} style={{marginLeft:"20px"}} variant={"contained"} size={"small"}>Remove</Button>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList searchCollections={searchCollections} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
+      {currentToken === 'nft' ? <NFTList searchCollections={() => searchCollections(true)} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

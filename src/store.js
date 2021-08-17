@@ -270,6 +270,31 @@ function rootReducer(state = initDb(), action) {
         currentPrincipal : (state.currentPrincipal > action.payload.index ? state.currentPrincipal - 1 : state.currentPrincipal),
         principals : state.principals.filter((e,i) => i !== action.payload.index)
       });
+    case "deleteToken":
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i === state.currentPrincipal) {
+            return {
+              ...principal,
+              accounts : principal.accounts.map((account,ii) => {
+                if (ii === state.currentAccount) {
+                  console.log(account);
+                  return {
+                    ...account,
+                    tokens : account.tokens.filter((e, i) => (e && i !== state.currentToken)),
+                  }
+                } else {
+                  return account;
+                }
+              }),
+            }
+          } else {
+            return principal;
+          }
+        }),
+        currentToken : state.currentToken-1
+      });
     case "addwallet": //TODO
       var cp = state.principals.length;
       return saveDb({
