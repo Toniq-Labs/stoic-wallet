@@ -20,15 +20,23 @@ const api = extjs.connect("https://boundary.ic0.app/");
 const collections = [
   {
     canister : "e3izy-jiaaa-aaaah-qacbq-cai",
-    name : "Cronic Critters"
+    name : "Cronic Critters",
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
   },
   {
     canister : "uzhxd-ziaaa-aaaah-qanaq-cai",
-    name : "ICP News"
+    name : "ICP News",
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
   },
   {
     canister : "tde7l-3qaaa-aaaah-qansa-cai",
-    name : "Cronic Wearables"
+    name : "Cronic Wearables",
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+  },
+  {
+    canister : "gevsk-tqaaa-aaaah-qaoca-cai",
+    name : "ICmojis",
+    comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
   },
 ];
 var cb = null;
@@ -144,7 +152,7 @@ export default function Marketplace(props) {
         try {
           if (b > txmin) {
             await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-(txfee + c)), BigInt(txfee));
-            await _api.token().transfer(identity.principal, payment, "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9", BigInt(c-txfee), BigInt(txfee));
+            await _api.token().transfer(identity.principal, payment, collections[j].comaddress, BigInt(c-txfee), BigInt(txfee));
           }
           await _api.canister(collections[j].canister).removePayments([payment]);
           console.log("Payments removed successfully");
