@@ -162,8 +162,8 @@ function AccountDetail(props) {
     });
   };
   const searchCollections = async (nftonly) => {
-    var trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai"];
-    if (nftonly) trustedCanisters  = ["e3izy-jiaaa-aaaah-qacbq-cai","uzhxd-ziaaa-aaaah-qanaq-cai","tde7l-3qaaa-aaaah-qansa-cai"];
+    var trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai", "gevsk-tqaaa-aaaah-qaoca-cai"];
+    if (nftonly) trustedCanisters  = ["e3izy-jiaaa-aaaah-qacbq-cai", "uzhxd-ziaaa-aaaah-qanaq-cai", "tde7l-3qaaa-aaaah-qansa-cai", "gevsk-tqaaa-aaaah-qaoca-cai"];
     var ps = [];
     for(var i = 0; i < trustedCanisters.length; i++) {
       ps.push(api.token(trustedCanisters[i]).getTokens(account.address).then(async tokens => {

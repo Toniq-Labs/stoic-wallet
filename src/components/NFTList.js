@@ -38,11 +38,13 @@ const nftMap = {
   "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics",
   "uzhxd-ziaaa-aaaah-qanaq-cai" : "ICP News",
   "tde7l-3qaaa-aaaah-qansa-cai" : "Cronic Wearables",
+  "gevsk-tqaaa-aaaah-qaoca-cai" : "ICmojis",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
   "uzhxd-ziaaa-aaaah-qanaq-cai",
   "tde7l-3qaaa-aaaah-qansa-cai",
+  "gevsk-tqaaa-aaaah-qaoca-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
