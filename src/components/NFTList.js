@@ -195,11 +195,15 @@ export default function NFTList(props) {
         bearer : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
         allowedToList : allowedForMarket.indexOf(dec.canister) >= 0,
         listing : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
-        listingText : (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? "Loading..." : (tokenDetails[nft.id][1].length === 0 ? "Not listed" : 
-          (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
-            "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
-            "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
-        ))),
+        listingText : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? 
+          "Loading..." : 
+          (tokenDetails[nft.id][1].length === 0 ? 
+            (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : "Not listed") : 
+            (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
+              "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
+              "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
+          )
+        ),
       })
     });
     setNfts(_nfts);
