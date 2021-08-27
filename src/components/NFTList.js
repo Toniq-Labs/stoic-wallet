@@ -46,6 +46,7 @@ const allowedForMarket = [
   "uzhxd-ziaaa-aaaah-qanaq-cai",
   "tde7l-3qaaa-aaaah-qansa-cai",
   "gevsk-tqaaa-aaaah-qaoca-cai",
+  "owuqd-dyaaa-aaaah-qapxq-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
