@@ -34,18 +34,17 @@ const collections = [
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
   },
   {
+    canister : "owuqd-dyaaa-aaaah-qapxq-cai",
+    name : "ICPuzzle",
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+  },
+  {
     canister : "gevsk-tqaaa-aaaah-qaoca-cai",
     name : "ICmojis",
     comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
   },
 ];
 var cb = null;
-// var allowedPrincipals = [
-  // "4opr7-aaepd-uw2ok-lpt52-bi5to-nguta-7r7gr-gx57i-tnzlw-ewjid-qae",
-  // "sensj-ihxp6-tyvl7-7zwvj-fr42h-7ojjp-n7kxk-z6tvo-vxykp-umhfk-wqe",
-  // "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
-  // "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
-// ];
 const txfee = 10000;
 const txmin = 100000;
 const txcomm = 0.015;
@@ -73,33 +72,6 @@ export default function Marketplace(props) {
   const listingBuyFormClose = () => {    
     setListingBuyFormOpen(false);
   };
-  /*const withdraw = async () => {
-    try {
-      var answer = await props.confirm("Withdraw sale proceeds", "If you have sold items, you need to manually withdraw sale proceeds. Would you like to look for any funds to withdraw (this can take some time)?");
-      if (!answer) {
-        return props.loader(false);
-      };
-      props.loader(true);
-      const id = StoicIdentity.getIdentity(identity.principal);
-      const _api = extjs.connect("https://boundary.ic0.app/", id);
-      var payments = await _api.canister("e3izy-jiaaa-aaaah-qacbq-cai").payments();
-      if (payments.length === 0) return props.alert("Sorry!", "There are no funds to be withdrawn");
-      var ps = payments[0].map(async payment => {
-        var a = extjs.toAddress(identity.principal, payment);
-        var b = Number(await api.token().getBalance(a));
-        if (b <= 10000) return;
-        return _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-10000), BigInt(10000));
-      });
-      Promise.all(ps).then(() => {
-        props.alert("Funds Sent", "We found some funds to withdraw and have sent them to your Main account");
-      }).finally(() => {       
-        props.loader(false);
-      });
-    } catch (e) {
-      props.loader(false);
-      error(e);
-    };
-  }*/
   const showListingBuyForm = () => {
     setListingBuyFormOpen(true);
     return new Promise((resolve, reject) => {
