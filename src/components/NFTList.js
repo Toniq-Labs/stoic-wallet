@@ -39,6 +39,7 @@ const nftMap = {
   "uzhxd-ziaaa-aaaah-qanaq-cai" : "ICP News",
   "tde7l-3qaaa-aaaah-qansa-cai" : "Cronic Wearables",
   "gevsk-tqaaa-aaaah-qaoca-cai" : "ICmojis",
+  "owuqd-dyaaa-aaaah-qapxq-cai" : "ICPuzzle",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
@@ -280,7 +281,7 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    <a href={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} style={{width:64}} /></a>
+                    <a href={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={"https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id} style={{width:64}} /></a>
                   </TableCell>
                   <TableCell>
                     
