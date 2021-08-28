@@ -14,7 +14,6 @@ function initDb(){
     db = JSON.parse(db);
     //db versioning
     var savenow = false;
-    savenow = true;
     if (!Array.isArray(db)) {
       db = [[db],[],[0,0,0]];
       console.log("Converting old DB to new");
@@ -115,7 +114,6 @@ function clearDb(){
   return clearState;
 }
 function saveDb(newState){
-  //console.log(newState);
   var updatedDb = [[], newState.addresses, [newState.currentPrincipal, newState.currentAccount, newState.currentToken]];
   
   newState.principals.map(principal => {
@@ -282,7 +280,6 @@ function rootReducer(state = initDb(), action) {
               ...principal,
               accounts : principal.accounts.map((account,ii) => {
                 if (ii === state.currentAccount) {
-                  console.log(account);
                   return {
                     ...account,
                     tokens : account.tokens.filter((e, i) => (e && i !== state.currentToken)),
