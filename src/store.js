@@ -24,7 +24,6 @@ function initDb(_db){
       savenow = true;
     }
     var loadedPrincipals = [];
-    console.log(db[0]);
     appData = {
       principals : [],
       addresses : [],
@@ -33,7 +32,6 @@ function initDb(_db){
       currentToken : 0,
     };
     db[0].forEach(principal => {
-      console.log(principal);
       if (loadedPrincipals.indexOf(principal.identity.principal) >= 0) return false;
       loadedPrincipals.push(principal.identity.principal);
       var _principal = {
@@ -78,9 +76,6 @@ function initDb(_db){
       appData.principals.push(_principal);
       return true;
     });
-    console.log(loadedPrincipals);
-    console.log(appData);
-    console.log("end");
     appData.addresses = db[1];
     appData.currentPrincipal = db[2][0];
     appData.currentAccount = db[2][1];
@@ -160,7 +155,6 @@ function saveDb(newState){
     updatedDb[0].push(_p);
     return true;
   });
-  console.log(loadedPrincipals);
   localStorage.setItem('_db', JSON.stringify(updatedDb));
   appData = newState;
   return newState;
@@ -169,9 +163,7 @@ function rootReducer(state = initDb(), action) {
   switch(action.type){
     case "refresh":
       console.log("Detected storage update");
-      console.log(initDb(action.payload));
-      console.log(state);
-      return state;
+      return initDb(action.payload);
     case "app/edit":
       return saveDb({
         ...state,
@@ -515,7 +507,6 @@ function rootReducer(state = initDb(), action) {
 };
 const store = createStore(rootReducer);
 window.addEventListener('storage', (e) => {
-  console.log(e);
   if (e.key === "_db" && e.url !== "https://www.stoicwallet.com/?stoicTunnel") {
     store.dispatch({
       type: "refresh",
