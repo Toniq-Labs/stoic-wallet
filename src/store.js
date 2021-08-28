@@ -8,8 +8,8 @@ var appData = {
   currentAccount : 0,
   currentToken : 0,
 };
-function initDb(){
-  var db = localStorage.getItem('_db');
+function initDb(_db){
+  var db = _db ?? localStorage.getItem('_db');
   if (db){
     db = JSON.parse(db);
     //db versioning
@@ -152,7 +152,7 @@ function rootReducer(state = initDb(), action) {
   switch(action.type){
     case "refresh":
       console.log("Detected storage update");
-      return initDb();
+      return initDb(action.payload);
     case "app/edit":
       return saveDb({
         ...state,
@@ -497,6 +497,11 @@ function rootReducer(state = initDb(), action) {
 const store = createStore(rootReducer);
 window.addEventListener('storage', (e) => {
   console.log(e);
-  if (e.url !== "https://www.stoicwallet.com/?stoicTunnel") store.dispatch({type: "refresh"});
+  if (e.key === "_db" && e.url !== "https://www.stoicwallet.com/?stoicTunnel") {
+    store.dispatch({
+      type: "refresh",
+      payload : e.newValue
+    });
+  }
 });
 export default store;
