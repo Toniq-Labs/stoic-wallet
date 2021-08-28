@@ -23,14 +23,17 @@ function initDb(_db){
       db[2] = [0,0,0];
       savenow = true;
     }
-    db[0].map(principal => {
+    var loadedPrincipals = [];
+    db[0].forEach(principal => {
+      if (loadedPrincipals.indexOf(principal.identity.principal) >= 0) return false;
+      loadedPrincipals.push(principal.identity.principal);
       var _principal = {
         accounts : [],
         neurons : [],
         apps : [],
         identity : principal.identity
       };
-      principal.accounts.map((account, subaccount) => {
+      principal.accounts.forEach((account, subaccount) => {
         //savenow = true;
         //if (subaccount >= 2) return;
         if (account.length === 2) account[2] = [];
