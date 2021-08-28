@@ -153,6 +153,7 @@ function saveDb(newState){
 function rootReducer(state = initDb(), action) {
   switch(action.type){
     case "refresh":
+      console.log("Detected storage update");
       return initDb();
     case "app/edit":
       return saveDb({
@@ -498,6 +499,7 @@ function rootReducer(state = initDb(), action) {
 };
 const store = createStore(rootReducer);
 window.addEventListener('storage', (e) => {
+  console.log(e);
   store.dispatch({type: "refresh"});
 });
 export default store;
