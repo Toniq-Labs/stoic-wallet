@@ -152,7 +152,9 @@ function rootReducer(state = initDb(), action) {
   switch(action.type){
     case "refresh":
       console.log("Detected storage update");
-      return initDb(action.payload);
+      console.log(initDb(action.payload));
+      console.log(state);
+      return state;
     case "app/edit":
       return saveDb({
         ...state,
@@ -498,10 +500,10 @@ const store = createStore(rootReducer);
 window.addEventListener('storage', (e) => {
   console.log(e);
   if (e.key === "_db" && e.url !== "https://www.stoicwallet.com/?stoicTunnel") {
-    // store.dispatch({
-      // type: "refresh",
-      // payload : e.newValue
-    // });
+    store.dispatch({
+      type: "refresh",
+      payload : e.newValue
+    });
   }
 });
 export default store;
