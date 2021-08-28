@@ -496,7 +496,6 @@ function rootReducer(state = initDb(), action) {
 };
 const store = createStore(rootReducer);
 window.addEventListener('storage', (e) => {
-  console.log(e);
-  store.dispatch({type: "refresh"});
+  if (e !== "https://www.stoicwallet.com/?stoicTunnel") store.dispatch({type: "refresh"});
 });
 export default store;
