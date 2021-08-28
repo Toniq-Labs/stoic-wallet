@@ -25,6 +25,13 @@ function initDb(_db){
     }
     var loadedPrincipals = [];
     console.log(db[0]);
+    appData = {
+      principals : [],
+      addresses : [],
+      currentPrincipal : 0,
+      currentAccount : 0,
+      currentToken : 0,
+    };
     db[0].forEach(principal => {
       console.log(principal);
       if (loadedPrincipals.indexOf(principal.identity.principal) >= 0) return false;
