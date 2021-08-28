@@ -24,6 +24,7 @@ function initDb(_db){
       savenow = true;
     }
     var loadedPrincipals = [];
+    console.log(db[0]);
     db[0].forEach(principal => {
       console.log(principal);
       if (loadedPrincipals.indexOf(principal.identity.principal) >= 0) return false;
@@ -71,6 +72,8 @@ function initDb(_db){
       return true;
     });
     console.log(loadedPrincipals);
+    console.log(appData);
+    console.log("end");
     appData.addresses = db[1];
     appData.currentPrincipal = db[2][0];
     appData.currentAccount = db[2][1];
