@@ -152,6 +152,8 @@ function saveDb(newState){
 }
 function rootReducer(state = initDb(), action) {
   switch(action.type){
+    case "refresh":
+      return initDb();
     case "app/edit":
       return saveDb({
         ...state,
@@ -495,5 +497,7 @@ function rootReducer(state = initDb(), action) {
   return state;
 };
 const store = createStore(rootReducer);
-
+window.addEventListener('storage', (e) => {
+  store.dispatch({type: "refresh"});
+});
 export default store;
