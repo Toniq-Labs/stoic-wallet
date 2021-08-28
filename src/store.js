@@ -118,15 +118,17 @@ function clearDb(){
 }
 function saveDb(newState){
   var updatedDb = [[], newState.addresses, [newState.currentPrincipal, newState.currentAccount, newState.currentToken]];
-  
-  newState.principals.map(principal => {
+  var loadedPrincipals = [];
+  newState.principals.forEach(principal => {
+    if (loadedPrincipals.indexOf(principal.identity.principal) >= 0) return false;
+    loadedPrincipals.push(principal.identity.principal);
     var _p = {
       accounts : [],
       neurons : [],
       apps : [],
       identity : principal.identity
     };
-    principal.accounts.map(account => {
+    principal.accounts.forEach(account => {
       var _a = [account.name, [], account.nfts];
       account.tokens.map((b, i) => {
         if (i === 0) return false;
@@ -136,7 +138,7 @@ function saveDb(newState){
       _p.accounts.push(_a);
       return true;
     });
-    principal.apps.map(app => {
+    principal.apps.forEach(app => {
       _p.apps.push(app);
       return true;
     });
