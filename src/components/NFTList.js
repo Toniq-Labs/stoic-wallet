@@ -40,13 +40,15 @@ const nftMap = {
   "tde7l-3qaaa-aaaah-qansa-cai" : "Cronic Wearables",
   "gevsk-tqaaa-aaaah-qaoca-cai" : "ICmojis",
   "owuqd-dyaaa-aaaah-qapxq-cai" : "ICPuzzle",
+  //"nbg4r-saaaa-aaaah-qap7a-cai" : "Starverse",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
   "uzhxd-ziaaa-aaaah-qanaq-cai",
   "tde7l-3qaaa-aaaah-qansa-cai",
   "gevsk-tqaaa-aaaah-qaoca-cai",
-  //"owuqd-dyaaa-aaaah-qapxq-cai",
+  "owuqd-dyaaa-aaaah-qapxq-cai",
+  //"nbg4r-saaaa-aaaah-qap7a-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
