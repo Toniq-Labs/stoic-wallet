@@ -149,6 +149,7 @@ function saveDb(newState){
     updatedDb[0].push(_p);
     return true;
   });
+  console.log(loadedPrincipals);
   localStorage.setItem('_db', JSON.stringify(updatedDb));
   appData = newState;
   return newState;
