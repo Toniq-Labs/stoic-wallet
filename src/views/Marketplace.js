@@ -24,6 +24,11 @@ const collections = [
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
   },
   {
+    canister : "nbg4r-saaaa-aaaah-qap7a-cai",
+    name : "Starverse",
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+  },
+  {
     canister : "uzhxd-ziaaa-aaaah-qanaq-cai",
     name : "ICP News",
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
@@ -37,6 +42,11 @@ const collections = [
     canister : "owuqd-dyaaa-aaaah-qapxq-cai",
     name : "ICPuzzle",
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+  },
+  {
+    canister : "gevsk-tqaaa-aaaah-qaoca-cai",
+    name : "ICmojis",
+    comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
   },
   {
     canister : "gevsk-tqaaa-aaaah-qaoca-cai",
