@@ -110,6 +110,12 @@ export default function Marketplace(props) {
       height: 60,
     },
   };
+  const _process = async () => {
+    props.loader(true);
+    await processPayments();
+    await processRefunds();
+    props.loader(false);
+  };
   const _updates = async () => {
     console.log("poll");
     refreshListings();
@@ -117,7 +123,7 @@ export default function Marketplace(props) {
     // await processRefunds();
     setTimeout(_updates, 30 *1000);
   };
-  /*
+  
   const processPayments = async () => {
     const id = StoicIdentity.getIdentity(identity.principal);
     const _api = extjs.connect("https://boundary.ic0.app/", id);
@@ -166,7 +172,7 @@ export default function Marketplace(props) {
       };
     };
   };
-  */
+  
   const refreshListings = () => {
     api.canister("e3izy-jiaaa-aaaah-qacbq-cai").listings().then(listings => {
       setListings(listings);
@@ -186,6 +192,7 @@ export default function Marketplace(props) {
     
   return (
     <div style={styles.root}>
+    <Alert severity="warning">If you have not received ICP for sold NFTs through the marketplace you can trigger a manual withdraw here <Button onClick={_process} variant="contained" size={"small"} color={"primary"}>Withdraw ICP</Button></Alert>
     {listings.length === 0 ?
       <div style={styles.empty}>
         <Typography paragraph align="center">
@@ -198,7 +205,6 @@ export default function Marketplace(props) {
         <Button onClick={() => {props.loader(true);refreshListings();}} variant="contained" color="primary">Refresh Listings</Button>
       </div> :
       <>
-      <Alert severity="error"><strong>We have introduced a marketplace fee of 1.5% on all listings, which is deducted from the final sale price. Use at your own risk - we take no responsibility for any losses of NFTs or ICP.</strong></Alert>
         <div style={styles.empty}>
           <Typography paragraph style={{paddingTop:20,fontWeight:"bold"}} align="center">
             Buy and Sell NFTs from the Marketplace. You can list NFTs for sale directly from your wallet!
