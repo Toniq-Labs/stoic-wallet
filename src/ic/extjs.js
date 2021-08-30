@@ -6,6 +6,7 @@ import ledgerIDL from './candid/ledger.did.js';
 import governanceIDL from './candid/governance.did.js';
 import nnsIDL from './candid/nns.did.js';
 import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
+import icpunksIDL from './candid/icpunks.did.js'; //hardcode to icpunks...
 import extIDL from './candid/ext.did.js';
 import advancedIDL from './candid/advanced.did.js';
 //import cronicsIDL from './candid/cronics.did.js';
@@ -49,6 +50,7 @@ const _preloadedIdls = {
   'governance' : governanceIDL,
   'ledger' : ledgerIDL,
   'hzld' : hzldIDL,
+  'icpunks' : icpunksIDL,
   'nns' : nnsIDL,
   'ext' : extIDL,
   'default' : extIDL,
@@ -61,6 +63,7 @@ class ExtConnection {
     [GOVERNANCE_CANISTER_ID] : _preloadedIdls['governance'],
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
+    "qcg3w-tyaaa-aaaah-qakea-cai" : _preloadedIdls['icpunks'],
     "kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
   };
   _metadata = {
@@ -148,73 +151,120 @@ class ExtConnection {
           }
         });
       },
-      getTokens : (aid) => {
-        return new Promise((resolve, reject) => {
-          if (typeof api.tokens == 'undefined') reject("Not supported");
-          else {
-            try {
-              api.tokens(aid).then(r => {
-                if (typeof r.ok != 'undefined') {
-                  resolve(r.ok.map(x => tokenIdentifier(tokenObj.canister, x)));
-                }else if (typeof r.err != 'undefined') reject(r.err)
-                else reject(r);
-              }).catch(reject);
-            } catch(e) {
-              reject(e);
-            };
-          };
-        });
+      getTokens : (aid, principal) => {
+        switch(tokenObj.canister) {
+          case "qcg3w-tyaaa-aaaah-qakea-cai":
+            return new Promise((resolve, reject) => {
+              api.user_tokens(Principal.fromText(principal)).then(r => {
+                resolve(r.ok.map(x => tokenIdentifier(tokenObj.canister, x)));
+              });
+            });
+          break;
+          default:
+            return new Promise((resolve, reject) => {
+              if (typeof api.tokens == 'undefined') reject("Not supported");
+              else {
+                try {
+                  api.tokens(aid).then(r => {
+                    if (typeof r.ok != 'undefined') {
+                      resolve(r.ok.map(x => tokenIdentifier(tokenObj.canister, x)));
+                    }else if (typeof r.err != 'undefined') reject(r.err)
+                    else reject(r);
+                  }).catch(reject);
+                } catch(e) {
+                  reject(e);
+                };
+              };
+            });
+          break;
+        }
       },
       getMetadata : () => {
-        return new Promise((resolve, reject) => {
-          if (this._metadata.hasOwnProperty(tokenObj.canister)) {
-            resolve(this._metadata[tokenObj.canister]);
-          } else {
-            switch(tokenObj.canister) {
-              default:
-                api.metadata(tokenObj.token).then(r => {
-                  if (typeof r.ok != 'undefined') {
-                    if (typeof r.ok.fungible != 'undefined') {
-                      resolve({
-                        name : r.ok.fungible.name,
-                        symbol : r.ok.fungible.symbol,
-                        decimals : r.ok.fungible.decimals,
-                        metadata : r.ok.fungible.metadata,
-                        type : 'fungible'
-                      });
-                    } else {
-                      var md = r.ok.nonfungible.metadata[0];
-                      if (md.length > 256) md = md.slice(0, 256);
-                      resolve({
-                        metadata : [md],
-                        type : 'nonfungible'
-                      });
-                    }
-                  } else if (typeof r.err != 'undefined') reject(r.err)
-                  else reject(r);
-                }).catch(reject);
-              break;
-            }
-          }
-        });
+        switch(tokenObj.canister) {
+          case "qcg3w-tyaaa-aaaah-qakea-cai":
+            return new Promise((resolve, reject) => {
+              api.data_of(tokenObj.index).then(r => {
+                resolve({
+                  metadata : r,
+                  type : 'nonfungible'
+                });
+              });
+            });
+          break;
+          default:
+            return new Promise((resolve, reject) => {
+              if (this._metadata.hasOwnProperty(tokenObj.canister)) {
+                resolve(this._metadata[tokenObj.canister]);
+              } else {
+                switch(tokenObj.canister) {
+                  default:
+                    api.metadata(tokenObj.token).then(r => {
+                      if (typeof r.ok != 'undefined') {
+                        if (typeof r.ok.fungible != 'undefined') {
+                          resolve({
+                            name : r.ok.fungible.name,
+                            symbol : r.ok.fungible.symbol,
+                            decimals : r.ok.fungible.decimals,
+                            metadata : r.ok.fungible.metadata,
+                            type : 'fungible'
+                          });
+                        } else {
+                          var md = r.ok.nonfungible.metadata[0];
+                          if (md.length > 256) md = md.slice(0, 256);
+                          resolve({
+                            metadata : [md],
+                            type : 'nonfungible'
+                          });
+                        }
+                      } else if (typeof r.err != 'undefined') reject(r.err)
+                      else reject(r);
+                    }).catch(reject);
+                  break;
+                }
+              }
+            });
+          break;
+        }
       },
       getBearer : () => {
-        return new Promise((resolve, reject) => {
-          api.bearer(tokenObj.token).then(r => {
-            if (typeof r.ok != 'undefined') resolve(r.ok)
-            else if (typeof r.err != 'undefined') reject(r.err)
-            else reject(r);
-          }).catch(reject);    
-        });
+        switch(tokenObj.canister) {
+          case "qcg3w-tyaaa-aaaah-qakea-cai":
+            return new Promise((resolve, reject) => {
+              api.owner_of(tokenObj.index).then(r => {
+                resolve(principalToAccountIdentifier(r.toText(), 0));
+              });
+            });
+          break;
+          default:
+            return new Promise((resolve, reject) => {
+              api.bearer(tokenObj.token).then(r => {
+                if (typeof r.ok != 'undefined') resolve(r.ok)
+                else if (typeof r.err != 'undefined') reject(r.err)
+                else reject(r);
+              }).catch(reject);    
+            });
+          break;
+        }
       },
       getDetails : () => {
-        return new Promise((resolve, reject) => {
-          api.details(tokenObj.token).then(r => {
-            if (typeof r.ok != 'undefined') resolve(r.ok)
-            else if (typeof r.err != 'undefined') reject(r.err)
-            else reject(r);
-          }).catch(reject);    
-        });
+        switch(tokenObj.canister) {
+          case "qcg3w-tyaaa-aaaah-qakea-cai":
+            return new Promise((resolve, reject) => {
+              api.owner_of(tokenObj.index).then(r => {
+                resolve([principalToAccountIdentifier(r.toText(), 0), null]);
+              });
+            });
+          break;
+          default:
+            return new Promise((resolve, reject) => {
+              api.details(tokenObj.token).then(r => {
+                if (typeof r.ok != 'undefined') resolve(r.ok)
+                else if (typeof r.err != 'undefined') reject(r.err)
+                else reject(r);
+              }).catch(reject);    
+            });
+          break;
+        }
       },
       getBalance : (address, princpal) => {
         return new Promise((resolve, reject) => {
@@ -224,6 +274,9 @@ class ExtConnection {
               rosettaApi.getAccountBalance(address).then(b => {       
                 resolve(b)
               });
+            break;
+            case "qcg3w-tyaaa-aaaah-qakea-cai":
+              //ICPUNKS TODO?
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
               args = {
@@ -295,6 +348,7 @@ class ExtConnection {
           switch(tokenObj.canister) {
             case LEDGER_CANISTER_ID:
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
+            case "qcg3w-tyaaa-aaaah-qakea-cai":
               reject("Not supported");
             break;
             default:
@@ -331,6 +385,9 @@ class ExtConnection {
                 resolve(true);
               }).catch(reject);
               //Notify here
+            break;
+            case "qcg3w-tyaaa-aaaah-qakea-cai":
+              //ICPUNKS TODO
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
               args = {

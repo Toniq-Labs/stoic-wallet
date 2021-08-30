@@ -113,10 +113,11 @@ export default function Marketplace(props) {
   const _updates = async () => {
     console.log("poll");
     refreshListings();
-    await processPayments();
-    await processRefunds();
+    // await processPayments();
+    // await processRefunds();
     setTimeout(_updates, 30 *1000);
   };
+  /*
   const processPayments = async () => {
     const id = StoicIdentity.getIdentity(identity.principal);
     const _api = extjs.connect("https://boundary.ic0.app/", id);
@@ -165,6 +166,7 @@ export default function Marketplace(props) {
       };
     };
   };
+  */
   const refreshListings = () => {
     api.canister("e3izy-jiaaa-aaaah-qacbq-cai").listings().then(listings => {
       setListings(listings);
