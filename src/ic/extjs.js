@@ -160,9 +160,13 @@ class ExtConnection {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
           case "jzg5e-giaaa-aaaah-qaqda-cai":
             return new Promise((resolve, reject) => {
-              api.user_tokens(Principal.fromText(principal)).then(r => {
-                resolve(r.map(x => tokenIdentifier(tokenObj.canister, Number(x))));
-              });
+              if (aid !== principalToAccountIdentifier(principal, 0)) {
+                resolve([]);
+              } else {
+                api.user_tokens(Principal.fromText(principal)).then(r => {
+                  resolve(r.map(x => tokenIdentifier(tokenObj.canister, Number(x))));
+                });
+              }
             });
           break;
           default:

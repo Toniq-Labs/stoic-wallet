@@ -111,34 +111,45 @@ export default function NFTList(props) {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
-    props.loader(true);
+    props.loader(true, "Unwrapping NFT...");
     //hot api, will sign as identity - BE CAREFUL
     var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").unwrap(tokenid, [extjs.toSubaccount(currentAccount ?? 0)]);
     if (!r) return error("There was an error!");
     await props.searchCollections(true);
     props.loader(false);
     dispatch({ type: 'account/nft/remove', payload: {id:tokenid}});
-    return props.alert("You were successful!", "Your NFT has been unwrapped! Unwrapped NFTs will usually appear in your Main account");    
+    return props.alert("You were successful!", "Your NFT has been unwrapped!" + (currentAccount !== 0 ? " Unwrapped NFTs will appear in your Main account" : ""));    
   };
   const wrapNft = async (tokenid) => {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
-    props.loader(true);
+    props.loader(true, "Creating wrapper...this may take a minute");
     //hot api, will sign as identity - BE CAREFUL
-    var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").wrap(tokenid);
-    if (!r) return error("There was an error!");
-    console.log("Wrapper made");
-    var r2 = await extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(identity.principal, currentAccount, "bxdf4-baaaa-aaaah-qaruq-cai", BigInt(1), BigInt(0), "00", false);
-    if (!r2) return error("There was an error!");
-    console.log("NFT Sent");
-    var r3 = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").mint(tokenid);
-    if (!r) return error("There was an error!");
-    console.log("Wrapper minted");
-    await props.searchCollections(true);
-    props.loader(false);
+    try{
+      var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").wrap(tokenid);
+      if (!r) return error("There was an error wrapping this NFT!");
+      props.loader(true, "Sending NFT to wrapper...");
+      var r2 = await extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(identity.principal, currentAccount, "bxdf4-baaaa-aaaah-qaruq-cai", BigInt(1), BigInt(0), "00", false);
+      if (!r2) return error("There was an error wrapping this NFT!");
+      props.loader(true, "Wrapping NFT...");
+      var r3 = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").mint(tokenid);
+      if (!r) return error("There was an error wrapping this NFT!");
+      await props.searchCollections(true);
+      props.loader(false);
+      _removeNft(tokenid)
+      return props.alert("You were successful!", "Your NFT has been wrapped!");
+    } catch(e) {
+      props.loader(false);
+      console.log(e);
+      return
+    };
+  };
+  const _removeNft = (tokenid) => {
+    if (nfts.length === 1) {      
+      dispatch({ type: 'currentToken', payload: {index:0}});
+    }
     dispatch({ type: 'account/nft/remove', payload: {id:tokenid}});
-    return props.alert("You were successful!", "Your NFT has been wrapped!");
   };
   const nftAction = (tokenid, memo) => {
     //Submit to blockchain here
@@ -154,7 +165,7 @@ export default function NFTList(props) {
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
     
-    props.loader(true);
+    props.loader(true, "Processing NFT action...");
     //hot api, will sign as identity - BE CAREFUL
     extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(async r => {
       if (r !== false) {
@@ -162,6 +173,7 @@ export default function NFTList(props) {
         var el = document.getElementById("img-"+tokenid);     
         el.src = el.src+"?t=" + new Date().getTime(); 
         //Update here
+        props.loader(true, "Updating tokens...");
         await props.searchCollections();
         return props.alert("You were successful!", "You completed an advanced NFT action!");
       } else {        
@@ -194,7 +206,9 @@ export default function NFTList(props) {
   };
   const deleteNft = (id) => {
     props.confirm("Please confirm", "You are about to remove this NFT from your account? This does not affect the ownership of the NFT, and you can add it back again in future").then(v => {
-      if (v) dispatch({ type: 'account/nft/remove', payload: {id:id}});
+      if (v) {
+        _removeNft(id);
+      }
     });
   };
   const getTokenDetails = (id, refresh) => {

@@ -29,7 +29,9 @@ import Transactions from '../components/Transactions';
 import NFTList from '../components/NFTList';
 import MainFab from '../components/MainFab';
 import InputForm from '../components/InputForm';
+import RefreshIcon from '@material-ui/icons/Refresh';
 import AddTokenForm from '../components/AddTokenForm';
+import Chip from '@material-ui/core/Chip';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal} from '../ic/utils.js';
@@ -136,6 +138,9 @@ function AccountDetail(props) {
   const removeToken = (i) => {
     dispatch({ type: 'deleteToken'});
   }
+  const gotomain = () => {
+    dispatch({ type: 'currentAccount', payload: {index:0}});
+  }
   const changeToken = (i) => {
     dispatch({ type: 'currentToken', payload: {index:i}});
   }
@@ -232,11 +237,14 @@ function AccountDetail(props) {
   };
   return (
     <div style={styles.root}>
-      <Alert severity="warning">If some of your NFTs are missing from your list then please use this to load your tokens <Button onClick={refreshTokens} variant="contained" size={"small"} color={"primary"}>Load Tokens</Button></Alert>
+      {currentAccount === 0 ?
+      <Alert severity="error">If you want to receive <strong>ICPunks</strong> (or other tokens that don't support addresses), then please ensure you are sending to the <Chip color={"primary"} size="small" label="Principal ID" /></Alert> : ""}
+      {currentAccount !== 0 ?
+      <Alert severity="error">If you want to receive <strong>ICPunks</strong> (or other tokens that don't support addresses) then please switch to your Main account.</Alert> : ""}
       <List>
         <ListItem>
           <ListItemAvatar>
-            <Avatar style={{width:60, height:60}}>
+            <Avatar style={{width:110, height:110}}>
               <Blockie address={account.address} />
             </Avatar>
           </ListItemAvatar>
@@ -246,21 +254,39 @@ function AccountDetail(props) {
             secondaryTypographyProps={{noWrap:true, variant:'subtitle1'}} 
             primary={account.name}
             secondary={
-              <div style={{overflow: "hidden", textOverflow: "ellipsis"}}> 
-                {account.address.substr(0, 22)+"..."}
-                <SnackbarButton
-                  message="Address Copied"
-                  anchorOrigin={{
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  }}
-                  onClick={() => clipboardCopy(account.address)}
-                >
-                  <IconButton size="small" edge="end" aria-label="copy">
-                    <FileCopyIcon style={{ fontSize: 18 }} />
-                  </IconButton>
-                </SnackbarButton>
-              </div>
+              <>
+                <div style={{overflow: "hidden", textOverflow: "ellipsis", fontSize:"0.9em"}}>
+                  <Chip color={"secondary"} style={{fontSize:"0.9em"}} size="small" label="Address" /> {account.address.substr(0, 29)+"..."}
+                  <SnackbarButton
+                    message="Address Copied"
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    }}
+                    onClick={() => clipboardCopy(account.address)}
+                  >
+                    <IconButton size="small" edge="end" aria-label="copy">
+                      <FileCopyIcon style={{ fontSize: 18 }} />
+                    </IconButton>
+                  </SnackbarButton>
+                </div>
+                {currentAccount === 0 ?
+                <div style={{overflow: "hidden", textOverflow: "ellipsis", fontSize:"0.9em", marginTop:"2px"}}>
+                  <Chip color={"primary"} style={{fontSize:"0.9em"}} size="small" label="Principal ID" /> {principal.substr(0, 32)+"..."}
+                  <SnackbarButton
+                    message="Principal ID Copied"
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    }}
+                    onClick={() => clipboardCopy(principal)}
+                  >
+                    <IconButton size="small" edge="end" aria-label="copy">
+                      <FileCopyIcon style={{ fontSize: 18 }} />
+                    </IconButton>
+                  </SnackbarButton>
+                </div> : ""}
+              </>
             }              />
           <ListItemSecondaryAction>
             <InputForm
@@ -306,6 +332,11 @@ function AccountDetail(props) {
                 </Fab>
               </Tooltip>
             </AddTokenForm>
+            <Tooltip title="Reload">
+              <Fab onClick={refreshTokens} style={{marginLeft:10}} color="primary" aria-label="add">
+                <RefreshIcon />
+              </Fab>
+            </Tooltip>
           </Grid>
         </Grid>
       </div>

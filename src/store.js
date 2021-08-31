@@ -77,9 +77,9 @@ function initDb(_db){
       return true;
     });
     appData.addresses = db[1];
-    appData.currentPrincipal = db[2][0];
-    appData.currentAccount = db[2][1];
-    appData.currentToken = db[2][2];
+    appData.currentPrincipal = db[2][0] ?? 0;
+    appData.currentAccount = db[2][1] ?? 0;
+    appData.currentToken = db[2][2] ?? 0;
     
     if (savenow) saveDb(appData);
     return appData;
@@ -352,7 +352,7 @@ function rootReducer(state = initDb(), action) {
     case "currentToken":
       return saveDb({
         ...state,
-        currentToken : action.payload.index
+        currentToken : action.payload.index ?? 0
       });
     case "account/edit":
       return saveDb({
