@@ -181,7 +181,6 @@ function AccountDetail(props) {
     });
   };
   const searchCollections = async (nftonly) => {
-    console.log("SEARCHING");
     var trustedCanisters = CANISTERS.TRUSTED;
     if (nftonly) trustedCanisters  = CANISTERS.NFT_AUTOSEARCH;
     var ps = [];

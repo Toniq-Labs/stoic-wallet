@@ -26,8 +26,8 @@ import SnackbarButton from '../components/SnackbarButton';
 import Pagination from '@material-ui/lab/Pagination';
 import SendNFTForm from '../components/SendNFTForm';
 import ListingForm from '../components/ListingForm';
-import SettingsSystemDaydreamIcon from '@material-ui/icons/SettingsSystemDaydream';
-import CloudIcon from '@material-ui/icons/Cloud';
+import LockIcon from '@material-ui/icons/Lock';
+import LockOpenIcon from '@material-ui/icons/LockOpen';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {toHexString} from '../ic/utils.js';
@@ -412,7 +412,7 @@ export default function NFTList(props) {
                               <Divider key={0} />,
                               <MenuItem key={1} onClick={() => {handleClose(); unwrapNft(nft.id)}}>
                                 <ListItemIcon>
-                                  <CloudIcon fontSize="small" />
+                                  <LockOpenIcon fontSize="small" />
                                 </ListItemIcon>
                                 <Typography variant="inherit">Unwrap NFT</Typography>
                               </MenuItem>
@@ -422,7 +422,7 @@ export default function NFTList(props) {
                               <Divider key={0} />,
                               <MenuItem key={1} onClick={() => {handleClose(); wrapNft(nft.id)}}>
                                 <ListItemIcon>
-                                  <SettingsSystemDaydreamIcon fontSize="small" />
+                                  <LockIcon fontSize="small" />
                                 </ListItemIcon>
                                 <Typography variant="inherit">Wrap NFT</Typography>
                               </MenuItem>
