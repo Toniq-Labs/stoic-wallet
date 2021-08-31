@@ -26,6 +26,8 @@ import SnackbarButton from '../components/SnackbarButton';
 import Pagination from '@material-ui/lab/Pagination';
 import SendNFTForm from '../components/SendNFTForm';
 import ListingForm from '../components/ListingForm';
+import SettingsSystemDaydreamIcon from '@material-ui/icons/SettingsSystemDaydream';
+import CloudIcon from '@material-ui/icons/Cloud';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {toHexString} from '../ic/utils.js';
@@ -41,6 +43,9 @@ const nftMap = {
   "gevsk-tqaaa-aaaah-qaoca-cai" : "ICmojis",
   "owuqd-dyaaa-aaaah-qapxq-cai" : "ICPuzzle",
   "nbg4r-saaaa-aaaah-qap7a-cai" : "Starverse",
+  "qcg3w-tyaaa-aaaah-qakea-cai" : "ICPunks",
+  "jzg5e-giaaa-aaaah-qaqda-cai" : "ICFakes",
+  "bxdf4-baaaa-aaaah-qaruq-cai" : "Wrapped ICPunks",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
@@ -49,6 +54,7 @@ const allowedForMarket = [
   "gevsk-tqaaa-aaaah-qaoca-cai",
   "owuqd-dyaaa-aaaah-qapxq-cai",
   "nbg4r-saaaa-aaaah-qap7a-cai",
+  "bxdf4-baaaa-aaaah-qaruq-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
@@ -100,6 +106,39 @@ export default function NFTList(props) {
     table: {
       minWidth: 650,
     },
+  };
+  const unwrapNft = async (tokenid) => {
+    //Load signing ID
+    const id = StoicIdentity.getIdentity(identity.principal);
+    if (!id) return error("Something wrong with your wallet, try logging in again");
+    props.loader(true);
+    //hot api, will sign as identity - BE CAREFUL
+    var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").unwrap(tokenid, [extjs.toSubaccount(currentAccount ?? 0)]);
+    if (!r) return error("There was an error!");
+    await props.searchCollections(true);
+    props.loader(false);
+    dispatch({ type: 'account/nft/remove', payload: {id:tokenid}});
+    return props.alert("You were successful!", "Your NFT has been unwrapped! Unwrapped NFTs will usually appear in your Main account");    
+  };
+  const wrapNft = async (tokenid) => {
+    //Load signing ID
+    const id = StoicIdentity.getIdentity(identity.principal);
+    if (!id) return error("Something wrong with your wallet, try logging in again");
+    props.loader(true);
+    //hot api, will sign as identity - BE CAREFUL
+    var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").wrap(tokenid);
+    if (!r) return error("There was an error!");
+    console.log("Wrapper made");
+    var r2 = await extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(identity.principal, currentAccount, "bxdf4-baaaa-aaaah-qaruq-cai", BigInt(1), BigInt(0), "00", false);
+    if (!r2) return error("There was an error!");
+    console.log("NFT Sent");
+    var r3 = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").mint(tokenid);
+    if (!r) return error("There was an error!");
+    console.log("Wrapper minted");
+    await props.searchCollections(true);
+    props.loader(false);
+    dispatch({ type: 'account/nft/remove', payload: {id:tokenid}});
+    return props.alert("You were successful!", "Your NFT has been wrapped!");
   };
   const nftAction = (tokenid, memo) => {
     //Submit to blockchain here
@@ -175,11 +214,29 @@ export default function NFTList(props) {
   const error = (e) => {
     props.error(e);
   }
+  const getMintNumber = nft => {
+    if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return nft.index;
+    else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return nft.index;
+    else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return nft.index;
+    else return nft.index+1;
+  }
+  const getNftImg = nft => {
+    if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
+    else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
+    else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
+    else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
+  }
+  const getNftLink = nft => {
+    if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
+    else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
+    else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
+    else return "https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id;
+  }
   const wearableMap = ["accessories","hats","eyewear","pets"];
   React.useEffect(() => {
     var _nfts = [];
-    var collectCollections = false;
-    if (collections == false) collectCollections = true;
+    var collectCollections = true;
+    //if (collections == false) collectCollections = true;
     var _collections = [];
     var index = 0;
     account.nfts.forEach((nft) => {
@@ -193,7 +250,7 @@ export default function NFTList(props) {
         id : nft.id,
         index : dec.index,
         canister : dec.canister,
-        metadata : toHexString(nft.metadata.metadata[0]),
+        metadata : (nft.metadata.metadata[0].length ? toHexString(nft.metadata.metadata[0]) : (nft.metadata.metadata.length > 1 ? JSON.stringify(nft.metadata.metadata[1]) : "NO DATA")),
         price : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
         bearer : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
         allowedToList : allowedForMarket.indexOf(dec.canister) >= 0,
@@ -212,11 +269,38 @@ export default function NFTList(props) {
     setNfts(_nfts);
     if (collectCollections) setCollections(_collections);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wearableFilter,page, currentAccount, account.nfts, tokenDetails, collection]);
+  }, [wearableFilter, page, currentAccount, account.nfts, tokenDetails, collection]);
 
 
   return (
     <>
+      <FormControl style={{marginRight:20}}>
+      <InputLabel>Collections</InputLabel>
+      <Select
+        value={collection}
+        onChange={changeCollection}
+      >
+      <MenuItem value={false}>All Collections</MenuItem>
+      {collections.map(col => {
+        return (<MenuItem key={col} value={col}>{nftMap.hasOwnProperty(col) ? nftMap[col] : col}</MenuItem>)
+      })}
+      </Select>
+      </FormControl>
+      {collection === "tde7l-3qaaa-aaaah-qansa-cai" ? 
+      <FormControl style={{minWidth:120}}>
+        <InputLabel>Wearable Type</InputLabel>
+        <Select
+          value={wearableFilter}
+          onChange={changeWearableFilter}
+        >
+          <MenuItem value={"all"}>All Wearables</MenuItem>
+          <MenuItem value={"pets"}>Pets</MenuItem>
+          <MenuItem value={"accessories"}>Accessories/Flags</MenuItem>
+          <MenuItem value={"hats"}>Hats/Hair</MenuItem>
+          <MenuItem value={"eyewear"}>Eyewear</MenuItem>
+        </Select>
+      </FormControl> : "" }
+      <span style={{marginLeft:20,lineHeight:"50px"}}>Showing {nfts.length}</span>
       {nfts.length === 0 ?
       <div style={styles.empty}>
         <Typography paragraph style={{paddingTop:20,fontWeight:"bold"}} align="center">
@@ -224,33 +308,6 @@ export default function NFTList(props) {
         </Typography>
       </div> :
       <>
-        <FormControl style={{marginRight:20}}>
-          <InputLabel>Collections</InputLabel>
-          <Select
-            value={collection}
-            onChange={changeCollection}
-          >
-          <MenuItem value={false}>All Collections</MenuItem>
-          {collections.map(col => {
-            return (<MenuItem key={col} value={col}>{nftMap.hasOwnProperty(col) ? nftMap[col] : col}</MenuItem>)
-          })}
-          </Select>
-        </FormControl>
-        {collection === "tde7l-3qaaa-aaaah-qansa-cai" ? 
-          <FormControl style={{minWidth:120}}>
-            <InputLabel>Wearable Type</InputLabel>
-            <Select
-              value={wearableFilter}
-              onChange={changeWearableFilter}
-            >
-              <MenuItem value={"all"}>All Wearables</MenuItem>
-              <MenuItem value={"pets"}>Pets</MenuItem>
-              <MenuItem value={"accessories"}>Accessories/Flags</MenuItem>
-              <MenuItem value={"hats"}>Hats/Hair</MenuItem>
-              <MenuItem value={"eyewear"}>Eyewear</MenuItem>
-            </Select>
-          </FormControl> : "" }
-         <span style={{marginLeft:20,lineHeight:"50px"}}>Showing {nfts.length}</span>
         {nfts.length > perPage ?
         <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(nfts.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
         : ""}
@@ -271,7 +328,7 @@ export default function NFTList(props) {
             <TableBody>
               {nfts.filter((nft,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((nft, i) => {
                 return (<TableRow key={nft.id}>
-                  <TableCell style={{fontWeight:'bold'}}>{nft.index+1}</TableCell>
+                  <TableCell style={{fontWeight:'bold'}}>{getMintNumber(nft)}</TableCell>
                   <TableCell style={{fontWeight:'bold'}}>
                     {compressAddress(nft.id)}
                     <SnackbarButton
@@ -288,7 +345,7 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    <a href={"https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={"https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id} style={{width:64}} /></a>
+                    <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a>
                   </TableCell>
                   <TableCell>
                     
@@ -317,7 +374,7 @@ export default function NFTList(props) {
                     {nft.listing !== false ?
                       <>{nft.bearer === account.address ?
                         <strong>{nft.listingText}</strong> :
-                        <Tooltip title="This NFT was either sold via the marketplace, or was not removed after sending. In some cases, this may be here in error from previous versions of StoicWallet"><strong>SOLD<span style={{color:"red"}}>*</span></strong></Tooltip>
+                        <Tooltip title="This NFT was either sold via the marketplace, or was not removed after sending. In some cases, this may be here in error from previous versions of StoicWallet"><strong>Not Owned<span style={{color:"red"}}>*</span></strong></Tooltip>
                       }</> :
                       <strong>Loading...</strong> 
                     }
@@ -350,6 +407,26 @@ export default function NFTList(props) {
                               </ListItemIcon>
                               <Typography variant="inherit">Manage Listing</Typography>
                             </MenuItem> : ""}
+                            {["bxdf4-baaaa-aaaah-qaruq-cai"].indexOf(nft.canister) >= 0 ?
+                            ([
+                              <Divider key={0} />,
+                              <MenuItem key={1} onClick={() => {handleClose(); unwrapNft(nft.id)}}>
+                                <ListItemIcon>
+                                  <CloudIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Unwrap NFT</Typography>
+                              </MenuItem>
+                            ]): ""}
+                            {["qcg3w-tyaaa-aaaah-qakea-cai","jzg5e-giaaa-aaaah-qaqda-cai"].indexOf(nft.canister) >= 0 ?
+                            ([
+                              <Divider key={0} />,
+                              <MenuItem key={1} onClick={() => {handleClose(); wrapNft(nft.id)}}>
+                                <ListItemIcon>
+                                  <SettingsSystemDaydreamIcon fontSize="small" />
+                                </ListItemIcon>
+                                <Typography variant="inherit">Wrap NFT</Typography>
+                              </MenuItem>
+                            ]): ""}
                             {nft.canister === "e3izy-jiaaa-aaaah-qacbq-cai" ?
                             ([
                               <Divider key={0} />,

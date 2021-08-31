@@ -34,8 +34,25 @@ import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal} from '../ic/utils.js';
 import { clipboardCopy } from '../utils';
+import CANISTERS from '../ic/canisters.js';
+function useInterval(callback, delay) {
+  const savedCallback = React.useRef();
+  // Remember the latest callback.
+  React.useEffect(() => {
+    savedCallback.current = callback;
+  }, [callback]);
 
-
+  // Set up the interval.
+  React.useEffect(() => {
+    function tick() {
+      savedCallback.current();
+    }
+    if (delay !== null) {
+      let id = setInterval(tick, delay);
+      return () => clearInterval(id);
+    }
+  }, [delay]);
+}
 const api = extjs.connect("https://boundary.ic0.app/");
 function AccountDetail(props) {
   const currentToken = useSelector(state => state.currentToken);
@@ -93,10 +110,11 @@ function AccountDetail(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
+    searchCollections(true)
     setTokens(account.tokens);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentToken, currentAccount, currentPrincipal]);
-  
+  useInterval(() => searchCollections(true), 10 *1000);
   const theme = useTheme();
   const styles = {
     root : {
@@ -126,6 +144,7 @@ function AccountDetail(props) {
     if (name.length > 20) return error("Max length or account names is 20 characters");
     dispatch({ type: 'account/edit', payload: {name:name}});
   };
+  var ignoreOwnership = false;
   const _addToken = (cid, checkBearer) => {
     return new Promise(function(resolve, reject) { 
       api.token(cid).getMetadata().then(md => {
@@ -142,7 +161,7 @@ function AccountDetail(props) {
           };
           if (checkBearer) {
             api.token(cid).getBearer().then(b => {
-              if (b === account.address) {
+              if (b === account.address || ignoreOwnership) {
                 dispatch({ type: 'account/nft/add', payload: {
                   nft : nft
                 }});
@@ -152,28 +171,29 @@ function AccountDetail(props) {
               };
             }).catch(reject);
           } else {
-          dispatch({ type: 'account/nft/add', payload: {
-            nft : nft
-          }});
-          resolve("nft");
+            dispatch({ type: 'account/nft/add', payload: {
+              nft : nft
+            }});
+            resolve("nft");
           }
         }
       }).catch(reject);
     });
   };
   const searchCollections = async (nftonly) => {
-    var trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai", "e3izy-jiaaa-aaaah-qacbq-cai", "kxh4l-cyaaa-aaaah-qadaq-cai", "tde7l-3qaaa-aaaah-qansa-cai", "gevsk-tqaaa-aaaah-qaoca-cai", "owuqd-dyaaa-aaaah-qapxq-cai", "nbg4r-saaaa-aaaah-qap7a-cai"];
-    if (nftonly) trustedCanisters  = ["e3izy-jiaaa-aaaah-qacbq-cai", "uzhxd-ziaaa-aaaah-qanaq-cai", "tde7l-3qaaa-aaaah-qansa-cai", "gevsk-tqaaa-aaaah-qaoca-cai", "owuqd-dyaaa-aaaah-qapxq-cai", "nbg4r-saaaa-aaaah-qap7a-cai"];
+    console.log("SEARCHING");
+    var trustedCanisters = CANISTERS.TRUSTED;
+    if (nftonly) trustedCanisters  = CANISTERS.NFT_AUTOSEARCH;
     var ps = [];
     for(var i = 0; i < trustedCanisters.length; i++) {
-      ps.push(api.token(trustedCanisters[i]).getTokens(account.address).then(async tokens => {
-        return Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
+      ps.push(api.token(trustedCanisters[i]).getTokens(account.address, principal).then(async found => {
+        return Promise.all(found.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
           return _addToken(ct, false);
         }));
       }));
     };
     await Promise.all(ps.map(p => p.catch(e => e)));
-    dispatch({ type: 'currentToken', payload: {index:"nft"}});
+    if (!nftonly) dispatch({ type: 'currentToken', payload: {index:"nft"}});
     return true;
   };
   const refreshTokens = async () => {
@@ -194,7 +214,7 @@ function AccountDetail(props) {
     } else if (type === 'find') {
       if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
       props.loader(true);
-      api.token(cid).getTokens(account.address).then(async tokens => {
+      api.token(cid).getTokens(account.address, principal).then(async tokens => {
         await Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
           return _addToken(ct, false);
         }));

@@ -432,6 +432,7 @@ function rootReducer(state = initDb(), action) {
               ...principal,
               accounts : principal.accounts.map((account,ii) => {
                 if (ii === state.currentAccount) {
+                  if (account.nfts.findIndex(x => x.id === action.payload.nft.id) >= 0) return account;
                   return {
                     ...account,
                     nfts : [...account.nfts, action.payload.nft]

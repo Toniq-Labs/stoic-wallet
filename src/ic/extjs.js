@@ -1,6 +1,6 @@
 /* global BigInt */
 import { Actor, HttpAgent, Principal } from "@dfinity/agent";  
-import { LEDGER_CANISTER_ID, GOVERNANCE_CANISTER_ID, NNS_CANISTER_ID, CYCLES_MINTING_CANISTER_ID, getCyclesTopupSubAccount, rosettaApi, principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString } from "./utils.js";
+import { LEDGER_CANISTER_ID, GOVERNANCE_CANISTER_ID, NNS_CANISTER_ID, CYCLES_MINTING_CANISTER_ID, getCyclesTopupSubAccount, rosettaApi, principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString, validatePrincipal } from "./utils.js";
 
 import ledgerIDL from './candid/ledger.did.js';
 import governanceIDL from './candid/governance.did.js';
@@ -9,6 +9,7 @@ import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import icpunksIDL from './candid/icpunks.did.js'; //hardcode to icpunks...
 import extIDL from './candid/ext.did.js';
 import advancedIDL from './candid/advanced.did.js';
+import wrapperIDL from './candid/wrapper.did.js';
 //import cronicsIDL from './candid/cronics.did.js';
 
 const constructUser = (u) => {
@@ -54,6 +55,7 @@ const _preloadedIdls = {
   'nns' : nnsIDL,
   'ext' : extIDL,
   'default' : extIDL,
+  'wrapper' : wrapperIDL,
 };
 
 class ExtConnection {
@@ -64,6 +66,8 @@ class ExtConnection {
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
     "qcg3w-tyaaa-aaaah-qakea-cai" : _preloadedIdls['icpunks'],
+    "jzg5e-giaaa-aaaah-qaqda-cai" : _preloadedIdls['icpunks'],
+    "bxdf4-baaaa-aaaah-qaruq-cai" : _preloadedIdls['wrapper'],
     "kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
   };
   _metadata = {
@@ -154,9 +158,10 @@ class ExtConnection {
       getTokens : (aid, principal) => {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
+          case "jzg5e-giaaa-aaaah-qaqda-cai":
             return new Promise((resolve, reject) => {
               api.user_tokens(Principal.fromText(principal)).then(r => {
-                resolve(r.ok.map(x => tokenIdentifier(tokenObj.canister, x)));
+                resolve(r.map(x => tokenIdentifier(tokenObj.canister, Number(x))));
               });
             });
           break;
@@ -182,10 +187,16 @@ class ExtConnection {
       getMetadata : () => {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
+          case "jzg5e-giaaa-aaaah-qaqda-cai":
             return new Promise((resolve, reject) => {
               api.data_of(tokenObj.index).then(r => {
                 resolve({
-                  metadata : r,
+                  metadata : [[],{
+                    name : r.name,
+                    desc : r.desc,
+                    properties : r.properties,
+                    url : r.url,
+                  }],
                   type : 'nonfungible'
                 });
               });
@@ -229,6 +240,7 @@ class ExtConnection {
       getBearer : () => {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
+          case "jzg5e-giaaa-aaaah-qaqda-cai":
             return new Promise((resolve, reject) => {
               api.owner_of(tokenObj.index).then(r => {
                 resolve(principalToAccountIdentifier(r.toText(), 0));
@@ -249,9 +261,10 @@ class ExtConnection {
       getDetails : () => {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
+          case "jzg5e-giaaa-aaaah-qaqda-cai":
             return new Promise((resolve, reject) => {
               api.owner_of(tokenObj.index).then(r => {
-                resolve([principalToAccountIdentifier(r.toText(), 0), null]);
+                resolve([principalToAccountIdentifier(r.toText(), 0), []]);
               });
             });
           break;
@@ -276,6 +289,7 @@ class ExtConnection {
               });
             break;
             case "qcg3w-tyaaa-aaaah-qakea-cai":
+            case "jzg5e-giaaa-aaaah-qaqda-cai":
               //ICPUNKS TODO?
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
@@ -349,6 +363,7 @@ class ExtConnection {
             case LEDGER_CANISTER_ID:
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
             case "qcg3w-tyaaa-aaaah-qakea-cai":
+            case "jzg5e-giaaa-aaaah-qaqda-cai":
               reject("Not supported");
             break;
             default:
@@ -387,7 +402,16 @@ class ExtConnection {
               //Notify here
             break;
             case "qcg3w-tyaaa-aaaah-qakea-cai":
-              //ICPUNKS TODO
+            case "jzg5e-giaaa-aaaah-qaqda-cai":
+              if (!validatePrincipal(to_user)) reject("ICPunks does no support traditional addresses, you must use a Principal");
+              api.transfer_to(Principal.fromText(to_user), tokenObj.index).then(b => {
+                if (b) {          
+                  resolve(true);
+                } else {
+                  reject("Something went wrong");
+                }
+              }).catch(reject);
+            break;
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
               args = {
@@ -475,6 +499,7 @@ const extjs = {
   connect : (host, identity) => new ExtConnection(host ?? "https://boundary.ic0.app/", identity),
   decodeTokenId : decodeTokenId,
   encodeTokenId : tokenIdentifier,
+  toSubaccount : getSubAccountArray,
   toAddress : principalToAccountIdentifier,
 };
 export default extjs;
