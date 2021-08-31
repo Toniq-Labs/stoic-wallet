@@ -124,7 +124,7 @@ export default function NFTList(props) {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
-    props.loader(true, "Creating wrapper...this may take a minute");
+    props.loader(true, "Creating wrapper...this may take a few minutes");
     //hot api, will sign as identity - BE CAREFUL
     try{
       var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").wrap(tokenid);

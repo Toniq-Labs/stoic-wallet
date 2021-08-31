@@ -29,6 +29,11 @@ const collections = [
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
   },
   {
+    canister : "bxdf4-baaaa-aaaah-qaruq-cai",
+    name : "Wrapped ICPunks",
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+  },
+  {
     canister : "uzhxd-ziaaa-aaaah-qanaq-cai",
     name : "ICP News",
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
