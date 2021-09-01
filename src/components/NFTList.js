@@ -273,7 +273,8 @@ export default function NFTList(props) {
         listingText : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? 
           "Loading..." : 
           (tokenDetails[nft.id][1].length === 0 ? 
-            (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : "Not listed") : 
+            (dec.canister == "qcg3w-tyaaa-aaaah-qakea-cai" ? "Wrap First" :
+              (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : "Not listed")) : 
             (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
               "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
               "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
