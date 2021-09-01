@@ -226,6 +226,7 @@ export default function NFTList(props) {
     }
   };
   const error = (e) => {
+    props.loader(false);
     props.error(e);
   }
   const getMintNumber = nft => {
