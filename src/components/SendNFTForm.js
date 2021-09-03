@@ -6,6 +6,7 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
+import Alert from '@material-ui/lab/Alert';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Autocomplete from '@material-ui/lab/Autocomplete';
 import extjs from '../ic/extjs.js';
@@ -103,7 +104,10 @@ export default function SendNFTForm(props) {
         <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Send NFT</DialogTitle>
         {step === 0 ?
           <DialogContent>
-            <DialogContentText style={{textAlign:'center',fontWeight:'bold'}}>Please enter the recipient address and amount that you wish to send below.</DialogContentText>
+          { props.nft && extjs.decodeTokenId(props.nft).canister === "bxdf4-baaaa-aaaah-qaruq-cai" ?
+          <Alert severity="error">It looks like you are sending a <strong>Wrapped ICPunk</strong> - please note that Plug wallet does not support Wrapped ICPunks. Please unwrap it first if this is the case.</Alert> : "" }
+            <DialogContentText style={{textAlign:'center',fontWeight:'bold', marginTop:10}}>
+            Please enter the recipient address and amount that you wish to send below.</DialogContentText>
               <Autocomplete
                 freeSolo
                 value={toOption}
