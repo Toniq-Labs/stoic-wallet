@@ -185,12 +185,12 @@ export default function NFTList(props) {
       props.loader(false);
     });
   };
-  const sendNft = (id) => {
-    setTokenNFT(id);
+  const sendNft = (nft) => {
+    setTokenNFT(nft);
     setOpenNFTForm(true);
   }
-  const listNft = (id) => {
-    setTokenNFT(id);
+  const listNft = (nft) => {
+    setTokenNFT(nft);
     setOpenListingForm(true);
   }
   const closeNFTForm = () => {
@@ -410,7 +410,7 @@ export default function NFTList(props) {
                             open={(anchorEl !== null && anchorEl.id === nft.id)}
                             onClose={handleClose}
                           >
-                            <MenuItem onClick={() => {handleClose(); sendNft(nft.id)}}>
+                            <MenuItem onClick={() => {handleClose(); sendNft(nft)}}>
                               <ListItemIcon>
                                 <SendIcon fontSize="small" />
                               </ListItemIcon>

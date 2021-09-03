@@ -24,6 +24,7 @@ export default function SendNFTForm(props) {
 
   const [to, setTo] = React.useState('');
   const [toOption, setToOption] = React.useState('');
+  const [canister, setCanister] = React.useState('');
     
   const [contacts, setContacts] = React.useState([]);
   
@@ -53,10 +54,10 @@ export default function SendNFTForm(props) {
     handleClose();
     
     //hot api, will sign as identity - BE CAREFUL
-    extjs.connect("https://boundary.ic0.app/", id).token(props.nft).transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(r => {
+    extjs.connect("https://boundary.ic0.app/", id).token(props.nft.id).transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(r => {
       if (r !== false) {
         if (r > 0n) {
-          dispatch({ type: 'account/nft/remove', payload: {id:props.nft}});
+          dispatch({ type: 'account/nft/remove', payload: {id:props.nft.id}});
           return props.alert("Transaction complete", "Your transfer was sent successfully");
         } else { 
           return props.alert("You were successful!", "You completed an advanced NFT action!");
@@ -77,6 +78,8 @@ export default function SendNFTForm(props) {
     props.close()
   };
   React.useEffect(() => {
+    if (props.nft) setCanister(extjs.decodeTokenId(props.nft.id).canister);
+    else setCanister("");
     var contacts = [];
     addresses.forEach(el => {
       contacts.push({
@@ -104,7 +107,7 @@ export default function SendNFTForm(props) {
         <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Send NFT</DialogTitle>
         {step === 0 ?
           <DialogContent>
-          { props.nft && extjs.decodeTokenId(props.nft).canister === "bxdf4-baaaa-aaaah-qaruq-cai" ?
+          { canister  === "bxdf4-baaaa-aaaah-qaruq-cai" ?
           <Alert severity="error">It looks like you are sending a <strong>Wrapped ICPunk</strong> - please note that Plug wallet does not support Wrapped ICPunks. Please unwrap it first if this is the case.</Alert> : "" }
             <DialogContentText style={{textAlign:'center',fontWeight:'bold', marginTop:10}}>
             Please enter the recipient address and amount that you wish to send below.</DialogContentText>
@@ -140,7 +143,7 @@ export default function SendNFTForm(props) {
           <DialogContent>
             <DialogContentText style={{textAlign:'center'}}>
             Please confirm that you are about to send NFT <br />
-            <strong style={{color:'red'}}>{props.nft}</strong><br /> 
+            <strong style={{color:'red'}}>{props.nft.id}</strong><br /> 
             to <strong style={{color:'red'}}>{compressAddress(to)}</strong>
             </DialogContentText>
             <DialogContentText style={{textAlign:'center'}}>
