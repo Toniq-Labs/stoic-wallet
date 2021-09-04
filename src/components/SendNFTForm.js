@@ -108,7 +108,7 @@ export default function SendNFTForm(props) {
         {step === 0 ?
           <DialogContent>
           { canister  === "bxdf4-baaaa-aaaah-qaruq-cai" ?
-          <Alert severity="error">It looks like you are sending a <strong>Wrapped ICPunk</strong> - please note that Plug wallet does not support Wrapped ICPunks. Please unwrap it first if this is the case.</Alert> : "" }
+          <Alert severity="error">It looks like you are sending a <strong>Wrapped ICPunk</strong> - please note that some wallets (like Plug wallet) do not support Wrapped ICPunks. Please unwrap it first if this is the case.</Alert> : "" }
             <DialogContentText style={{textAlign:'center',fontWeight:'bold', marginTop:10}}>
             Please enter the recipient address and amount that you wish to send below.</DialogContentText>
               <Autocomplete
