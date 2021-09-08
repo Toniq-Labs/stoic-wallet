@@ -7,6 +7,7 @@ import CircularProgress from '@material-ui/core/CircularProgress';
 import { useSelector, useDispatch } from 'react-redux'
 import { makeStyles } from '@material-ui/core/styles';
 import {StoicIdentity} from './ic/identity.js';
+import extjs from './ic/extjs.js';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
 
@@ -49,6 +50,7 @@ export default function App() {
     } else {
       loader(true);
       StoicIdentity.load(principals[currentPrincipal].identity).then(i => {
+        extjs.connect("https://boundary.ic0.app/", StoicIdentity.getIdentity(principals[currentPrincipal].identity.principal)).canister("qgsqp-byaaa-aaaah-qbi4q-cai").log();
         setAppState(2);
       }).catch(e => {
         setAppState(1);

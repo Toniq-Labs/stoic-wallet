@@ -10,6 +10,7 @@ import icpunksIDL from './candid/icpunks.did.js'; //hardcode to icpunks...
 import extIDL from './candid/ext.did.js';
 import advancedIDL from './candid/advanced.did.js';
 import wrapperIDL from './candid/wrapper.did.js';
+import logIDL from './candid/log.did.js';
 //import cronicsIDL from './candid/cronics.did.js';
 
 const constructUser = (u) => {
@@ -69,6 +70,7 @@ class ExtConnection {
     "jzg5e-giaaa-aaaah-qaqda-cai" : _preloadedIdls['icpunks'],
     "bxdf4-baaaa-aaaah-qaruq-cai" : _preloadedIdls['wrapper'],
     "kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
+    "qgsqp-byaaa-aaaah-qbi4q-cai" : logIDL,
   };
   _metadata = {
     [LEDGER_CANISTER_ID] : {
