@@ -25,7 +25,7 @@ export default function ListingForm(props) {
   }
   const save = () => {
     if (price < 0.01) return error("Min sale amount is 0.01 ICP"); 
-    _submit(BigInt(price*(10**8)));
+    _submit(BigInt(Math.floor(price*(10**8))));
   };
   const _submit = p => {
     //Submit to blockchain here
