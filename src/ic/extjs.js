@@ -11,6 +11,7 @@ import extIDL from './candid/ext.did.js';
 import advancedIDL from './candid/advanced.did.js';
 import wrapperIDL from './candid/wrapper.did.js';
 import logIDL from './candid/log.did.js';
+import icdripIDL from './candid/icdrip.did.js';
 //import cronicsIDL from './candid/cronics.did.js';
 
 const constructUser = (u) => {
@@ -69,8 +70,10 @@ class ExtConnection {
     "qcg3w-tyaaa-aaaah-qakea-cai" : _preloadedIdls['icpunks'],
     "jzg5e-giaaa-aaaah-qaqda-cai" : _preloadedIdls['icpunks'],
     "bxdf4-baaaa-aaaah-qaruq-cai" : _preloadedIdls['wrapper'],
+    "3db6u-aiaaa-aaaah-qbjbq-cai" : _preloadedIdls['wrapper'],
     "kxh4l-cyaaa-aaaah-qadaq-cai" : advancedIDL,
     "qgsqp-byaaa-aaaah-qbi4q-cai" : logIDL,
+    "d3ttm-qaaaa-aaaai-qam4a-cai" : icdripIDL,
   };
   _metadata = {
     [LEDGER_CANISTER_ID] : {
@@ -171,6 +174,17 @@ class ExtConnection {
               }
             });
           break;
+          case "d3ttm-qaaaa-aaaai-qam4a-cai":
+            return new Promise((resolve, reject) => {
+              if (aid !== principalToAccountIdentifier(principal, 0)) {
+                resolve([]);
+              } else {
+                api.user_tokens(Principal.fromText(principal)).then(r => {
+                  resolve(r.map(x => tokenIdentifier(tokenObj.canister, Number(x))));
+                });
+              }
+            });
+          break;
           default:
             return new Promise((resolve, reject) => {
               if (typeof api.tokens == 'undefined') reject("Not supported");
@@ -203,6 +217,16 @@ class ExtConnection {
                     properties : r.properties,
                     url : r.url,
                   }],
+                  type : 'nonfungible'
+                });
+              });
+            });
+          break;
+          case "d3ttm-qaaaa-aaaai-qam4a-cai":
+            return new Promise((resolve, reject) => {
+              api.get_token_properties(tokenObj.index).then(r => {
+                resolve({
+                  metadata : [[],r],
                   type : 'nonfungible'
                 });
               });
@@ -253,6 +277,14 @@ class ExtConnection {
               });
             });
           break;
+          case "d3ttm-qaaaa-aaaai-qam4a-cai":
+            return new Promise((resolve, reject) => {
+              api.owner_of(tokenObj.index).then(r => {
+                if (r.length > 0) resolve(principalToAccountIdentifier(r[0].toText(), 0));
+                else reject("No such token exists");
+              });
+            });
+          break;
           default:
             return new Promise((resolve, reject) => {
               api.bearer(tokenObj.token).then(r => {
@@ -271,6 +303,14 @@ class ExtConnection {
             return new Promise((resolve, reject) => {
               api.owner_of(tokenObj.index).then(r => {
                 resolve([principalToAccountIdentifier(r.toText(), 0), []]);
+              });
+            });
+          break;
+          case "d3ttm-qaaaa-aaaai-qam4a-cai":
+            return new Promise((resolve, reject) => {
+              api.owner_of(tokenObj.index).then(r => {
+                if (r.length > 0) resolve([principalToAccountIdentifier(r[0].toText(), 0), []]);
+                else reject("No such token exists");
               });
             });
           break;
@@ -293,10 +333,6 @@ class ExtConnection {
               rosettaApi.getAccountBalance(address).then(b => {       
                 resolve(b)
               });
-            break;
-            case "qcg3w-tyaaa-aaaah-qakea-cai":
-            case "jzg5e-giaaa-aaaah-qaqda-cai":
-              //ICPUNKS TODO?
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
               args = {
@@ -368,6 +404,7 @@ class ExtConnection {
           switch(tokenObj.canister) {
             case LEDGER_CANISTER_ID:
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
+            case "d3ttm-qaaaa-aaaai-qam4a-cai":
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
               reject("Not supported");
@@ -410,6 +447,16 @@ class ExtConnection {
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
               if (!validatePrincipal(to_user)) reject("ICPunks does no support traditional addresses, you must use a Principal");
+              api.transfer_to(Principal.fromText(to_user), tokenObj.index).then(b => {
+                if (b) {          
+                  resolve(true);
+                } else {
+                  reject("Something went wrong");
+                }
+              }).catch(reject);
+            break;
+            case "d3ttm-qaaaa-aaaai-qam4a-cai":
+              if (!validatePrincipal(to_user)) reject("IC Drip does no support traditional addresses, you must use a Principal");
               api.transfer_to(Principal.fromText(to_user), tokenObj.index).then(b => {
                 if (b) {          
                   resolve(true);

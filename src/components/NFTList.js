@@ -45,7 +45,9 @@ const nftMap = {
   "nbg4r-saaaa-aaaah-qap7a-cai" : "Starverse",
   "qcg3w-tyaaa-aaaah-qakea-cai" : "ICPunks",
   "jzg5e-giaaa-aaaah-qaqda-cai" : "ICFakes",
+  "d3ttm-qaaaa-aaaai-qam4a-cai" : "IC Drip",
   "bxdf4-baaaa-aaaah-qaruq-cai" : "Wrapped ICPunks",
+  "3db6u-aiaaa-aaaah-qbjbq-cai" : "Wrapped IC Drip",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
@@ -55,6 +57,7 @@ const allowedForMarket = [
   "owuqd-dyaaa-aaaah-qapxq-cai",
   "nbg4r-saaaa-aaaah-qap7a-cai",
   "bxdf4-baaaa-aaaah-qaruq-cai",
+  "3db6u-aiaaa-aaaah-qbjbq-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
@@ -107,33 +110,38 @@ export default function NFTList(props) {
       minWidth: 650,
     },
   };
-  const unwrapNft = async (tokenid) => {
+  var canisterMap = {
+    "qcg3w-tyaaa-aaaah-qakea-cai" : "bxdf4-baaaa-aaaah-qaruq-cai",
+    "d3ttm-qaaaa-aaaai-qam4a-cai" : "3db6u-aiaaa-aaaah-qbjbq-cai",
+  };
+  const unwrapNft = async (tokenid, canister) => {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
     props.loader(true, "Unwrapping NFT...");
     //hot api, will sign as identity - BE CAREFUL
-    var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").unwrap(tokenid, [extjs.toSubaccount(currentAccount ?? 0)]);
+    var r = await extjs.connect("https://boundary.ic0.app/", id).canister(canister).unwrap(tokenid, [extjs.toSubaccount(currentAccount ?? 0)]);
     if (!r) return error("There was an error!");
     await props.searchCollections(true);
     props.loader(false);
     dispatch({ type: 'account/nft/remove', payload: {id:tokenid}});
     return props.alert("You were successful!", "Your NFT has been unwrapped!" + (currentAccount !== 0 ? " Unwrapped NFTs will appear in your Main account" : ""));    
   };
-  const wrapNft = async (tokenid) => {
+  const wrapNft = async (tokenid, canister) => {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
     props.loader(true, "Creating wrapper...this may take a few minutes");
     //hot api, will sign as identity - BE CAREFUL
+    
     try{
-      var r = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").wrap(tokenid);
+      var r = await extjs.connect("https://boundary.ic0.app/", id).canister(canisterMap[canister]).wrap(tokenid);
       if (!r) return error("There was an error wrapping this NFT!");
       props.loader(true, "Sending NFT to wrapper...");
-      var r2 = await extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(identity.principal, currentAccount, "bxdf4-baaaa-aaaah-qaruq-cai", BigInt(1), BigInt(0), "00", false);
+      var r2 = await extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(identity.principal, currentAccount, canisterMap[canister], BigInt(1), BigInt(0), "00", false);
       if (!r2) return error("There was an error wrapping this NFT!");
       props.loader(true, "Wrapping NFT...");
-      var r3 = await extjs.connect("https://boundary.ic0.app/", id).canister("bxdf4-baaaa-aaaah-qaruq-cai").mint(tokenid);
+      var r3 = await extjs.connect("https://boundary.ic0.app/", id).canister(canisterMap[canister]).mint(tokenid);
       if (!r) return error("There was an error wrapping this NFT!");
       await props.searchCollections(true);
       props.loader(false);
@@ -239,12 +247,16 @@ export default function NFTList(props) {
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
+    else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
+    else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
     else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
   }
   const getNftLink = nft => {
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
+    else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
+    else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
     else return "https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id;
   }
   const wearableMap = ["accessories","hats","eyewear","pets"];
@@ -273,7 +285,7 @@ export default function NFTList(props) {
         listingText : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? 
           "Loading..." : 
           (tokenDetails[nft.id][1].length === 0 ? 
-            (dec.canister == "qcg3w-tyaaa-aaaah-qakea-cai" ? "Wrap First" :
+            (['d3ttm-qaaaa-aaaai-qam4a-cai', 'qcg3w-tyaaa-aaaah-qakea-cai'].indexOf(dec.canister) >= 0 ? "Wrap First" :
               (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : "Not listed")) : 
             (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
               "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
@@ -423,20 +435,20 @@ export default function NFTList(props) {
                               </ListItemIcon>
                               <Typography variant="inherit">Manage Listing</Typography>
                             </MenuItem> : ""}
-                            {["bxdf4-baaaa-aaaah-qaruq-cai"].indexOf(nft.canister) >= 0 ?
+                            {["3db6u-aiaaa-aaaah-qbjbq-cai", "bxdf4-baaaa-aaaah-qaruq-cai"].indexOf(nft.canister) >= 0 ?
                             ([
                               <Divider key={0} />,
-                              <MenuItem key={1} onClick={() => {handleClose(); unwrapNft(nft.id)}}>
+                              <MenuItem key={1} onClick={() => {handleClose(); unwrapNft(nft.id, nft.canister)}}>
                                 <ListItemIcon>
                                   <LockOpenIcon fontSize="small" />
                                 </ListItemIcon>
                                 <Typography variant="inherit">Unwrap NFT</Typography>
                               </MenuItem>
                             ]): ""}
-                            {["qcg3w-tyaaa-aaaah-qakea-cai","jzg5e-giaaa-aaaah-qaqda-cai"].indexOf(nft.canister) >= 0 ?
+                            {["qcg3w-tyaaa-aaaah-qakea-cai","jzg5e-giaaa-aaaah-qaqda-cai", "d3ttm-qaaaa-aaaai-qam4a-cai"].indexOf(nft.canister) >= 0 ?
                             ([
                               <Divider key={0} />,
-                              <MenuItem key={1} onClick={() => {handleClose(); wrapNft(nft.id)}}>
+                              <MenuItem key={1} onClick={() => {handleClose(); wrapNft(nft.id, nft.canister)}}>
                                 <ListItemIcon>
                                   <LockIcon fontSize="small" />
                                 </ListItemIcon>
