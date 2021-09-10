@@ -54,9 +54,14 @@ const collections = [
     comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
   },
   {
-    canister : "gevsk-tqaaa-aaaah-qaoca-cai",
-    name : "ICmojis",
-    comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
+    canister : "3db6u-aiaaa-aaaah-qbjbq-cai",
+    name : "ICdrip",
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+  },
+  {
+    canister : "73xld-saaaa-aaaah-qbjya-cai",
+    name : "Wing",
+    comaddress : "1d978f4f38d19dca4218832e856c956678de0aa470cd492f5d8ac4377db6f2a2",
   },
 ];
 var cb = null;
