@@ -24,7 +24,7 @@ const tips = [
   "If your browser gives you any sort of security warning about this web wallet, get in touch with us and report it. Do not ignore the warning nor enter your mnemonic secret!",
   "Only use your own devices when accessing your accounts. Do not enter your mnemonic secret on untrustworthy devices (public computers, friends computers/phones, etc) as they might be littered with malware and keyloggers.",
   "Always keep your operating system, anti-virus software and browser up to date with latest security updates.",
-  "If possible, prefer hardware wallets over mnemonic secret for storing larger amounts of RISE.",
+  "If possible, prefer hardware wallets over mnemonic secret for storing larger amounts of assets.",
 ];
 var type = '';
 export default function WalletDialog(props) {
