@@ -21,47 +21,74 @@ const collections = [
   {
     canister : "e3izy-jiaaa-aaaah-qacbq-cai",
     name : "Cronic Critters",
+    mature : false,
+    commission : 0.015,
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb : (<>Cronics is a Play-to-earn NFT game being developed by ToniqLabs for the Internet Computer. Cronics  incorporates breeding mechanics, wearable NFTs and a p2e minigame ecosystem and more. Join the <a href="https://t.me/cronic_fun" target="_blank" rel="noreferrer">Telegram group</a> or read more on <a href="https://toniqlabs.medium.com/cronics-breeding-and-supply-604fa374776d" target="_blank" rel="noreferrer">Medium</a></>)
   },
   {
     canister : "nbg4r-saaaa-aaaah-qap7a-cai",
     name : "Starverse",
+    mature : false,
+    commission : 0.015,
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb:false,
   },
   {
     canister : "bxdf4-baaaa-aaaah-qaruq-cai",
-    name : "Wrapped ICPunks",
-    comaddress : "38bc2ce470085db3a3223806e61946f645106915a0a7da8fa9368969db7a3264",
-  },
-  {
-    canister : "uzhxd-ziaaa-aaaah-qanaq-cai",
-    name : "ICP News",
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-  },
-  {
-    canister : "tde7l-3qaaa-aaaah-qansa-cai",
-    name : "Cronic Wearables",
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-  },
-  {
-    canister : "owuqd-dyaaa-aaaah-qapxq-cai",
-    name : "ICPuzzle",
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-  },
-  {
-    canister : "gevsk-tqaaa-aaaah-qaoca-cai",
-    name : "ICmojis",
-    comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
+    name : "ICPunks",
+    mature : false,
+    commission : 0.03,
+    comaddress : "c47942416fa8e7151f679d57a6b2d2e01a92fecd5e6f9ac99f6db548ea4f37aa",
+    blurb : (<>Are you down with the clown? Get your hands on the latest NFT to hit the Internet Computer! You can wrap and trade them on the Marketplace! <strong>Wrapped ICPunks are 1:1 wrapped versions of actual ICPunks</strong> - you can read more about how to wrap, unwrap, and how safe it is <a href="https://medium.com/@toniqlabs/wrapped-nfts-8c91fd3a4c1" target="_blank" rel="noreferrer">here</a></>)
   },
   {
     canister : "3db6u-aiaaa-aaaah-qbjbq-cai",
-    name : "ICdrip",
+    name : "IC Drip",
+    mature : false,
+    commission : 0.015,
     comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb:(<>IC Drip are randomly generated meta-commerce shopping carts for outfits and personas stored on chain. Stats, images, and other functionality are intentionally omitted for others to interpret. Feel free to use IC Drip in any way you want. <a href="https://dvr6e-lqaaa-aaaai-qam5a-cai.raw.ic0.app/" target="_blank" rel="noreferrer">IC Drip Website</a></>),
   },
   {
     canister : "73xld-saaaa-aaaah-qbjya-cai",
     name : "Wing",
+    mature : true,
+    commission : 0.02,
     comaddress : "1d978f4f38d19dca4218832e856c956678de0aa470cd492f5d8ac4377db6f2a2",
+    blurb:(<>To escape from containment and restriction, releasing the stressors held so long in the body, Wings’s ego is jettisoned as she explores a more fundamental form of existence, expressing her humanity in this elemental piece.<br />She is framed within the themes of air, water, to take flight on chalky cliff tops overlooking distant horizons, to express the existential freedom that lives within. No borders.<br />And so through this series I invite the viewer to celebrate their own sovereignty of consciousness; to be bold as we emerge from our cocoons and open ourselves up to the world and each other again.</>),
+  },
+  {
+    canister : "uzhxd-ziaaa-aaaah-qanaq-cai",
+    name : "ICP News",
+    mature : false,
+    commission : 0.015,
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb:false,
+  },
+  {
+    canister : "tde7l-3qaaa-aaaah-qansa-cai",
+    name : "Cronic Wearables",
+    mature : false,
+    commission : 0.015,
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb:false,
+  },
+  {
+    canister : "gevsk-tqaaa-aaaah-qaoca-cai",
+    name : "ICmojis",
+    mature : false,
+    commission : 0.015,
+    comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
+    blurb:false,
+  },
+  {
+    canister : "owuqd-dyaaa-aaaah-qapxq-cai",
+    name : "ICPuzzle",
+    mature : true,
+    commission : 0.015,
+    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb:false,
   },
 ];
 var cb = null;
@@ -147,15 +174,18 @@ export default function Marketplace(props) {
         payment = payments[0][i];
         a = extjs.toAddress(identity.principal, payment);
         b = Number(await api.token().getBalance(a));
-        c = Math.round(b * txcomm);
+        c = Math.round(b * collections[j].commission);
         try {
+          var txs = [];
           if (b > txmin) {
-            await _api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-(txfee + c)), BigInt(txfee));
-            await _api.token().transfer(identity.principal, payment, collections[j].comaddress, BigInt(c-txfee), BigInt(txfee));
+            txs.push(_api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-(txfee + c)), BigInt(txfee)));
+            txs.push(_api.token().transfer(identity.principal, payment, collections[j].comaddress, BigInt(c-txfee), BigInt(txfee)));
           }
-          await _api.canister(collections[j].canister).removePayments([payment]);
+          await Promise.all(txs);
           console.log("Payments removed successfully");
-        } catch (e) {};
+        } catch (e)  {
+          console.log(e);
+        };
       };
     };
   };
