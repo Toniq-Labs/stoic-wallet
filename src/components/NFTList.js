@@ -273,8 +273,17 @@ export default function NFTList(props) {
     //if (collections == false) collectCollections = true;
     var _collections = [];
     var index = 0;
+    var decoder;
+    try {
+      new Uint8Array([]);
+      decoder = new TextDecoder();
+    } catch (e) { console.log('Browser can\'t decode.'); };
     account.nfts.forEach((nft) => {
       var dec = extjs.decodeTokenId(nft.id);
+      var metascoreMd;
+      if (decoder && dec.canister === 'uwroj-kaaaa-aaaaj-qabxa-cai') {
+        metascoreMd = decoder.decode(new Uint8Array(nft.metadata.metadata[0]));
+      }
       if (collectCollections && _collections.indexOf(dec.canister) < 0) _collections.push(dec.canister);
       if (collection !== false && dec.canister != collection) return;
       if (collection !== false && collection ==  "tde7l-3qaaa-aaaah-qansa-cai" && wearableFilter !== "all" && wearableMap[nft.metadata.metadata[0][0]] !== wearableFilter) return;
@@ -284,14 +293,15 @@ export default function NFTList(props) {
         id : nft.id,
         index : dec.index,
         canister : dec.canister,
-        metadata : (nft.metadata.metadata[0].length ? toHexString(nft.metadata.metadata[0]) : (nft.metadata.metadata.length > 1 ? JSON.stringify(nft.metadata.metadata[1]) : "NO DATA")),
+        metadata : (nft.metadata.metadata[0].length ? metascoreMd ? metascoreMd : toHexString(nft.metadata.metadata[0]) : (nft.metadata.metadata.length > 1 ? JSON.stringify(nft.metadata.metadata[1]) : "NO DATA")),
         price : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
         bearer : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
         allowedToList : allowedForMarket.indexOf(dec.canister) >= 0,
         listing : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
-        listingText : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? 
+        listingText : dec.canister === 'uwroj-kaaaa-aaaaj-qabxa-cai' ? 'Non-Transferable' :
+        (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? 
           "Loading..." : 
-          (tokenDetails[nft.id][1].length === 0 ? 
+          (tokenDetails[nft.id][1].length === 0 ?
             (['d3ttm-qaaaa-aaaai-qam4a-cai', 'qcg3w-tyaaa-aaaah-qakea-cai'].indexOf(dec.canister) >= 0 ? "Wrap First" :
               (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : "Not listed")) : 
             (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
