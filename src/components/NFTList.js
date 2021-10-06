@@ -50,6 +50,7 @@ const nftMap = {
   "3db6u-aiaaa-aaaah-qbjbq-cai" : "Wrapped IC Drip",
   "kss7i-hqaaa-aaaah-qbvmq-cai" : "ICelebrity",
   "k4qsa-4aaaa-aaaah-qbvnq-cai" : "Faceted Meninas",
+  "uwroj-kaaaa-aaaaj-qabxa-cai" : "Metascore",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
