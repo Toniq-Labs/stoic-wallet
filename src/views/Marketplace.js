@@ -19,76 +19,207 @@ const perPage = 30;
 const api = extjs.connect("https://boundary.ic0.app/");
 const collections = [
   {
-    canister : "e3izy-jiaaa-aaaah-qacbq-cai",
-    name : "Cronic Critters",
-    mature : false,
-    commission : 0.015,
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-    blurb : (<>Cronics is a Play-to-earn NFT game being developed by ToniqLabs for the Internet Computer. Cronics  incorporates breeding mechanics, wearable NFTs and a p2e minigame ecosystem and more. Join the <a href="https://t.me/cronic_fun" target="_blank" rel="noreferrer">Telegram group</a> or read more on <a href="https://toniqlabs.medium.com/cronics-breeding-and-supply-604fa374776d" target="_blank" rel="noreferrer">Medium</a></>)
+    canister: "e3izy-jiaaa-aaaah-qacbq-cai",
+    name: "Cronic Critters",
+    route: "cronics",
+    mature: false,
+    commission: 0.025,
+    comaddress:
+      "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb: (
+      <>
+        Cronics is a Play-to-earn NFT game being developed by ToniqLabs for the
+        Internet Computer. Cronics incorporates breeding mechanics, wearable
+        NFTs and a p2e minigame ecosystem and more. Join the{" "}
+        <a href="https://t.me/cronic_fun" target="_blank" rel="noreferrer">
+          Telegram group
+        </a>{" "}
+        or read more on{" "}
+        <a
+          href="https://toniqlabs.medium.com/cronics-breeding-and-supply-604fa374776d"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Medium
+        </a>
+      </>
+    ),
   },
   {
-    canister : "nbg4r-saaaa-aaaah-qap7a-cai",
-    name : "Starverse",
-    mature : false,
-    commission : 0.015,
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-    blurb:false,
+    canister: "nbg4r-saaaa-aaaah-qap7a-cai",
+    name: "Starverse",
+    route: "starverse",
+    mature: false,
+    commission: 0.025,
+    comaddress:
+      "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb: false,
   },
   {
-    canister : "bxdf4-baaaa-aaaah-qaruq-cai",
-    name : "ICPunks",
-    mature : false,
-    commission : 0.03,
-    comaddress : "c47942416fa8e7151f679d57a6b2d2e01a92fecd5e6f9ac99f6db548ea4f37aa",
-    blurb : (<>Are you down with the clown? Get your hands on the latest NFT to hit the Internet Computer! You can wrap and trade them on the Marketplace! <strong>Wrapped ICPunks are 1:1 wrapped versions of actual ICPunks</strong> - you can read more about how to wrap, unwrap, and how safe it is <a href="https://medium.com/@toniqlabs/wrapped-nfts-8c91fd3a4c1" target="_blank" rel="noreferrer">here</a></>)
+    canister: "njgly-uaaaa-aaaah-qb6pa-cai",
+    name: "ICPuppies",
+    route: "icpuppies",
+    mature: false,
+    commission: 0,//0.035,
+    comaddress:
+      "9f76290b181807c5fa3c7cfcfca2525d578a3770f40ae8b14a03a4a3530368e2",
+    blurb: (
+      <>
+        10,000 randomly generated 8-bit puppy NFTs. Join the{" "}
+        <a href="discord.gg/A3rmDSjBaJ" target="_blank" rel="noreferrer">
+          Discord
+        </a>{" "}
+        or follow us on{" "}
+        <a
+          href="https://twitter.com/ICPuppies"
+          target="_blank"
+          rel="noreferrer"
+        >
+          Twitter
+        </a>
+      </>
+    ),
   },
   {
-    canister : "3db6u-aiaaa-aaaah-qbjbq-cai",
-    name : "IC Drip",
-    mature : false,
-    commission : 0.015,
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-    blurb:(<>IC Drip are randomly generated meta-commerce shopping carts for outfits and personas stored on chain. Stats, images, and other functionality are intentionally omitted for others to interpret. Feel free to use IC Drip in any way you want. <a href="https://dvr6e-lqaaa-aaaai-qam5a-cai.raw.ic0.app/" target="_blank" rel="noreferrer">IC Drip Website</a></>),
+    canister: "bxdf4-baaaa-aaaah-qaruq-cai",
+    name: "ICPunks",
+    route: "icpunks",
+    mature: false,
+    commission: 0.035,
+    comaddress:
+      "c47942416fa8e7151f679d57a6b2d2e01a92fecd5e6f9ac99f6db548ea4f37aa",
+    blurb: (
+      <>
+        Are you down with the clown? Get your hands on the latest NFT to hit the
+        Internet Computer! You can wrap and trade them on the Marketplace!{" "}
+        <strong>
+          Wrapped ICPunks are 1:1 wrapped versions of actual ICPunks
+        </strong>{" "}
+        - you can read more about how to wrap, unwrap, and how safe it is{" "}
+        <a
+          href="https://medium.com/@toniqlabs/wrapped-nfts-8c91fd3a4c1"
+          target="_blank"
+          rel="noreferrer"
+        >
+          here
+        </a>
+      </>
+    ),
   },
   {
-    canister : "73xld-saaaa-aaaah-qbjya-cai",
-    name : "Wing",
-    mature : true,
-    commission : 0.02,
-    comaddress : "1d978f4f38d19dca4218832e856c956678de0aa470cd492f5d8ac4377db6f2a2",
-    blurb:(<>To escape from containment and restriction, releasing the stressors held so long in the body, Wings’s ego is jettisoned as she explores a more fundamental form of existence, expressing her humanity in this elemental piece.<br />She is framed within the themes of air, water, to take flight on chalky cliff tops overlooking distant horizons, to express the existential freedom that lives within. No borders.<br />And so through this series I invite the viewer to celebrate their own sovereignty of consciousness; to be bold as we emerge from our cocoons and open ourselves up to the world and each other again.</>),
+    canister: "3db6u-aiaaa-aaaah-qbjbq-cai",
+    name: "IC Drip",
+    route: "icdrip",
+    mature: false,
+    commission: 0.025,
+    comaddress:
+      "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb: (
+      <>
+        IC Drip are randomly generated meta-commerce shopping carts for outfits
+        and personas stored on chain. Stats, images, and other functionality are
+        intentionally omitted for others to interpret. Feel free to use IC Drip
+        in any way you want.{" "}
+        <a
+          href="https://dvr6e-lqaaa-aaaai-qam5a-cai.raw.ic0.app/"
+          target="_blank"
+          rel="noreferrer"
+        >
+          IC Drip Website
+        </a>
+      </>
+    ),
   },
   {
-    canister : "uzhxd-ziaaa-aaaah-qanaq-cai",
-    name : "ICP News",
-    mature : false,
-    commission : 0.015,
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-    blurb:false,
+    canister: "73xld-saaaa-aaaah-qbjya-cai",
+    name: "Wing",
+    route: "wing",
+    mature: true,
+    commission: 0.025,
+    comaddress:
+      "1d978f4f38d19dca4218832e856c956678de0aa470cd492f5d8ac4377db6f2a2",
+    blurb: (
+      <>
+        To escape from containment and restriction, releasing the stressors held
+        so long in the body, Wings’s ego is jettisoned as she explores a more
+        fundamental form of existence, expressing her humanity in this elemental
+        piece.
+        <br />
+        She is framed within the themes of air, water, to take flight on chalky
+        cliff tops overlooking distant horizons, to express the existential
+        freedom that lives within. No borders.
+        <br />
+        And so through this series I invite the viewer to celebrate their own
+        sovereignty of consciousness; to be bold as we emerge from our cocoons
+        and open ourselves up to the world and each other again.
+      </>
+    ),
   },
   {
-    canister : "tde7l-3qaaa-aaaah-qansa-cai",
-    name : "Cronic Wearables",
-    mature : false,
-    commission : 0.015,
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-    blurb:false,
+    canister: "kss7i-hqaaa-aaaah-qbvmq-cai",
+    name: "ICelebrity",
+    route: "icelebrity",
+    mature: false,
+    commission: 0.035,
+    comaddress:
+      "8b6840cb0e67738e69dbb6d79a3963f7bd93c35f593a393be5cc39cd59ed993e",
+    blurb: false,
   },
   {
-    canister : "gevsk-tqaaa-aaaah-qaoca-cai",
-    name : "ICmojis",
-    mature : false,
-    commission : 0.015,
-    comaddress : "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
-    blurb:false,
+    canister: "k4qsa-4aaaa-aaaah-qbvnq-cai",
+    name: "Faceted Meninas",
+    route: "faceted-meninas",
+    mature: false,
+    commission: 0.02,
+    comaddress:
+      "12692014390fbdbb2f0a1ecd440f02d29962601a782553b45bb1a744f167f13b",
+    blurb: (
+      <>
+        Faceted Meninas is a creature species that holds the power of the
+        universe to act as a magic pillar giving their allies the essence of
+        outer worlds to maximize their powers.
+      </>
+    ),
   },
   {
-    canister : "owuqd-dyaaa-aaaah-qapxq-cai",
-    name : "ICPuzzle",
-    mature : true,
-    commission : 0.015,
-    comaddress : "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
-    blurb:false,
+    canister: "uzhxd-ziaaa-aaaah-qanaq-cai",
+    name: "ICP News",
+    mature: false,
+    route: "icp-news",
+    commission: 0.02,
+    comaddress:
+      "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb: false,
+  },
+  {
+    canister: "tde7l-3qaaa-aaaah-qansa-cai",
+    name: "Cronic Wearables",
+    route: "wearables",
+    mature: false,
+    commission: 0.025,
+    comaddress:
+      "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+    blurb: false,
+  },
+  {
+    canister: "gevsk-tqaaa-aaaah-qaoca-cai",
+    name: "ICmojis",
+    route: "icmojis",
+    mature: false,
+    commission: 0.02,
+    comaddress:
+      "df13f7ef228d7213c452edc3e52854bc17dd4189dfc0468d8cb77403e52b5a69",
+    blurb: false,
+  },
+  {
+    canister: "owuqd-dyaaa-aaaah-qapxq-cai",
+    name: "ICPuzzle",
+    route: "icpuzzle",
+    mature: true,
+    commission: 0.02,
+    comaddress:
+      "12692014390fbdbb2f0a1ecd440f02d29962601a782553b45bb1a744f167f13b",
+    blurb: false,
   },
 ];
 var cb = null;
@@ -150,14 +281,11 @@ export default function Marketplace(props) {
   const _process = async () => {
     props.loader(true);
     await processPayments();
-    await processRefunds();
     props.loader(false);
   };
   const _updates = async () => {
     console.log("poll");
     refreshListings();
-    // await processPayments();
-    // await processRefunds();
     setTimeout(_updates, 30 *1000);
   };
   
@@ -179,7 +307,9 @@ export default function Marketplace(props) {
           var txs = [];
           if (b > txmin) {
             txs.push(_api.token().transfer(identity.principal, payment, accounts[0].address, BigInt(b-(txfee + c)), BigInt(txfee)));
-            txs.push(_api.token().transfer(identity.principal, payment, collections[j].comaddress, BigInt(c-txfee), BigInt(txfee)));
+            if (collections[j].commission > 0) {
+              txs.push(_api.token().transfer(identity.principal, payment, collections[j].comaddress, BigInt(c-txfee), BigInt(txfee)));
+            }
           }
           await Promise.all(txs);
           console.log("Payments removed successfully");
@@ -189,35 +319,12 @@ export default function Marketplace(props) {
       };
     };
   };
-  const processRefunds = async () => {
-    const id = StoicIdentity.getIdentity(identity.principal);
-    const _api = extjs.connect("https://boundary.ic0.app/", id);
-    for(var j = 0; j < collections.length; j++){
-      var refunds = await _api.canister(collections[j].canister).refunds();
-      if (refunds.length === 0) continue;
-      if (refunds[0].length === 0) continue;
-      var a, b, refund;
-      for(var i = 0; i < refunds[0].length; i++) {
-        refund = refunds[0][i];
-        a = extjs.toAddress(identity.principal, refund);
-        b = Number(await api.token().getBalance(a));
-        try {
-          if (b > txfee) {
-            //Process refunds
-            await _api.token().transfer(identity.principal, refund, "07ce335b2451bec20426497d97afb0352d89dc3f1286bf26909ecb90cf370c76", BigInt(b-txfee), BigInt(txfee));
-          }
-          await _api.canister(collections[j].canister).removeRefunds([refund]);
-          console.log("Refund removed successfully");
-        } catch (e) {};
-      };
-    };
-  };
   
   const refreshListings = () => {
     api.canister("e3izy-jiaaa-aaaah-qacbq-cai").listings().then(listings => {
       setListings(listings);
     }).finally(() => {
-      props.loader(false);      
+      //props.loader(false);      
     });
   }
   const error = (e) => {

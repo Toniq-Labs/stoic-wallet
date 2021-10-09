@@ -51,6 +51,7 @@ const nftMap = {
   "kss7i-hqaaa-aaaah-qbvmq-cai" : "ICelebrity",
   "k4qsa-4aaaa-aaaah-qbvnq-cai" : "Faceted Meninas",
   "uwroj-kaaaa-aaaaj-qabxa-cai" : "Metascore",
+  "njgly-uaaaa-aaaah-qb6pa-cai" : "ICPuppies",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
@@ -63,6 +64,7 @@ const allowedForMarket = [
   "3db6u-aiaaa-aaaah-qbjbq-cai",
   "kss7i-hqaaa-aaaah-qbvmq-cai",
   "k4qsa-4aaaa-aaaah-qbvnq-cai",
+  //"njgly-uaaaa-aaaah-qb6pa-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
