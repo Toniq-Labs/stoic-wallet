@@ -52,6 +52,7 @@ const nftMap = {
   "k4qsa-4aaaa-aaaah-qbvnq-cai" : "Faceted Meninas",
   "uwroj-kaaaa-aaaaj-qabxa-cai" : "Metascore",
   "njgly-uaaaa-aaaah-qb6pa-cai" : "ICPuppies",
+  "wxi2q-oiaaa-aaaaj-qab2q-cai" : "Cake",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
