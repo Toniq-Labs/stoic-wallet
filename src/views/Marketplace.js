@@ -324,7 +324,7 @@ export default function Marketplace(props) {
     api.canister("e3izy-jiaaa-aaaah-qacbq-cai").listings().then(listings => {
       setListings(listings);
     }).finally(() => {
-      //props.loader(false);      
+      props.loader(false);      
     });
   }
   const error = (e) => {
