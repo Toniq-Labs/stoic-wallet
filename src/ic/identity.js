@@ -333,4 +333,4 @@ const StoicIdentity = {
   }
 }
 export {StoicIdentity};
-//window.StoicIdentity = StoicIdentity;
+window.StoicIdentity = StoicIdentity;

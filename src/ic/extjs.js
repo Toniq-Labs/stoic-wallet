@@ -446,7 +446,7 @@ class ExtConnection {
             break;
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
-              if (!validatePrincipal(to_user)) reject("ICPunks does no support traditional addresses, you must use a Principal");
+              if (!validatePrincipal(to_user)) reject("ICPunks does not support traditional addresses, you must use a Principal");
               api.transfer_to(Principal.fromText(to_user), tokenObj.index).then(b => {
                 if (b) {          
                   resolve(true);
@@ -456,7 +456,7 @@ class ExtConnection {
               }).catch(reject);
             break;
             case "d3ttm-qaaaa-aaaai-qam4a-cai":
-              if (!validatePrincipal(to_user)) reject("IC Drip does no support traditional addresses, you must use a Principal");
+              if (!validatePrincipal(to_user)) reject("IC Drip does not support traditional addresses, you must use a Principal");
               api.transfer_to(Principal.fromText(to_user), tokenObj.index).then(b => {
                 if (b) {          
                   resolve(true);
@@ -554,8 +554,7 @@ const extjs = {
   encodeTokenId : tokenIdentifier,
   toSubaccount : getSubAccountArray,
   toAddress : principalToAccountIdentifier,
+  fromHexString : fromHexString,
 };
 export default extjs;
-//window.extjs = extjs.connect;
-//window.principalToAccountIdentifier = principalToAccountIdentifier;
-//window.fromHexString = fromHexString;
+window.extjs = extjs;

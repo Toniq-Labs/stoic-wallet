@@ -53,6 +53,7 @@ const nftMap = {
   "uwroj-kaaaa-aaaaj-qabxa-cai" : "Metascore",
   "njgly-uaaaa-aaaah-qb6pa-cai" : "ICPuppies",
   "cihkf-qyaaa-aaaah-qb7jq-cai" : "ICmoji Items",
+  "sr4qi-vaaaa-aaaah-qcaaq-cai" : "Internet Astronauts",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
@@ -66,6 +67,8 @@ const allowedForMarket = [
   "kss7i-hqaaa-aaaah-qbvmq-cai",
   "k4qsa-4aaaa-aaaah-qbvnq-cai",
   "njgly-uaaaa-aaaah-qb6pa-cai",
+  //"cihkf-qyaaa-aaaah-qb7jq-cai",
+  //"sr4qi-vaaaa-aaaah-qcaaq-cai",
 ];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
