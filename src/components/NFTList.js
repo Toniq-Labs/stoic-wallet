@@ -54,6 +54,8 @@ const nftMap = {
   "njgly-uaaaa-aaaah-qb6pa-cai" : "ICPuppies",
   "cihkf-qyaaa-aaaah-qb7jq-cai" : "ICmoji Items",
   "sr4qi-vaaaa-aaaah-qcaaq-cai" : "Internet Astronauts",
+  "xkbqi-2qaaa-aaaah-qbpqq-cai" : "ICPBunny",
+  "q6hjz-kyaaa-aaaah-qcama-cai" : "Wrapped ICPBunny",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
@@ -67,6 +69,7 @@ const allowedForMarket = [
   "kss7i-hqaaa-aaaah-qbvmq-cai",
   "k4qsa-4aaaa-aaaah-qbvnq-cai",
   "njgly-uaaaa-aaaah-qb6pa-cai",
+  "q6hjz-kyaaa-aaaah-qcama-cai",
   //"cihkf-qyaaa-aaaah-qb7jq-cai",
   //"sr4qi-vaaaa-aaaah-qcaaq-cai",
 ];
@@ -124,6 +127,7 @@ export default function NFTList(props) {
   var canisterMap = {
     "qcg3w-tyaaa-aaaah-qakea-cai" : "bxdf4-baaaa-aaaah-qaruq-cai",
     "d3ttm-qaaaa-aaaai-qam4a-cai" : "3db6u-aiaaa-aaaah-qbjbq-cai",
+    "xkbqi-2qaaa-aaaah-qbpqq-cai" : "q6hjz-kyaaa-aaaah-qcama-cai",
   };
   const unwrapNft = async (tokenid, canister) => {
     //Load signing ID
@@ -248,6 +252,20 @@ export default function NFTList(props) {
     props.loader(false);
     props.error(e);
   }
+  const icpbunnyimg = i => {
+    const icbstorage = ['efqhu-yqaaa-aaaaf-qaeda-cai',
+    'ecrba-viaaa-aaaaf-qaedq-cai',
+    'fp7fo-2aaaa-aaaaf-qaeea-cai',
+    'fi6d2-xyaaa-aaaaf-qaeeq-cai',
+    'fb5ig-bqaaa-aaaaf-qaefa-cai',
+    'fg4os-miaaa-aaaaf-qaefq-cai',
+    'ft377-naaaa-aaaaf-qaega-cai',
+    'fu2zl-ayaaa-aaaaf-qaegq-cai',
+    'f5zsx-wqaaa-aaaaf-qaeha-cai',
+    'f2yud-3iaaa-aaaaf-qaehq-cai']
+
+    return "https://" +icbstorage[i % 10]+".raw.ic0.app/Token/"+i;
+  };
   const getMintNumber = nft => {
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return nft.index;
@@ -262,6 +280,8 @@ export default function NFTList(props) {
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
     else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
+    else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return icpbunnyimg(nft.index);
+    else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return icpbunnyimg(nft.index);
     else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
   }
   const getNftLink = nft => {
@@ -270,6 +290,8 @@ export default function NFTList(props) {
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
     else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
+    else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return icpbunnyimg(nft.index);
+    else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return icpbunnyimg(nft.index);
     else return "https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id;
   }
   const wearableMap = ["accessories","hats","eyewear","pets"];
@@ -308,7 +330,7 @@ export default function NFTList(props) {
         (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? 
           "Loading..." : 
           (tokenDetails[nft.id][1].length === 0 ?
-            (['d3ttm-qaaaa-aaaai-qam4a-cai', 'qcg3w-tyaaa-aaaah-qakea-cai'].indexOf(dec.canister) >= 0 ? "Wrap First" :
+            (['xkbqi-2qaaa-aaaah-qbpqq-cai', 'd3ttm-qaaaa-aaaai-qam4a-cai', 'qcg3w-tyaaa-aaaah-qakea-cai'].indexOf(dec.canister) >= 0 ? "Wrap First" :
               (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : "Not listed")) : 
             (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
               "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
@@ -458,7 +480,7 @@ export default function NFTList(props) {
                               </ListItemIcon>
                               <Typography variant="inherit">Manage Listing</Typography>
                             </MenuItem> : ""}
-                            {["3db6u-aiaaa-aaaah-qbjbq-cai", "bxdf4-baaaa-aaaah-qaruq-cai"].indexOf(nft.canister) >= 0 ?
+                            {["q6hjz-kyaaa-aaaah-qcama-cai", "3db6u-aiaaa-aaaah-qbjbq-cai", "bxdf4-baaaa-aaaah-qaruq-cai"].indexOf(nft.canister) >= 0 ?
                             ([
                               <Divider key={0} />,
                               <MenuItem key={1} onClick={() => {handleClose(); unwrapNft(nft.id, nft.canister)}}>
@@ -468,7 +490,7 @@ export default function NFTList(props) {
                                 <Typography variant="inherit">Unwrap NFT</Typography>
                               </MenuItem>
                             ]): ""}
-                            {["qcg3w-tyaaa-aaaah-qakea-cai","jzg5e-giaaa-aaaah-qaqda-cai", "d3ttm-qaaaa-aaaai-qam4a-cai"].indexOf(nft.canister) >= 0 ?
+                            {["xkbqi-2qaaa-aaaah-qbpqq-cai", "qcg3w-tyaaa-aaaah-qakea-cai","jzg5e-giaaa-aaaah-qaqda-cai", "d3ttm-qaaaa-aaaai-qam4a-cai"].indexOf(nft.canister) >= 0 ?
                             ([
                               <Divider key={0} />,
                               <MenuItem key={1} onClick={() => {handleClose(); wrapNft(nft.id, nft.canister)}}>

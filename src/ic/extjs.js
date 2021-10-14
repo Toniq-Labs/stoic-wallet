@@ -68,6 +68,7 @@ class ExtConnection {
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
     "qcg3w-tyaaa-aaaah-qakea-cai" : _preloadedIdls['icpunks'],
+    "xkbqi-2qaaa-aaaah-qbpqq-cai" : _preloadedIdls['icpunks'],
     "jzg5e-giaaa-aaaah-qaqda-cai" : _preloadedIdls['icpunks'],
     "bxdf4-baaaa-aaaah-qaruq-cai" : _preloadedIdls['wrapper'],
     "3db6u-aiaaa-aaaah-qbjbq-cai" : _preloadedIdls['wrapper'],
@@ -164,6 +165,7 @@ class ExtConnection {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
           case "jzg5e-giaaa-aaaah-qaqda-cai":
+          case "xkbqi-2qaaa-aaaah-qbpqq-cai":
             return new Promise((resolve, reject) => {
               if (aid !== principalToAccountIdentifier(principal, 0)) {
                 resolve([]);
@@ -208,6 +210,7 @@ class ExtConnection {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
           case "jzg5e-giaaa-aaaah-qaqda-cai":
+          case "xkbqi-2qaaa-aaaah-qbpqq-cai":
             return new Promise((resolve, reject) => {
               api.data_of(tokenObj.index).then(r => {
                 resolve({
@@ -271,6 +274,7 @@ class ExtConnection {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
           case "jzg5e-giaaa-aaaah-qaqda-cai":
+          case "xkbqi-2qaaa-aaaah-qbpqq-cai":
             return new Promise((resolve, reject) => {
               api.owner_of(tokenObj.index).then(r => {
                 resolve(principalToAccountIdentifier(r.toText(), 0));
@@ -300,6 +304,7 @@ class ExtConnection {
         switch(tokenObj.canister) {
           case "qcg3w-tyaaa-aaaah-qakea-cai":
           case "jzg5e-giaaa-aaaah-qaqda-cai":
+          case "xkbqi-2qaaa-aaaah-qbpqq-cai":
             return new Promise((resolve, reject) => {
               api.owner_of(tokenObj.index).then(r => {
                 resolve([principalToAccountIdentifier(r.toText(), 0), []]);
@@ -407,6 +412,7 @@ class ExtConnection {
             case "d3ttm-qaaaa-aaaai-qam4a-cai":
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
+            case "xkbqi-2qaaa-aaaah-qbpqq-cai":
               reject("Not supported");
             break;
             default:
@@ -446,6 +452,7 @@ class ExtConnection {
             break;
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
+            case "xkbqi-2qaaa-aaaah-qbpqq-cai":
               if (!validatePrincipal(to_user)) reject("ICPunks does not support traditional addresses, you must use a Principal");
               api.transfer_to(Principal.fromText(to_user), tokenObj.index).then(b => {
                 if (b) {          

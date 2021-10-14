@@ -17,6 +17,8 @@ var nftAutoSearch = [
   "njgly-uaaaa-aaaah-qb6pa-cai",
   "cihkf-qyaaa-aaaah-qb7jq-cai",
   "sr4qi-vaaaa-aaaah-qcaaq-cai",
+  "q6hjz-kyaaa-aaaah-qcama-cai",
+  "xkbqi-2qaaa-aaaah-qbpqq-cai",
 ];
 var trustedCanisters = ["uzhxd-ziaaa-aaaah-qanaq-cai"].concat(nftAutoSearch);
 export default {
