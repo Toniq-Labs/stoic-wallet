@@ -272,6 +272,8 @@ export default function NFTList(props) {
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return nft.index;
     else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return nft.index;
     else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai") return nft.index;
+    else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return nft.index;
+    else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return nft.index;
     else return nft.index+1;
   }
   const getNftImg = nft => {
