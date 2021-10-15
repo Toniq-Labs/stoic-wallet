@@ -254,7 +254,7 @@ class ExtConnection {
                             type : 'fungible'
                           });
                         } else {
-                          var md = r.ok.nonfungible.metadata[0];
+                          var md = r.ok.nonfungible.metadata[0] ?? [];
                           if (md.length > 256) md = md.slice(0, 256);
                           resolve({
                             metadata : [md],

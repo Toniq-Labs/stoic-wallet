@@ -268,6 +268,30 @@ export default function NFTList(props) {
 
     return "https://" +icbstorage[i % 10]+".raw.ic0.app/Token/"+i;
   };
+  const tutsimg = i => {
+    const icbstorage = ["bkf7n-yyaaa-aaaaj-qacfq-cai",
+    "dqzxr-giaaa-aaaaj-qackq-cai",
+    "dz24n-qaaaa-aaaaj-qacla-cai",
+    "d632z-5yaaa-aaaaj-qaclq-cai",
+    "ctv6x-sqaaa-aaaaj-qacma-cai",
+    "cuuyd-7iaaa-aaaaj-qacmq-cai",
+    "c5xt7-jaaaa-aaaaj-qacna-cai",
+    "c2wvl-eyaaa-aaaaj-qacnq-cai",
+    "cpreg-fqaaa-aaaaj-qacoa-cai",
+    "ciqcs-iiaaa-aaaaj-qacoq-cai",
+    "cbtjo-6aaaa-aaaaj-qacpa-cai",
+    "b7coa-zqaaa-aaaaj-qacga-cai",
+    "cgsp2-tyaaa-aaaaj-qacpq-cai",
+    "bydiu-uiaaa-aaaaj-qacgq-cai",
+    "bradi-caaaa-aaaaj-qacha-cai",
+    "bwbf4-pyaaa-aaaaj-qachq-cai",
+    "dm5na-riaaa-aaaaj-qaciq-cai",
+    "df6g4-haaaa-aaaaj-qacja-cai",
+    "dc7ai-kyaaa-aaaaj-qacjq-cai",
+    "dxyrf-lqaaa-aaaaj-qacka-cai"]
+
+    return "https://" +icbstorage[i % icbstorage.length]+".raw.ic0.app/?index="+i;
+  };
   const getMintNumber = nft => {
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return nft.index;
@@ -286,6 +310,7 @@ export default function NFTList(props) {
     else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
     else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return icpbunnyimg(nft.index);
     else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return icpbunnyimg(nft.index);
+    else if (nft.canister === "ahl3d-xqaaa-aaaaj-qacca-cai") return tutsimg(nft.index);
     else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
   }
   const getNftLink = nft => {
