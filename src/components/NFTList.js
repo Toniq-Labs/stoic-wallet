@@ -56,6 +56,7 @@ const nftMap = {
   "sr4qi-vaaaa-aaaah-qcaaq-cai" : "Internet Astronauts",
   "xkbqi-2qaaa-aaaah-qbpqq-cai" : "ICPBunny",
   "q6hjz-kyaaa-aaaah-qcama-cai" : "Wrapped ICPBunny",
+  "ahl3d-xqaaa-aaaaj-qacca-cai" : "ICTuTs",
 };
 const allowedForMarket = [
   "e3izy-jiaaa-aaaah-qacbq-cai",
@@ -70,6 +71,7 @@ const allowedForMarket = [
   "k4qsa-4aaaa-aaaah-qbvnq-cai",
   "njgly-uaaaa-aaaah-qb6pa-cai",
   "q6hjz-kyaaa-aaaah-qcama-cai",
+  "ahl3d-xqaaa-aaaaj-qacca-cai",
   //"cihkf-qyaaa-aaaah-qb7jq-cai",
   //"sr4qi-vaaaa-aaaah-qcaaq-cai",
 ];
