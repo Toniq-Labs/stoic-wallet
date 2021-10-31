@@ -315,4 +315,13 @@ export default [
     name: "ICPBunny",
     market : false,
   },
+  {
+    canister: "bid2t-gyaaa-aaaah-qcdea-cai",
+    name: "Haunted Hamsters",
+    route: "hauntedhamsters",
+    nftv : false,
+    mature: false,
+    commission: 0.0,
+    comaddress: "35b902472e845179b3d6ad9ff7079fee6bcadb4e0ca870230ba7a79757fa88fb",
+  },
 ];
