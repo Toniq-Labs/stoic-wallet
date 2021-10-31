@@ -337,7 +337,7 @@ export default function NFTList(props) {
         </Typography>
       </div> :
       <>
-        {nfts.filter(a => (collection == false || a.canister == collection)).length > perPage ?
+        {nfts.slice().filter(a => (collection == false || a.canister == collection)).length > perPage ?
         <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(nfts.filter(a => (collection == false || a.canister == collection)).length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
         : ""}
         
@@ -355,7 +355,7 @@ export default function NFTList(props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {nfts.filter(a => (collection == false || a.canister == collection)).filter((nft,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((nft, i) => {
+              {nfts.slice().filter(a => (collection == false || a.canister == collection)).filter((nft,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((nft, i) => {
                 return (<TableRow key={nft.id}>
                   <TableCell style={{fontWeight:'bold'}}>{getMintNumber(nft)}</TableCell>
                   <TableCell style={{fontWeight:'bold'}}>
@@ -422,7 +422,7 @@ export default function NFTList(props) {
                               </ListItemIcon>
                               <Typography variant="inherit">Transfer</Typography>
                             </MenuItem>
-                            {nft.allowedToList ?
+                            {nft.allowedToList || nft.listing ?
                             <MenuItem onClick={() => {handleClose(); listNft(nft)}}>
                               <ListItemIcon>
                                 <StorefrontIcon fontSize="small" />
@@ -468,7 +468,7 @@ export default function NFTList(props) {
             </TableBody>
           </Table>
         </TableContainer>
-        {nfts.filter(a => (collection == false || a.canister == collection)).length > perPage ?
+        {nfts.slice().filter(a => (collection == false || a.canister == collection)).length > perPage ?
         <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(nfts.filter(a => (collection == false || a.canister == collection)).length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
         : ""}
       </>}

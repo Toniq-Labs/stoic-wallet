@@ -120,7 +120,7 @@ function AccountDetail(props) {
       } , false);
       window.opener.postMessage({action : "initiateStoicConnect"}, "*");
     };
-    getNftCount();
+    _refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
@@ -136,14 +136,14 @@ function AccountDetail(props) {
     setNftCount("Loading...");
   }, [currentAccount, currentPrincipal]);
   React.useEffect(() => {
-    getNftCount();
+    _refresh();
   }, [collections]);
   React.useEffect(() => {
     setTokens(account.tokens);
-    getNftCount();
+    _refresh();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentToken, currentAccount, currentPrincipal]);
-  useInterval(() => getNftCount(), 10 *1000);
+  useInterval(() => _refresh(), 10 *1000);
   const theme = useTheme();
   const styles = {
     root : {
@@ -179,9 +179,12 @@ function AccountDetail(props) {
   var ignoreOwnership = false;
   const refreshTokens = async () => {
     props.loader(true);
-    setChildRefresh(prev => prev + 1);
-    await getNftCount();
+    await _refresh();
     props.loader(false);
+  };
+  const _refresh = async () => {
+    //setChildRefresh(prev => prev + 1);
+    await getNftCount();
   };
   const _addToken = (cid, checkBearer) => {
     return new Promise(function(resolve, reject) { 
