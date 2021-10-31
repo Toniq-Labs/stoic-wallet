@@ -30,7 +30,6 @@ import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import extjs from '../ic/extjs.js';
 import CANISTERS from '../ic/canisters.js';
-import COLLECTIONS from '../ic/collections.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -110,7 +109,7 @@ export default function NFTList(props) {
     //hot api, will sign as identity - BE CAREFUL
     
     try{
-      var wrappedCanister = COLLECTIONS.find(a => a.wrapped == canister).canister;
+      var wrappedCanister = props.collections.find(a => a.wrapped == canister).canister;
       var r = await extjs.connect("https://boundary.ic0.app/", id).canister(wrappedCanister).wrap(tokenid);
       if (!r) return error("There was an error wrapping this NFT!");
       props.loader(true, "Sending NFT to wrapper...");
@@ -253,9 +252,9 @@ export default function NFTList(props) {
       new Uint8Array([]);
       decoder = new TextDecoder();
     } catch (e) { console.log('Browser can\'t decode.'); };
-    await Promise.all(COLLECTIONS.map(c => {
+    await Promise.all(props.collections.map(c => {
       return new Promise((resolve, reject) => {
-        var allowedForMarket = COLLECTIONS.filter(a => a.market).map(a => a.canister);
+        var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
         api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
           if (nfts.length){
             _nfts = _nfts.concat(nfts.map(nft => {
@@ -296,7 +295,7 @@ export default function NFTList(props) {
   React.useEffect(() => {
     loadNfts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount]);
+  }, [currentAccount, props.childRefresh]);
   React.useEffect(() => {
     setPage(1);
   }, [collection]);
@@ -312,7 +311,7 @@ export default function NFTList(props) {
       >
       <MenuItem value={false}>All Collections</MenuItem>
       {collections.map(col => {
-        return (<MenuItem key={col} value={col}>{COLLECTIONS.find(a => a.canister == col)?.name ?? col}</MenuItem>)
+        return (<MenuItem key={col} value={col}>{props.collections.find(a => a.canister == col)?.name ?? col}</MenuItem>)
       })}
       </Select>
       </FormControl>
@@ -379,7 +378,7 @@ export default function NFTList(props) {
                   </TableCell>
                   <TableCell>
                     
-                    {COLLECTIONS.find(a => a.canister == nft.canister)?.name ?? compressAddress(nft.canister)}<Tooltip title="View in browser">
+                    {props.collections.find(a => a.canister == nft.canister)?.name ?? compressAddress(nft.canister)}<Tooltip title="View in browser">
                       <IconButton size="small" href={"https://" + nft.canister + ".raw.ic0.app"} target="_blank" edge="end" aria-label="search">
                         <LaunchIcon style={{ fontSize: 18 }} />
                       </IconButton>

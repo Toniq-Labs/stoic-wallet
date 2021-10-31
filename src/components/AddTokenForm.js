@@ -42,7 +42,6 @@ export default function AddTokenForm(props) {
             >
               <Tab value="add" label="Add Token" />
               <Tab value="find" label="Find Tokens" />
-              <Tab value="search" label="Search Collections" />
             </Tabs>
           </div>
           { tabValue === "add" ? 
@@ -77,10 +76,6 @@ export default function AddTokenForm(props) {
               fullWidth
             />
           </div> : ""}
-          { tabValue === "search" ? 
-          <div>
-            <DialogContentText>Use this option to automatically search for tokens you own within trusted multi-token collections/canisters, e.g. our Token Registry or Cronics NFT</DialogContentText>
-          </div> : ""}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
@@ -88,7 +83,6 @@ export default function AddTokenForm(props) {
           </Button>
           { tabValue === "add" ? <Button onClick={submit} color="primary">Add</Button> : ""}
           { tabValue === "find" ? <Button onClick={submit} color="primary">Find</Button> : ""}
-          { tabValue === "search" ? <Button onClick={submit} color="primary">Search</Button> : ""}
         </DialogActions>
       </Dialog>
     </>

@@ -65,12 +65,21 @@ function AccountDetail(props) {
   const apps = useSelector(state => state.principals[currentPrincipal].apps);
   const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
+  const [collections, setCollections] = React.useState(COLLECTIONS);
   const [tokens, setTokens] = React.useState(account.tokens);
   const [nftCount, setNftCount] = React.useState(0);
-  
+  const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
+  console.log(account);
   const dispatch = useDispatch()
   
   React.useEffect(() => {
+    setCollections(COLLECTIONS.concat(account.nfts.filter(a => (a && COLLECTIONS.findIndex(b => b.id === a) < 0)).map(a => {
+      return {
+        canister : a,
+        name : a,
+        market : false,
+      };
+    })));
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
     const authorizeApp = params.get('authorizeApp');
@@ -115,8 +124,20 @@ function AccountDetail(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
+    setCollections(COLLECTIONS.concat(account.nfts.filter(a => (a && COLLECTIONS.findIndex(b => b.id === a) < 0)).map(a => {
+      return {
+        canister : a,
+        name : a,
+        market : false,
+      };
+    })));
+  }, [account.nfts]);
+  React.useEffect(() => {
     setNftCount("Loading...");
   }, [currentAccount, currentPrincipal]);
+  React.useEffect(() => {
+    getNftCount();
+  }, [collections]);
   React.useEffect(() => {
     setTokens(account.tokens);
     getNftCount();
@@ -156,6 +177,12 @@ function AccountDetail(props) {
     dispatch({ type: 'account/edit', payload: {name:name}});
   };
   var ignoreOwnership = false;
+  const refreshTokens = async () => {
+    props.loader(true);
+    setChildRefresh(prev => prev + 1);
+    await getNftCount();
+    props.loader(false);
+  };
   const _addToken = (cid, checkBearer) => {
     return new Promise(function(resolve, reject) { 
       api.token(cid).getMetadata().then(md => {
@@ -167,6 +194,7 @@ function AccountDetail(props) {
           resolve(account.tokens.length);
         } else {
           var d = extjs.decodeTokenId(cid);
+          console.log(d);
           dispatch({ type: 'account/nft/add', payload: {
             canister : d.canister
           }});
@@ -175,29 +203,13 @@ function AccountDetail(props) {
       }).catch(reject);
     });
   };
-  const searchCollections = async () => {
-    var trustedCanisters = CANISTERS.TRUSTED;
-    var ps = [];
-    for(var i = 0; i < trustedCanisters.length; i++) {
-      ps.push(api.token(trustedCanisters[i]).getTokens(account.address, principal).then(async found => {
-        return Promise.all(found.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
-          return _addToken(ct, false);
-        }));
-      }));
-    };
-    await Promise.all(ps.map(p => p.catch(e => e)));
-    return true;
-  };
-  const refreshTokens = async () => {
-    props.loader(true);
-    props.loader(false);
-    //searchCollections(true).finally(() => props.loader(false));
-  };
   const addToken = (cid, type) => {
     if (type === 'add') {
+      var d = extjs.decodeTokenId(cid);
       if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
       if (account.tokens.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
-      if (account.nfts.findIndex(x => x.id === cid) >= 0) return error("Token has already been added");
+      if (account.tokens.findIndex(x => x.id === d.canister) >= 0) return error("Token has already been added");
+      if (account.nfts.findIndex(x => x === d.canister) >= 0) return error("Token has already been added");
       props.loader(true);
       _addToken(cid, true).then(nt => {
         dispatch({ type: 'currentToken', payload: {index:nt}});
@@ -208,7 +220,8 @@ function AccountDetail(props) {
       if (!validatePrincipal(cid)) return error("Please enter a valid canister ID");
       props.loader(true);
       api.token(cid).getTokens(account.address, principal).then(async tokens => {
-        await Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.nfts.findIndex(x => x.id === ct) < 0)).map((ct,i) => {
+        var d = extjs.decodeTokenId(cid);
+        await Promise.all(tokens.filter((ct, i) => (account.tokens.findIndex(x => x.id === ct) < 0 && account.tokens.findIndex(x => x.id === d.canister) < 0 && account.nfts.findIndex(x => x === d.canister) < 0)).map((ct,i) => {
           return _addToken(ct, false);
         }));
         dispatch({ type: 'currentToken', payload: {index:"nft"}});
@@ -217,19 +230,14 @@ function AccountDetail(props) {
       }).finally(() => {
         props.loader(false);
       });
-    } else if (type === 'search') {
-      props.loader(true);
-      searchCollections().finally(() => {
-        props.loader(false);
-      });
-    };
+    }
   };
   
   const getNftCount = async () => {
     var cc = 0;
     var ps = [];
     
-    COLLECTIONS.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a => {
+    collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a => {
       ps.push(api.token(a).getTokens(account.address, principal));
     });
     await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
@@ -357,7 +365,7 @@ function AccountDetail(props) {
         </SnackbarButton>
         <Button onClick={removeToken} color={"primary"} style={{marginLeft:"20px"}} variant={"contained"} size={"small"}>Remove</Button>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
+      {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

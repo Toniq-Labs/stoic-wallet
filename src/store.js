@@ -441,10 +441,11 @@ function rootReducer(state = initDb(), action) {
               ...principal,
               accounts : principal.accounts.map((account,ii) => {
                 if (ii === state.currentAccount) {
-                  if (account.nfts.findIndex(x => x.id === action.payload.nft.id) >= 0) return account;
+                  if (account.nfts.findIndex(x => x === action.payload.canister) >= 0) return account;
+                  if (!action.payload.canister) return account;
                   return {
                     ...account,
-                    nfts : [...account.nfts, action.payload.nft]
+                    nfts : [...account.nfts, action.payload.canister]
                   }
                 } else {
                   return account;
