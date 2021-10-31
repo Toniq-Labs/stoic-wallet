@@ -29,6 +29,8 @@ import ListingForm from '../components/ListingForm';
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import extjs from '../ic/extjs.js';
+import CANISTERS from '../ic/canisters.js';
+import COLLECTIONS from '../ic/collections.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
@@ -36,45 +38,6 @@ import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
 const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
-const nftMap = {
-  "e3izy-jiaaa-aaaah-qacbq-cai" : "Cronics",
-  "uzhxd-ziaaa-aaaah-qanaq-cai" : "ICP News",
-  "tde7l-3qaaa-aaaah-qansa-cai" : "Cronic Wearables",
-  "gevsk-tqaaa-aaaah-qaoca-cai" : "ICmojis",
-  "owuqd-dyaaa-aaaah-qapxq-cai" : "ICPuzzle",
-  "nbg4r-saaaa-aaaah-qap7a-cai" : "Starverse",
-  "qcg3w-tyaaa-aaaah-qakea-cai" : "ICPunks",
-  "jzg5e-giaaa-aaaah-qaqda-cai" : "ICFakes",
-  "d3ttm-qaaaa-aaaai-qam4a-cai" : "IC Drip",
-  "bxdf4-baaaa-aaaah-qaruq-cai" : "Wrapped ICPunks",
-  "3db6u-aiaaa-aaaah-qbjbq-cai" : "Wrapped IC Drip",
-  "kss7i-hqaaa-aaaah-qbvmq-cai" : "ICelebrity",
-  "k4qsa-4aaaa-aaaah-qbvnq-cai" : "Faceted Meninas",
-  "uwroj-kaaaa-aaaaj-qabxa-cai" : "Metascore",
-  "njgly-uaaaa-aaaah-qb6pa-cai" : "ICPuppies",
-  "cihkf-qyaaa-aaaah-qb7jq-cai" : "ICmoji Items",
-  "sr4qi-vaaaa-aaaah-qcaaq-cai" : "Internet Astronauts",
-  "xkbqi-2qaaa-aaaah-qbpqq-cai" : "ICPBunny",
-  "q6hjz-kyaaa-aaaah-qcama-cai" : "Wrapped ICPBunny",
-  "ahl3d-xqaaa-aaaaj-qacca-cai" : "ICTuTs",
-};
-const allowedForMarket = [
-  "e3izy-jiaaa-aaaah-qacbq-cai",
-  "uzhxd-ziaaa-aaaah-qanaq-cai",
-  "tde7l-3qaaa-aaaah-qansa-cai",
-  "gevsk-tqaaa-aaaah-qaoca-cai",
-  "owuqd-dyaaa-aaaah-qapxq-cai",
-  "nbg4r-saaaa-aaaah-qap7a-cai",
-  "bxdf4-baaaa-aaaah-qaruq-cai",
-  "3db6u-aiaaa-aaaah-qbjbq-cai",
-  "kss7i-hqaaa-aaaah-qbvmq-cai",
-  "k4qsa-4aaaa-aaaah-qbvnq-cai",
-  "njgly-uaaaa-aaaah-qb6pa-cai",
-  "q6hjz-kyaaa-aaaah-qcama-cai",
-  "ahl3d-xqaaa-aaaaj-qacca-cai",
-  //"cihkf-qyaaa-aaaah-qb7jq-cai",
-  //"sr4qi-vaaaa-aaaah-qcaaq-cai",
-];
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
   return n.toFixed(8).replace(/0{1,6}$/, '');
@@ -126,11 +89,6 @@ export default function NFTList(props) {
       minWidth: 650,
     },
   };
-  var canisterMap = {
-    "qcg3w-tyaaa-aaaah-qakea-cai" : "bxdf4-baaaa-aaaah-qaruq-cai",
-    "d3ttm-qaaaa-aaaai-qam4a-cai" : "3db6u-aiaaa-aaaah-qbjbq-cai",
-    "xkbqi-2qaaa-aaaah-qbpqq-cai" : "q6hjz-kyaaa-aaaah-qcama-cai",
-  };
   const unwrapNft = async (tokenid, canister) => {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
@@ -139,7 +97,7 @@ export default function NFTList(props) {
     //hot api, will sign as identity - BE CAREFUL
     var r = await extjs.connect("https://boundary.ic0.app/", id).canister(canister).unwrap(tokenid, [extjs.toSubaccount(currentAccount ?? 0)]);
     if (!r) return error("There was an error!");
-    await props.searchCollections(true);
+    await loadNfts();
     props.loader(false);
     dispatch({ type: 'account/nft/remove', payload: {id:tokenid}});
     return props.alert("You were successful!", "Your NFT has been unwrapped!" + (currentAccount !== 0 ? " Unwrapped NFTs will appear in your Main account" : ""));    
@@ -152,15 +110,16 @@ export default function NFTList(props) {
     //hot api, will sign as identity - BE CAREFUL
     
     try{
-      var r = await extjs.connect("https://boundary.ic0.app/", id).canister(canisterMap[canister]).wrap(tokenid);
+      var wrappedCanister = COLLECTIONS.find(a => a.wrapped == canister).canister;
+      var r = await extjs.connect("https://boundary.ic0.app/", id).canister(wrappedCanister).wrap(tokenid);
       if (!r) return error("There was an error wrapping this NFT!");
       props.loader(true, "Sending NFT to wrapper...");
-      var r2 = await extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(identity.principal, currentAccount, canisterMap[canister], BigInt(1), BigInt(0), "00", false);
+      var r2 = await extjs.connect("https://boundary.ic0.app/", id).token(tokenid).transfer(identity.principal, currentAccount, wrappedCanister, BigInt(1), BigInt(0), "00", false);
       if (!r2) return error("There was an error wrapping this NFT!");
       props.loader(true, "Wrapping NFT...");
-      var r3 = await extjs.connect("https://boundary.ic0.app/", id).canister(canisterMap[canister]).mint(tokenid);
+      var r3 = await extjs.connect("https://boundary.ic0.app/", id).canister(wrappedCanister).mint(tokenid);
       if (!r) return error("There was an error wrapping this NFT!");
-      await props.searchCollections(true);
+      await loadNfts();
       props.loader(false);
       _removeNft(tokenid)
       return props.alert("You were successful!", "Your NFT has been wrapped!");
@@ -199,7 +158,7 @@ export default function NFTList(props) {
         el.src = el.src+"?t=" + new Date().getTime(); 
         //Update here
         props.loader(true, "Updating tokens...");
-        await props.searchCollections();
+        await loadNfts();
         return props.alert("You were successful!", "You completed an advanced NFT action!");
       } else {        
         return error("Something went wrong with this transfer");
@@ -223,7 +182,7 @@ export default function NFTList(props) {
     setTokenNFT('');
   };
   const handleRefresh = () => {
-    getTokenDetails(tokenNFT.id, true)
+    //getTokenDetails(tokenNFT.id, true)
   };
   const closeListingForm = () => {
     setOpenListingForm(false);
@@ -236,20 +195,7 @@ export default function NFTList(props) {
       }
     });
   };
-  const getTokenDetails = (id, refresh) => {
-    if (typeof tokenDetails[id] == 'undefined') {
-      tokenDetails[id] = false;
-      setTokenDetails(tokenDetails);
-      refresh = true;
-    };
-    if (refresh) {
-      api.token(id).getDetails().then(b => {
-        tokenDetails[id] = b;
-        const newDetails = {...tokenDetails};
-        setTokenDetails(newDetails);
-      });
-    }
-  };
+
   const error = (e) => {
     props.loader(false);
     props.error(e);
@@ -267,30 +213,6 @@ export default function NFTList(props) {
     'f2yud-3iaaa-aaaaf-qaehq-cai']
 
     return "https://" +icbstorage[i % 10]+".raw.ic0.app/Token/"+i;
-  };
-  const tutsimg = i => {
-    const icbstorage = ["bkf7n-yyaaa-aaaaj-qacfq-cai",
-    "dqzxr-giaaa-aaaaj-qackq-cai",
-    "dz24n-qaaaa-aaaaj-qacla-cai",
-    "d632z-5yaaa-aaaaj-qaclq-cai",
-    "ctv6x-sqaaa-aaaaj-qacma-cai",
-    "cuuyd-7iaaa-aaaaj-qacmq-cai",
-    "c5xt7-jaaaa-aaaaj-qacna-cai",
-    "c2wvl-eyaaa-aaaaj-qacnq-cai",
-    "cpreg-fqaaa-aaaaj-qacoa-cai",
-    "ciqcs-iiaaa-aaaaj-qacoq-cai",
-    "cbtjo-6aaaa-aaaaj-qacpa-cai",
-    "b7coa-zqaaa-aaaaj-qacga-cai",
-    "cgsp2-tyaaa-aaaaj-qacpq-cai",
-    "bydiu-uiaaa-aaaaj-qacgq-cai",
-    "bradi-caaaa-aaaaj-qacha-cai",
-    "bwbf4-pyaaa-aaaaj-qachq-cai",
-    "dm5na-riaaa-aaaaj-qaciq-cai",
-    "df6g4-haaaa-aaaaj-qacja-cai",
-    "dc7ai-kyaaa-aaaaj-qacjq-cai",
-    "dxyrf-lqaaa-aaaaj-qacka-cai"]
-
-    return "https://" +icbstorage[i % icbstorage.length]+".raw.ic0.app/?index="+i;
   };
   const getMintNumber = nft => {
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return nft.index;
@@ -310,7 +232,6 @@ export default function NFTList(props) {
     else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
     else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return icpbunnyimg(nft.index);
     else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return icpbunnyimg(nft.index);
-    else if (nft.canister === "ahl3d-xqaaa-aaaaj-qacca-cai") return tutsimg(nft.index);
     else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
   }
   const getNftLink = nft => {
@@ -324,54 +245,61 @@ export default function NFTList(props) {
     else return "https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id;
   }
   const wearableMap = ["accessories","hats","eyewear","pets"];
-  React.useEffect(() => {
-    var _nfts = [];
-    var collectCollections = true;
-    //if (collections == false) collectCollections = true;
-    var _collections = [];
-    var index = 0;
+  const loadNfts = async () => {
     var decoder;
+    var _nfts = [];
+    var _collections = [];
     try {
       new Uint8Array([]);
       decoder = new TextDecoder();
     } catch (e) { console.log('Browser can\'t decode.'); };
-    account.nfts.forEach((nft) => {
-      var dec = extjs.decodeTokenId(nft.id);
-      var metascoreMd;
-      if (decoder && dec.canister === 'uwroj-kaaaa-aaaaj-qabxa-cai') {
-        metascoreMd = decoder.decode(new Uint8Array(nft.metadata.metadata[0]));
-      }
-      if (collectCollections && _collections.indexOf(dec.canister) < 0) _collections.push(dec.canister);
-      if (collection !== false && dec.canister != collection) return;
-      if (collection !== false && collection ==  "tde7l-3qaaa-aaaah-qansa-cai" && wearableFilter !== "all" && wearableMap[nft.metadata.metadata[0][0]] !== wearableFilter) return;
-      if (index >= ((page-1)*perPage) && index < ((page)*perPage)) getTokenDetails(nft.id);
-      index++;
-      _nfts.push({
-        id : nft.id,
-        index : dec.index,
-        canister : dec.canister,
-        metadata : (nft.metadata.metadata[0].length ? metascoreMd ? metascoreMd : toHexString(nft.metadata.metadata[0]) : (nft.metadata.metadata.length > 1 ? JSON.stringify(nft.metadata.metadata[1]) : "NO DATA")),
-        price : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1][0].price)),
-        bearer : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : tokenDetails[nft.id][0]),
-        allowedToList : allowedForMarket.indexOf(dec.canister) >= 0,
-        listing : (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? false : (tokenDetails[nft.id][1].length === 0 ? 0 : tokenDetails[nft.id][1])),
-        listingText : dec.canister === 'uwroj-kaaaa-aaaaj-qabxa-cai' ? 'Non-Transferable' :
-        (typeof tokenDetails[nft.id] === 'undefined' || tokenDetails[nft.id] === false ? 
-          "Loading..." : 
-          (tokenDetails[nft.id][1].length === 0 ?
-            (['xkbqi-2qaaa-aaaah-qbpqq-cai', 'd3ttm-qaaaa-aaaai-qam4a-cai', 'qcg3w-tyaaa-aaaah-qakea-cai'].indexOf(dec.canister) >= 0 ? "Wrap First" :
-              (allowedForMarket.indexOf(dec.canister) < 0 ? "Restricted" : "Not listed")) : 
-            (tokenDetails[nft.id][1][0].locked.length === 0 || (Number(tokenDetails[nft.id][1][0].locked[0]/1000000n) < Date.now())?
-              "Listed for " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" :
-              "Locked @ " + _showListingPrice(tokenDetails[nft.id][1][0].price) + " ICP" )
-          )
-        ),
-      })
-    });
-    setNfts(_nfts);
-    if (collectCollections) setCollections(_collections);
+    await Promise.all(COLLECTIONS.map(c => {
+      return new Promise((resolve, reject) => {
+        var allowedForMarket = COLLECTIONS.filter(a => a.market).map(a => a.canister);
+        api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
+          if (nfts.length){
+            _nfts = _nfts.concat(nfts.map(nft => {
+              return {
+                ...nft,
+                metadata : toHexString(nft.metadata),
+                allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+              };
+            }));
+            _collections = _collections.concat(c.canister);
+            setCollections(_collections);
+            setNfts(_nfts);
+            console.log(_nfts);
+          }
+          resolve();
+        }).catch(e => {
+          api.token(c.canister).getTokensLegacy(account.address, identity.principal).then(nfts => {
+            if (nfts.length){
+              _nfts = _nfts.concat(nfts.map(nft => {
+                return {
+                  ...nft,
+                  metadata : toHexString(nft.metadata),
+                  allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+                };
+              }));
+              _collections = _collections.concat(c.canister);
+              setCollections(_collections);
+              setNfts(_nfts);
+            }
+            resolve();
+          }).catch(e => {
+            resolve();
+          });
+        });
+      });
+    }));
+  };
+  React.useEffect(() => {
+    loadNfts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [wearableFilter, page, currentAccount, account.nfts, tokenDetails, collection]);
+  }, [currentAccount]);
+  React.useEffect(() => {
+    setPage(1);
+  }, [collection]);
 
 
   return (
@@ -384,7 +312,7 @@ export default function NFTList(props) {
       >
       <MenuItem value={false}>All Collections</MenuItem>
       {collections.map(col => {
-        return (<MenuItem key={col} value={col}>{nftMap.hasOwnProperty(col) ? nftMap[col] : col}</MenuItem>)
+        return (<MenuItem key={col} value={col}>{COLLECTIONS.find(a => a.canister == col)?.name ?? col}</MenuItem>)
       })}
       </Select>
       </FormControl>
@@ -402,7 +330,7 @@ export default function NFTList(props) {
           <MenuItem value={"eyewear"}>Eyewear</MenuItem>
         </Select>
       </FormControl> : "" }
-      <span style={{marginLeft:20,lineHeight:"50px"}}>Showing {nfts.length}</span>
+      <span style={{marginLeft:20,lineHeight:"50px"}}>Showing {nfts.filter(a => (collection == false || a.canister == collection)).length}</span>
       {nfts.length === 0 ?
       <div style={styles.empty}>
         <Typography paragraph style={{paddingTop:20,fontWeight:"bold"}} align="center">
@@ -410,8 +338,8 @@ export default function NFTList(props) {
         </Typography>
       </div> :
       <>
-        {nfts.length > perPage ?
-        <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(nfts.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
+        {nfts.filter(a => (collection == false || a.canister == collection)).length > perPage ?
+        <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(nfts.filter(a => (collection == false || a.canister == collection)).length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
         : ""}
         
         <TableContainer component={Paper}>
@@ -428,7 +356,7 @@ export default function NFTList(props) {
               </TableRow>
             </TableHead>
             <TableBody>
-              {nfts.filter((nft,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((nft, i) => {
+              {nfts.filter(a => (collection == false || a.canister == collection)).filter((nft,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((nft, i) => {
                 return (<TableRow key={nft.id}>
                   <TableCell style={{fontWeight:'bold'}}>{getMintNumber(nft)}</TableCell>
                   <TableCell style={{fontWeight:'bold'}}>
@@ -451,7 +379,7 @@ export default function NFTList(props) {
                   </TableCell>
                   <TableCell>
                     
-                    {nftMap[nft.canister] ?? compressAddress(nft.canister)}<Tooltip title="View in browser">
+                    {COLLECTIONS.find(a => a.canister == nft.canister)?.name ?? compressAddress(nft.canister)}<Tooltip title="View in browser">
                       <IconButton size="small" href={"https://" + nft.canister + ".raw.ic0.app"} target="_blank" edge="end" aria-label="search">
                         <LaunchIcon style={{ fontSize: 18 }} />
                       </IconButton>
@@ -473,18 +401,11 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    {nft.listing !== false ?
-                      <>{nft.bearer === account.address ?
-                        <strong>{nft.listingText}</strong> :
-                        <Tooltip title="This NFT was either sold via the marketplace, or was not removed after sending. In some cases, this may be here in error from previous versions of StoicWallet"><strong>Not Owned<span style={{color:"red"}}>*</span></strong></Tooltip>
-                      }</> :
-                      <strong>Loading...</strong> 
-                    }
+                    {nft.listing == false ? 
+                      <>{nft.allowedToList ? <><strong>Not Listed</strong></> : <><strong>Restricted</strong></>}</> :
+                      <>{nft.listing.locked.length ? <><strong>Locked @ {(Number(nft.listing.price/1000000n)/100).toFixed(2)} ICP</strong></> : <><strong>Listed @ {(Number(nft.listing.price/1000000n)/100).toFixed(2)} ICP</strong></>}</>}
                   </TableCell>
                   <TableCell align="right">
-                    {nft.listing !== false ?
-                    <>
-                      {nft.bearer === account.address ?
                       <>
                         <>
                           <IconButton id={"more-"+nft.id} size="small" onClick={event => handleClick(nft.id, event.currentTarget)} edge="end">
@@ -536,26 +457,21 @@ export default function NFTList(props) {
                             ]): ""}
                           </Menu>
                         </>
-                      </> : ""}
                        <Tooltip title="Remove from Stoic">
                         <IconButton size="small" onClick={() => deleteNft(nft.id)}>
                           <DeleteIcon size="small" />
                         </IconButton>
                       </Tooltip>
                     </>
-                    : 
-                      <Tooltip title="Remove from Stoic">
-                        <IconButton size="small" onClick={() => deleteNft(nft.id)}>
-                          <DeleteIcon size="small" />
-                        </IconButton>
-                      </Tooltip>
-                    }
                   </TableCell>
                 </TableRow>)
               })}
             </TableBody>
           </Table>
         </TableContainer>
+        {nfts.filter(a => (collection == false || a.canister == collection)).length > perPage ?
+        <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(nfts.filter(a => (collection == false || a.canister == collection)).length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
+        : ""}
       </>}
       <ListingForm alert={props.alert} handleRefresh={handleRefresh} open={openListingForm} close={closeListingForm} loader={props.loader} error={error} nft={tokenNFT} />
       <SendNFTForm alert={props.alert} open={openNFTForm} close={closeNFTForm} loader={props.loader} error={error} nft={tokenNFT} />

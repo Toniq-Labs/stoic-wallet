@@ -37,6 +37,7 @@ import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal} from '../ic/utils.js';
 import { clipboardCopy } from '../utils';
 import CANISTERS from '../ic/canisters.js';
+import COLLECTIONS from '../ic/collections.js';
 function useInterval(callback, delay) {
   const savedCallback = React.useRef();
   // Remember the latest callback.
@@ -65,6 +66,7 @@ function AccountDetail(props) {
   const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
   const [tokens, setTokens] = React.useState(account.tokens);
+  const [nftCount, setNftCount] = React.useState(0);
   
   const dispatch = useDispatch()
   
@@ -109,14 +111,18 @@ function AccountDetail(props) {
       } , false);
       window.opener.postMessage({action : "initiateStoicConnect"}, "*");
     };
+    getNftCount();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
-    searchCollections(true)
+    setNftCount("Loading...");
+  }, [currentAccount, currentPrincipal]);
+  React.useEffect(() => {
     setTokens(account.tokens);
+    getNftCount();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentToken, currentAccount, currentPrincipal]);
-  useInterval(() => searchCollections(true), 10 *1000);
+  useInterval(() => getNftCount(), 10 *1000);
   const theme = useTheme();
   const styles = {
     root : {
@@ -160,34 +166,17 @@ function AccountDetail(props) {
           }});
           resolve(account.tokens.length);
         } else {
-          var nft = {
-            id : cid,
-            metadata : md
-          };
-          if (checkBearer) {
-            api.token(cid).getBearer().then(b => {
-              if (b === account.address || ignoreOwnership) {
-                dispatch({ type: 'account/nft/add', payload: {
-                  nft : nft
-                }});
-                resolve("nft");
-              } else {
-                reject(error("Sorry, you don't own this NFT"));
-              };
-            }).catch(reject);
-          } else {
-            dispatch({ type: 'account/nft/add', payload: {
-              nft : nft
-            }});
-            resolve("nft");
-          }
+          var d = extjs.decodeTokenId(cid);
+          dispatch({ type: 'account/nft/add', payload: {
+            canister : d.canister
+          }});
+          resolve("nft");
         }
       }).catch(reject);
     });
   };
-  const searchCollections = async (nftonly) => {
+  const searchCollections = async () => {
     var trustedCanisters = CANISTERS.TRUSTED;
-    if (nftonly) trustedCanisters  = CANISTERS.NFT_AUTOSEARCH;
     var ps = [];
     for(var i = 0; i < trustedCanisters.length; i++) {
       ps.push(api.token(trustedCanisters[i]).getTokens(account.address, principal).then(async found => {
@@ -197,12 +186,12 @@ function AccountDetail(props) {
       }));
     };
     await Promise.all(ps.map(p => p.catch(e => e)));
-    if (!nftonly) dispatch({ type: 'currentToken', payload: {index:"nft"}});
     return true;
   };
   const refreshTokens = async () => {
     props.loader(true);
-    searchCollections(true).finally(() => props.loader(false));
+    props.loader(false);
+    //searchCollections(true).finally(() => props.loader(false));
   };
   const addToken = (cid, type) => {
     if (type === 'add') {
@@ -234,6 +223,17 @@ function AccountDetail(props) {
         props.loader(false);
       });
     };
+  };
+  
+  const getNftCount = async () => {
+    var cc = 0;
+    var ps = [];
+    
+    COLLECTIONS.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a => {
+      ps.push(api.token(a).getTokens(account.address, principal));
+    });
+    await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
+    setNftCount(cc);
   };
   return (
     <div style={styles.root}>
@@ -323,7 +323,7 @@ function AccountDetail(props) {
           {tokens.map((token, index) => {
             return (<TokenCard key={account.address + token.id} address={account.address} data={token} onClick={() => changeToken(index)} selected={index === currentToken} />)
           })}
-          { account.nfts.length > 0 ? <NFTCard address={account.address} onClick={() => changeToken('nft')} selected={currentToken === 'nft'} /> : "" }
+          <NFTCard count={nftCount} address={account.address} onClick={() => changeToken('nft')} selected={currentToken === 'nft'} />
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
             <AddTokenForm onClick={addToken}>
               <Tooltip title="Add a new token to this account">
@@ -357,7 +357,7 @@ function AccountDetail(props) {
         </SnackbarButton>
         <Button onClick={removeToken} color={"primary"} style={{marginLeft:"20px"}} variant={"contained"} size={"small"}>Remove</Button>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList searchCollections={() => searchCollections(true)} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
+      {currentToken === 'nft' ? <NFTList alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

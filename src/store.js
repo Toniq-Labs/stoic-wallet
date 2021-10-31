@@ -1,6 +1,6 @@
 import { createStore } from "redux";
 import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
-
+const DBVERSION = 1;
 var appData = {
   principals : [],
   addresses : [],
@@ -14,13 +14,21 @@ function initDb(_db){
     db = JSON.parse(db);
     //db versioning
     var savenow = false;
+    var clearnfts = false;
     if (!Array.isArray(db)) {
-      db = [[db],[],[0,0,0]];
+      db = [[db],[]];
       console.log("Converting old DB to new");
       savenow = true;
     }
     if (db.length === 2) {
-      db[2] = [0,0,0];
+      db.push([0,0,0]);
+      console.log("Converting old DB to new");
+      savenow = true;
+    }
+    if (db.length === 3) {
+      db.push(DBVERSION);
+      console.log("Converting old DB to new");
+      clearnfts = true;
       savenow = true;
     }
     var loadedPrincipals = [];
@@ -44,6 +52,7 @@ function initDb(_db){
         //savenow = true;
         //if (subaccount >= 2) return;
         if (account.length === 2) account[2] = [];
+        if (clearnfts) account[2] = [];
         _principal.accounts.push({
           name : account[0],
           address : principalToAccountIdentifier(principal.identity.principal, subaccount),
@@ -106,7 +115,7 @@ function newDb(identity){
       neurons : [],
       apps : []
     }
-  ],[],[0,0,0]];
+  ],[],[0,0,0], DBVERSION];
   localStorage.setItem('_db', JSON.stringify(tc));
   return initDb();
 }
@@ -123,7 +132,7 @@ function clearDb(){
   return clearState;
 }
 function saveDb(newState){
-  var updatedDb = [[], newState.addresses, [newState.currentPrincipal, newState.currentAccount, newState.currentToken]];
+  var updatedDb = [[], newState.addresses, [newState.currentPrincipal, newState.currentAccount, newState.currentToken], DBVERSION];
   var loadedPrincipals = [];
   newState.principals.forEach(principal => {
     if (loadedPrincipals.indexOf(principal.identity.principal) >= 0) return false;

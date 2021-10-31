@@ -16,9 +16,13 @@ import icdripIDL from './candid/icdrip.did.js';
 
 const constructUser = (u) => {
   if (isHex(u) && u.length === 64) {
-    return { 'address' : u };
+    return { 
+      'address' : u 
+    };
   } else {
-    return { 'principal' : Principal.fromText(u) };
+    return { 
+      'principal' : Principal.fromText(u) 
+    };
   };
 };
 const tokenIdentifier = (principal, index) => {
@@ -163,49 +167,110 @@ class ExtConnection {
         });
       },
       getTokens : (aid, principal) => {
-        switch(tokenObj.canister) {
-          case "qcg3w-tyaaa-aaaah-qakea-cai":
-          case "jzg5e-giaaa-aaaah-qaqda-cai":
-          case "xkbqi-2qaaa-aaaah-qbpqq-cai":
-            return new Promise((resolve, reject) => {
+        return new Promise((resolve, reject) => {
+          switch(tokenObj.canister) {
+            case "qcg3w-tyaaa-aaaah-qakea-cai":
+            case "jzg5e-giaaa-aaaah-qaqda-cai":
+            case "d3ttm-qaaaa-aaaai-qam4a-cai":
+            case "xkbqi-2qaaa-aaaah-qbpqq-cai":
               if (aid !== principalToAccountIdentifier(principal, 0)) {
                 resolve([]);
               } else {
                 api.user_tokens(Principal.fromText(principal)).then(r => {
-                  resolve(r.map(x => tokenIdentifier(tokenObj.canister, Number(x))));
+                  resolve(r.map(x => {
+                    return {
+                      id : tokenIdentifier(tokenObj.canister, Number(x)),
+                      canister : tokenObj.canister,
+                      index : Number(x),
+                      listing : false,
+                      metadata : false,
+                      wrapped : false,
+                    }
+                  }));
                 });
               }
-            });
-          break;
-          case "d3ttm-qaaaa-aaaai-qam4a-cai":
-            return new Promise((resolve, reject) => {
-              if (aid !== principalToAccountIdentifier(principal, 0)) {
-                resolve([]);
-              } else {
-                api.user_tokens(Principal.fromText(principal)).then(r => {
-                  resolve(r.map(x => tokenIdentifier(tokenObj.canister, Number(x))));
-                });
-              }
-            });
-          break;
-          default:
-            return new Promise((resolve, reject) => {
-              if (typeof api.tokens == 'undefined') reject("Not supported");
+            break;
+            default:
+              if (typeof api.tokens_ext == 'undefined') reject("Not supported");
               else {
                 try {
-                  api.tokens(aid).then(r => {
+                  api.tokens_ext(aid).then(r => {
                     if (typeof r.ok != 'undefined') {
-                      resolve(r.ok.map(x => tokenIdentifier(tokenObj.canister, x)));
-                    }else if (typeof r.err != 'undefined') reject(r.err)
-                    else reject(r);
+                      resolve(r.ok.map(d => {
+                        return {
+                          index : d[0],
+                          id : tokenIdentifier(tokenObj.canister, d[0]),
+                          canister : tokenObj.canister,
+                          listing : d[1].length ? d[1][0] : false,
+                          metadata : d[2].length ? d[2][0] : false,
+                        }
+                      }));
+                    }else if (typeof r.err != 'undefined') {
+                      if (r.err.hasOwnProperty("Other") && r.err.Other === "No tokens") {
+                        resolve([]);
+                      } else reject(r.err)
+                    } else reject(r);
                   }).catch(reject);
                 } catch(e) {
                   reject(e);
                 };
               };
-            });
-          break;
-        }
+            break;
+          }
+        });
+      },
+      getTokensLegacy : (aid, principal) => {
+        return new Promise((resolve, reject) => {
+          switch(tokenObj.canister) {
+            case "qcg3w-tyaaa-aaaah-qakea-cai":
+            case "jzg5e-giaaa-aaaah-qaqda-cai":
+            case "d3ttm-qaaaa-aaaai-qam4a-cai":
+            case "xkbqi-2qaaa-aaaah-qbpqq-cai":
+              if (aid !== principalToAccountIdentifier(principal, 0)) {
+                resolve([]);
+              } else {
+                api.user_tokens(Principal.fromText(principal)).then(r => {
+                  resolve(r.map(x => {
+                    return {
+                      id : tokenIdentifier(tokenObj.canister, Number(x)),
+                      canister : tokenObj.canister,
+                      index : Number(x),
+                      listing : false,
+                      metadata : false,
+                      wrapped : false,
+                    }
+                  }));
+                });
+              }
+            break;
+            default:
+              if (typeof api.tokens == 'undefined') reject("Not supported");
+              else {
+                try {
+                  api.tokens(aid).then(r => {
+                    if (typeof r.ok != 'undefined') {
+                      resolve(r.ok.map(d => {
+                        return {
+                          index : d[0],
+                          id : tokenIdentifier(tokenObj.canister, d[0]),
+                          canister : tokenObj.canister,
+                          listing : d[1].length ? d[1][0] : false,
+                          metadata : d[2].length ? d[2][0] : false,
+                        }
+                      }));
+                    }else if (typeof r.err != 'undefined') {
+                      if (r.err.hasOwnProperty("Other") && r.err.Other === "No tokens") {
+                        resolve([]);
+                      } else reject(r.err)
+                    } else reject(r);
+                  }).catch(reject);
+                } catch(e) {
+                  reject(e);
+                };
+              };
+            break;
+          }
+        });
       },
       getMetadata : () => {
         switch(tokenObj.canister) {

@@ -26,9 +26,6 @@ const styles = {
   },
 };
 export default function NFTCard(props) {
-  const currentPrincipal = useSelector(state => state.currentPrincipal)
-  const currentAccount = useSelector(state => state.currentAccount)
-  const nfts = useSelector(state => state.principals[currentPrincipal].accounts[currentAccount].nfts)
   const handleClick = () => {
     props.onClick();
   };
@@ -41,7 +38,7 @@ export default function NFTCard(props) {
               Non Fungible Tokens
             </Typography>
             <Typography variant="h6" >
-            {nfts.length} NFT{nfts.length === 1 ? "" : "s"}
+            {props.count}{typeof props.count != "string" ? <> NFT{props.count === 1 ? "" : "s"}</> : ""}
             </Typography>
             {/*<Typography style={styles.pos} color={props.selected ? "inherit" : "textSecondary"}>
               ~$123.04USD

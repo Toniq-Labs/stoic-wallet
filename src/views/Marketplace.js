@@ -33,6 +33,16 @@ const collections = [
     ),
   },
   {
+    canister: "er7d4-6iaaa-aaaaj-qac2q-cai",
+    name: "MoonWalkers",
+    route: "moonwalkers",
+    nftv : false,
+    mature: false,
+    commission: 0,//0.035,
+    comaddress: "2455059d792289741fb4c3128be9dfcf25474e161923c78c37bd53c457b24e60",
+    blurb: false,
+  },
+  {
     canister: "e3izy-jiaaa-aaaah-qacbq-cai",
     name: "Cronic Critters",
     route: "cronics",
