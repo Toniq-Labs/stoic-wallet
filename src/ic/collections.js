@@ -12,6 +12,9 @@ export default [
     blurb: (
       <>
         <p style={{display:"none"}}><strong>The Cronic's Marketplace is offline during our Public Sale (starting 18.10 3PM UTC). Please head over to the <a href="https://cronic.toniqlabs.com/" target="_blank">Cronic Dashboard</a> if you would like to participate. The marketplace will be online as soon as the sales conclude. You can still delist your Cronics during this time</strong></p>
+        <a style={{display:"none"}} href="https://cronic.toniqlabs.com/" target="_blank"><img style={{maxWidth:800}} src="https://cronic.toniqlabs.com/banner.png" /></a>
+        Cronics is a Play-to-earn NFT game being developed by ToniqLabs for the
+        Internet Computer. Cronics incorporates breeding mechanics, wearable
         NFTs and a p2e minigame ecosystem and more. Join the{" "}
         <a href="https://t.me/cronic_fun" target="_blank" rel="noreferrer">
           Telegram group
@@ -182,7 +185,7 @@ export default [
     blurb: (
       <>
         To escape from containment and restriction, releasing the stressors held
-        so long in the body, Wingsï¿½s ego is jettisoned as she explores a more
+        so long in the body, Wings’s ego is jettisoned as she explores a more
         fundamental form of existence, expressing her humanity in this elemental
         piece.
         <br />
