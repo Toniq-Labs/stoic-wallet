@@ -57,7 +57,7 @@ export default function SendNFTForm(props) {
     extjs.connect("https://boundary.ic0.app/", id).token(props.nft.id).transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify).then(r => {
       if (r !== false) {
         if (r > 0n) {
-          dispatch({ type: 'account/nft/remove', payload: {id:props.nft.id}});
+          props.loadNfts();
           return props.alert("Transaction complete", "Your transfer was sent successfully");
         } else { 
           return props.alert("You were successful!", "You completed an advanced NFT action!");

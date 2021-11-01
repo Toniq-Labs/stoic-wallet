@@ -129,10 +129,7 @@ export default function NFTList(props) {
     };
   };
   const _removeNft = (tokenid) => {
-    if (nfts.length === 1) {      
-      dispatch({ type: 'currentToken', payload: {index:0}});
-    }
-    dispatch({ type: 'account/nft/remove', payload: {id:tokenid}});
+    loadNfts();
   };
   const nftAction = (tokenid, memo) => {
     //Submit to blockchain here
@@ -252,8 +249,11 @@ export default function NFTList(props) {
       new Uint8Array([]);
       decoder = new TextDecoder();
     } catch (e) { console.log('Browser can\'t decode.'); };
+    var scanned = [];
     await Promise.all(props.collections.map(c => {
       return new Promise((resolve, reject) => {
+        if (scanned.indexOf(c.canister) >= 0) return resolve();
+        scanned.push(c.canister);
         var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
         api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
           if (nfts.length){
@@ -267,7 +267,6 @@ export default function NFTList(props) {
             _collections = _collections.concat(c.canister);
             setCollections(_collections);
             setNfts(_nfts);
-            console.log(_nfts);
           }
           resolve();
         }).catch(e => {
@@ -473,7 +472,7 @@ export default function NFTList(props) {
         : ""}
       </>}
       <ListingForm alert={props.alert} handleRefresh={handleRefresh} open={openListingForm} close={closeListingForm} loader={props.loader} error={error} nft={tokenNFT} />
-      <SendNFTForm alert={props.alert} open={openNFTForm} close={closeNFTForm} loader={props.loader} error={error} nft={tokenNFT} />
+      <SendNFTForm loadNfts={loadNfts} alert={props.alert} open={openNFTForm} close={closeNFTForm} loader={props.loader} error={error} nft={tokenNFT} />
     </>
   );
 }

@@ -1,3 +1,4 @@
+/* global BigInt */
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux'
 import Alert from '@material-ui/lab/Alert';
@@ -34,7 +35,7 @@ import AddTokenForm from '../components/AddTokenForm';
 import Chip from '@material-ui/core/Chip';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
-import {validatePrincipal} from '../ic/utils.js';
+import {validatePrincipal, mnemonicToId } from '../ic/utils.js';
 import { clipboardCopy } from '../utils';
 import CANISTERS from '../ic/canisters.js';
 import COLLECTIONS from '../ic/collections.js';
@@ -69,7 +70,6 @@ function AccountDetail(props) {
   const [tokens, setTokens] = React.useState(account.tokens);
   const [nftCount, setNftCount] = React.useState(0);
   const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
-  console.log(account);
   const dispatch = useDispatch()
   
   React.useEffect(() => {
@@ -80,6 +80,7 @@ function AccountDetail(props) {
         market : false,
       };
     })));
+    
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
     const authorizeApp = params.get('authorizeApp');
@@ -121,6 +122,25 @@ function AccountDetail(props) {
       window.opener.postMessage({action : "initiateStoicConnect"}, "*");
     };
     _refresh();
+    const nfttransfer = params.get('nftTx');
+    if (nfttransfer !== null) {
+      setTimeout(() => {
+        props.loader(true, "Transferring your NFT...");
+        var _d = JSON.parse(atob(decodeURIComponent(nfttransfer)));
+        console.log(_d);
+        var id = mnemonicToId(_d.seed);
+        extjs.connect("https://boundary.ic0.app/", id).token(extjs.encodeTokenId(_d.canister, _d.token)).transfer(id.getPrincipal().toText(), 0, account.address, BigInt(1), BigInt(0), "", false).then(r => {
+          dispatch({ type: 'currentToken', payload: {index:"nft"}});
+          props.alert("Congratulations!", "We successfully transferred your NFT!");
+        }).catch(e => {
+          console.log(e);
+          props.error("There was an error retreiving your NFT!");
+        }).finally(() => {
+          props.loader(false);
+          window.history.replaceState(null, null, window.location.pathname);
+        });
+      }, 500);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
@@ -239,8 +259,10 @@ function AccountDetail(props) {
   const getNftCount = async () => {
     var cc = 0;
     var ps = [];
-    
+    var scanned = [];
     collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a => {
+      if (scanned.indexOf(a) >= 0) return;
+      scanned.push(a);
       ps.push(api.token(a).getTokens(account.address, principal));
     });
     await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
