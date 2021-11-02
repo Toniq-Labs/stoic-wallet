@@ -14,8 +14,10 @@ import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
 import TwitterIcon from '@material-ui/icons/Twitter';
 import FacebookIcon from '@material-ui/icons/Facebook';
+import SnackbarButton from '../components/SnackbarButton';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import MailIcon from '@material-ui/icons/Mail';
+import { clipboardCopy } from '../utils';
 
 import {StoicIdentity} from '../ic/identity.js';
 import { useFilePicker } from 'use-file-picker';
@@ -261,9 +263,21 @@ export default function WalletDialog(props) {
               })}
             </div>
             <p>Write your mnemonic down on a physical piece of paper and store it somewhere safe and private. Anyone who knows this can transfer funds out of your account.</p>
+            <p style={{textAlign:"center"}}>
+              <SnackbarButton
+                    message="Seed Words Copied"
+                    anchorOrigin={{
+                      vertical: 'bottom',
+                      horizontal: 'left',
+                    }}
+                    onClick={() => clipboardCopy(newMnemonic)}
+                  >
+                <Button color={"primary"} variant={"outlined"}>Copy Seed Phrase</Button>
+              </SnackbarButton>
+            </p>
           </DialogContent>
           <DialogActions>
-            <Button onClick={cancel} color="primary">Cancel</Button>
+            <Button onClick={cancel} color="error">Cancel</Button>
             <Button onClick={() =>  setRoute("confirmMnemonic")} color="primary">Continue</Button>
           </DialogActions> 
         </Dialog>

@@ -88,6 +88,9 @@ function Wallet(props) {
   const [toolbarTitle, setToolbarTitle] = React.useState(routes[route].title);
   const dispatch = useDispatch()
   
+  const handleDrawerClose = () => {
+    setMobileOpen(false);
+  };
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
@@ -151,7 +154,7 @@ function Wallet(props) {
           </div>
         </Toolbar>
       </AppBar>
-      <AccountDrawer lockWallet={lockWallet} changeRoute={changeRoute} onClose={handleDrawerToggle} open={mobileOpen} />
+      <AccountDrawer lockWallet={lockWallet} changeRoute={changeRoute} onClose={handleDrawerClose} open={mobileOpen} />
       <main className={classes.content}>
         <div className={classes.toolbar} />
           {renderView(route)}
