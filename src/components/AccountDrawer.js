@@ -64,7 +64,7 @@ export default function AccountDrawer(props) {
         {accounts.map((account, index) => {
           return (
             <div key={index}>
-              <ListItem button onClick={() => props.changeRoute('accountDetail', index)}>
+              <ListItem button onClick={() => {props.onClose(); props.changeRoute('accountDetail', index)}}>
                 <ListItemAvatar>
                   <Avatar>
                     <Blockie address={account.address} />
@@ -90,28 +90,28 @@ export default function AccountDrawer(props) {
       </List>
       <Divider />
       <List>
-        <ListItem button onClick={() => props.changeRoute('addressBook')}>
+        <ListItem button onClick={() => {props.onClose(); props.changeRoute('addressBook')}}>
           <ListItemIcon><PeopleIcon /></ListItemIcon>
           <ListItemText primary="Address Book" />
         </ListItem>
-        <ListItem button onClick={() => props.changeRoute('neurons')}>
+        <ListItem button onClick={() => {props.onClose(); props.changeRoute('neurons')}}>
           <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
           <ListItemText primary="Neurons" />
         </ListItem>
-        <ListItem button onClick={() => props.changeRoute('marketplace')}>
+        <ListItem button onClick={() => {props.onClose(); props.changeRoute('marketplace')}}>
           <ListItemIcon><StorefrontIcon /></ListItemIcon>
           <ListItemText primary="Marketplace *BETA*" />
         </ListItem>
-        <ListItem button onClick={() => props.changeRoute('tokenregistry')}>
+        <ListItem button onClick={() => {props.onClose(); props.changeRoute('tokenregistry')}}>
           <ListItemIcon><ListIcon /></ListItemIcon>
           <ListItemText primary="Token Registry" />
         </ListItem>
-        <ListItem button onClick={() => props.changeRoute('applications')}>
+        <ListItem button onClick={() => {props.onClose(); props.changeRoute('applications')}}>
           <ListItemIcon><AppsIcon /></ListItemIcon>
           <ListItemText primary="Applications" />
         </ListItem>
         {idtype === 'watch' ? "" :
-        <ListItem button onClick={() => props.lockWallet()}>
+        <ListItem button onClick={() => {props.onClose(); props.lockWallet()}}>
           <ListItemIcon><LockIcon /></ListItemIcon>
           <ListItemText primary="Lock Wallet" />
         </ListItem> }

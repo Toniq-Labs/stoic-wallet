@@ -39,6 +39,7 @@ import {validatePrincipal, mnemonicToId } from '../ic/utils.js';
 import { clipboardCopy } from '../utils';
 import CANISTERS from '../ic/canisters.js';
 import COLLECTIONS from '../ic/collections.js';
+import { makeStyles } from '@material-ui/core/styles';
 function useInterval(callback, delay) {
   const savedCallback = React.useRef();
   // Remember the latest callback.
@@ -57,8 +58,20 @@ function useInterval(callback, delay) {
     }
   }, [delay]);
 }
+const useStyles = makeStyles((theme) => ({
+  accountAvatar: {
+    width:110, 
+    height:110,
+    [theme.breakpoints.down('sm')]: {
+      width:80, 
+      height:80,
+    },
+  }
+
+}));
 const api = extjs.connect("https://boundary.ic0.app/");
 function AccountDetail(props) {
+  const classes = useStyles();
   const currentToken = useSelector(state => state.currentToken);
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount);
@@ -270,14 +283,10 @@ function AccountDetail(props) {
   };
   return (
     <div style={styles.root}>
-      {currentAccount === 0 ?
-      <Alert severity="error">If you want to receive <strong>ICPunks</strong> (or other tokens that don't support addresses), then please ensure you are sending to the <Chip color={"primary"} size="small" label="Principal ID" /></Alert> : ""}
-      {currentAccount !== 0 ?
-      <Alert severity="error">If you want to receive <strong>ICPunks</strong> (or other tokens that don't support addresses) then please switch to your Main account.</Alert> : ""}
       <List>
         <ListItem>
           <ListItemAvatar>
-            <Avatar style={{width:110, height:110}}>
+              <Avatar className={classes.accountAvatar}>
               <Blockie address={account.address} />
             </Avatar>
           </ListItemAvatar>
@@ -285,11 +294,38 @@ function AccountDetail(props) {
             style={{paddingLeft:20}}
             primaryTypographyProps={{noWrap:true, variant:'h4'}} 
             secondaryTypographyProps={{noWrap:true, variant:'subtitle1'}} 
-            primary={account.name}
+            primary={
+            <>
+            {account.name}
+            <span style={{display:"block",float:"right"}}>
+              <InputForm
+                onClick={editAccountName}
+                title="Change Account Name"
+                inputLabel="Account Name"
+                secondaryInput={false}
+                content="Enter a new friendly name for this account."
+                defaultValue={account.name}
+                buttonLabel="Save"
+              >
+                <Tooltip title="Edit account name">
+                  <IconButton edge="end" aria-label="edit">
+                    <EditIcon />
+                  </IconButton>
+                </Tooltip>
+              </InputForm>
+              <Tooltip title="View in explorer (ic.rocks)">
+                <IconButton href={"https://ic.rocks/account/"+account.address} target="_blank" edge="end" aria-label="search">
+                  <LaunchIcon />
+                </IconButton>
+              </Tooltip>
+              </span>
+            </>}
             secondary={
               <>
-                <div style={{overflow: "hidden", textOverflow: "ellipsis", fontSize:"0.9em"}}>
+                <div style={{fontSize:"0.9em"}}>
+                  <span style={{overflow: "hidden", textOverflow: "ellipsis", display: "inline-block", maxWidth:"85%"}}>
                   <Chip color={"secondary"} style={{fontSize:"0.9em"}} size="small" label="Address" /> {account.address.substr(0, 29)+"..."}
+                  </span>
                   <SnackbarButton
                     message="Address Copied"
                     anchorOrigin={{
@@ -298,14 +334,16 @@ function AccountDetail(props) {
                     }}
                     onClick={() => clipboardCopy(account.address)}
                   >
-                    <IconButton size="small" edge="end" aria-label="copy">
+                    <IconButton style={{top:"-10px",}} size="small" edge="end" aria-label="copy">
                       <FileCopyIcon style={{ fontSize: 18 }} />
                     </IconButton>
                   </SnackbarButton>
                 </div>
                 {currentAccount === 0 ?
-                <div style={{overflow: "hidden", textOverflow: "ellipsis", fontSize:"0.9em", marginTop:"2px"}}>
+                <div style={{fontSize:"0.9em"}}>
+                  <span style={{overflow: "hidden", textOverflow: "ellipsis", display: "inline-block", maxWidth:"85%"}}>
                   <Chip color={"primary"} style={{fontSize:"0.9em"}} size="small" label="Principal ID" /> {principal.substr(0, 32)+"..."}
+                  </span>
                   <SnackbarButton
                     message="Principal ID Copied"
                     anchorOrigin={{
@@ -314,7 +352,7 @@ function AccountDetail(props) {
                     }}
                     onClick={() => clipboardCopy(principal)}
                   >
-                    <IconButton size="small" edge="end" aria-label="copy">
+                    <IconButton style={{top:"-10px",}} size="small" edge="end" aria-label="copy">
                       <FileCopyIcon style={{ fontSize: 18 }} />
                     </IconButton>
                   </SnackbarButton>
@@ -322,26 +360,7 @@ function AccountDetail(props) {
               </>
             }              />
           <ListItemSecondaryAction>
-            <InputForm
-              onClick={editAccountName}
-              title="Change Account Name"
-              inputLabel="Account Name"
-              secondaryInput={false}
-              content="Enter a new friendly name for this account."
-              defaultValue={account.name}
-              buttonLabel="Save"
-            >
-              <Tooltip title="Edit account name">
-                <IconButton edge="end" aria-label="edit">
-                  <EditIcon />
-                </IconButton>
-              </Tooltip>
-            </InputForm>
-            <Tooltip title="View in explorer (ic.rocks)">
-              <IconButton href={"https://ic.rocks/account/"+account.address} target="_blank" edge="end" aria-label="search">
-                <LaunchIcon />
-              </IconButton>
-            </Tooltip>
+            
           </ListItemSecondaryAction>
         </ListItem>
       </List>
