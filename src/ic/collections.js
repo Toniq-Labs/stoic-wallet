@@ -296,15 +296,10 @@ export default [
     route: "wildwest",
     nftv : false,
     mature: false,
+    market : true,
     commission: 0.035,
     comaddress:
       "9616e04724bd990eda94a848cbfe0dab273d6d663dee7e40e6e314fb34395dcd",
-    blurb: (
-      <>
-        <p>Wild and West: The Journey Begins. We’re excited to have you! Here are some of the amazing perks you get for participating in our pre-sale: access to the "Maverick" role in Discord along with its very own exclusive channel, daily NFT updates, and the chance to help us decide rarity. You will also be granted access to Keak the moment it launches, the chance to learn how genesis works, and any first glimpses at all future projects (collaborations and other). For more information <a href="https://t.co/v7Gy1l1ILi" target="_blank">click here</a>. We can’t thank you enough for all of your support. Welcome to the Wild and West!</p>
-        <strong>Important: These NFTs are placeholder NFTs, holders will receive the real Minted NFTs on December 1st. All placeholders are equal.</strong>
-      </>
-    ),
   },
   {
     canister: "btggw-4aaaa-aaaah-qcdgq-cai",
@@ -312,15 +307,10 @@ export default [
     route: "icpumpkins",
     nftv : false,
     mature: false,
+    market : true,
     commission: 0.035,
     comaddress:
       "9616e04724bd990eda94a848cbfe0dab273d6d663dee7e40e6e314fb34395dcd",
-    blurb: (
-      <>
-        <p>Halloween lovers only! ICPumpkin is 2222 unique pumpkins! The collection consists of 20 really different cool characters, each with their own mood and costume for this holiday. Halloween isn’t just for candy anymore!
-Specially for internet computer. Follow us on twitter: <a href="https://twitter.com/ICPumpkin" target="_blank">@ICPumpkin</a></p>
-      </>
-    ),
   },
   {
     canister: "cihkf-qyaaa-aaaah-qb7jq-cai",
@@ -351,9 +341,94 @@ Specially for internet computer. Follow us on twitter: <a href="https://twitter.
     canister: "bid2t-gyaaa-aaaah-qcdea-cai",
     name: "Haunted Hamsters",
     route: "hauntedhamsters",
+    market : false,
     nftv : false,
     mature: false,
     commission: 0.0,
     comaddress: "35b902472e845179b3d6ad9ff7079fee6bcadb4e0ca870230ba7a79757fa88fb",
+  },
+  
+  
+  {
+    canister: "dv6u3-vqaaa-aaaah-qcdlq-cai",
+    name: "Tyler Monsein & Dakota Light-Smith",
+    route: "tylerdakota",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.1,
+    comaddress:
+      "f9deb8b1752f6230f1f86c9ca0b7c613120733acadd3a3279ea843523f22d974",
+  },
+  
+  {
+    canister: "crt3j-mqaaa-aaaah-qcdnq-cai",
+    name: "Neil White",
+    route: "neilwhite",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.1,
+    comaddress:
+      "6d4aba3426e332add7b55d88a005805b436e98bec092f42e89510596a3ac8ee5",
+  },
+  
+  {
+    canister: "cnxby-3qaaa-aaaah-qcdpq-cai",
+    name: "André Wee",
+    route: "andrewee",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.1,
+    comaddress:
+      "ccac00c36859008eb9d33597f2c51ff8778dc4d3146d992b453eb330dee3f41c",
+  },
+  {
+    canister: "eb7r3-myaaa-aaaah-qcdya-cai",
+    name: "Iconic2021",
+    route: "iconic2021",
+    nftv : false,
+    mature: false,
+    market : true,
+    commission: 0.035,
+    comaddress:
+      "c7e461041c0c5800a56b64bb7cefc247abc0bbbb99bd46ff71c64e92d9f5c2f9",
+  },
+  
+  
+  {
+    canister: "ckwhm-wiaaa-aaaah-qcdpa-cai",
+    name: "PatternBased",
+    route: "patternbased",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.1,
+    comaddress:
+      "fa603565b08636498f83d493c33b8cab22ddeb59eae7ffde782a5f3f35634c6d",
+  },
+  
+  {
+    canister: "cdvmq-aaaaa-aaaah-qcdoq-cai",
+    name: "Selay Karasu",
+    route: "selaykarasu",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.1,
+    comaddress:
+      "b4e5130404276e730dbf04515621ccae616f6665a451c0ad57daa6d2c668b62e",
+  },
+  
+  {
+    canister: "oeee4-qaaaa-aaaak-qaaeq-cai",
+    name: "Motoko Day Drop",
+    route: "motoko",
+    market : true,
+    nftv : true,
+    mature: false,
+    commission: 0.035,
+    comaddress: "09b739076e074550862930ca17f662485076a6af60cc1b0e9a1f50b058d767c9",
   },
 ];

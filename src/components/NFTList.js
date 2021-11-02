@@ -179,6 +179,7 @@ export default function NFTList(props) {
   };
   const handleRefresh = () => {
     //getTokenDetails(tokenNFT.id, true)
+    loadNfts();
   };
   const closeListingForm = () => {
     setOpenListingForm(false);

@@ -34,7 +34,7 @@ export default function ListingForm(props) {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error("Something wrong with your wallet, try logging in again");
-    props.loader(true);
+    props.loader(true, "Listing NFT...");
     handleClose();
     extjs.connect("https://boundary.ic0.app/", id).token(props.nft.id).list(_from_sa, _price).then(r => {
       if (r) {

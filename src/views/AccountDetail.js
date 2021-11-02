@@ -212,11 +212,11 @@ function AccountDetail(props) {
   var ignoreOwnership = false;
   const refreshTokens = async () => {
     props.loader(true);
+    setChildRefresh(prev => prev + 1);
     await _refresh();
     props.loader(false);
   };
   const _refresh = async () => {
-    //setChildRefresh(prev => prev + 1);
     await getNftCount();
   };
   const _addToken = (cid, checkBearer) => {
