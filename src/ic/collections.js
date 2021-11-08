@@ -30,6 +30,52 @@ export default [
       </>
     ),
   },
+  
+  {
+    canister: "nfvlz-jaaaa-aaaah-qcciq-cai",
+    name: "IC3D",
+    route: "ic3d",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.035,
+    comaddress: "b29f5dc935f0457df12c9f91a58d77e192a0acb00694ca473d342063d375656c",
+  },
+  
+  {
+    canister: "dknxi-2iaaa-aaaah-qceuq-cai",
+    name: "Dfinity Bulls",
+    route: "bulls",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.035,
+    comaddress: "ae5cf8b282013bffd28908f1c4afad389a07e474a02f9a8e48bcc07cc63b05b4",
+  },
+  
+  {
+    canister: "bzsui-sqaaa-aaaah-qce2a-cai",
+    name: "Poked Bots",
+    route: "poked",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.035,
+    comaddress: "ace16992dcde53c7c67b396b65924be0e19bed8704a2a68b9cc794d100c3cd17",
+  },
+  
+  
+  {
+    canister: "gyuaf-kqaaa-aaaah-qceka-cai",
+    market : true,
+    name: "Infernal Vampire Colony",
+    route: "ivc",
+    nftv : false,
+    mature: false,
+    commission: 0.035,
+    comaddress: "7243722b9db43a26170b2bbc065b02f5ca2d1836ddaaee5ef05fc043a01f9ed9",
+    blurb: false,
+  },
   {
     canister: "pnpu4-3aaaa-aaaah-qcceq-cai",
     market : true,
@@ -115,6 +161,17 @@ export default [
         </a>
       </>
     ),
+  },
+  {
+    canister: "ep54t-xiaaa-aaaah-qcdza-cai",
+    market : true,
+    name: "ICPuppy Wearables",
+    route: "icpuppy-wearables",
+    nftv : false,
+    mature: false,
+    commission: 0.035,
+    comaddress: "9f76290b181807c5fa3c7cfcfca2525d578a3770f40ae8b14a03a4a3530368e2",
+    blurb: false,
   },
   {
     canister: "bxdf4-baaaa-aaaah-qaruq-cai",

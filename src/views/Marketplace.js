@@ -18,6 +18,49 @@ import Listing from '../components/Listing';
 const perPage = 30;
 const api = extjs.connect("https://boundary.ic0.app/");
 const collections = [
+  // {
+    // canister: "bid2t-gyaaa-aaaah-qcdea-cai",
+    // market : true,
+    // name: "Haunted Hamsters",
+    // route: "hauntedhamsters",
+    // nftv : false,
+    // mature: false,
+    // commission: 0,
+    // comaddress: "35b902472e845179b3d6ad9ff7079fee6bcadb4e0ca870230ba7a79757fa88fb",
+    // blurb: false,
+  // },
+  {
+    canister: "gyuaf-kqaaa-aaaah-qceka-cai",
+    market : true,
+    name: "Infernal Vampire Colony",
+    route: "ivc",
+    nftv : false,
+    mature: false,
+    commission: 0,
+    comaddress: "7243722b9db43a26170b2bbc065b02f5ca2d1836ddaaee5ef05fc043a01f9ed9",
+    blurb: false,
+  },
+  {
+    canister: "nfvlz-jaaaa-aaaah-qcciq-cai",
+    name: "IC3D",
+    route: "ic3d",
+    nftv : false,
+    mature: false,
+    commission: 0,//0.035,
+    comaddress: "2455059d792289741fb4c3128be9dfcf25474e161923c78c37bd53c457b24e60",
+    blurb: false,
+  },
+  
+  // {
+    // canister: "er7d4-6iaaa-aaaaj-qac2q-cai",
+    // name: "MoonWalkers",
+    // route: "moonwalkers",
+    // nftv : false,
+    // mature: false,
+    // commission: 0,//0.035,
+    // comaddress: "2455059d792289741fb4c3128be9dfcf25474e161923c78c37bd53c457b24e60",
+    // blurb: false,
+  // },
   {
     canister: "ahl3d-xqaaa-aaaaj-qacca-cai",
     name: "ICTuTs",
@@ -31,16 +74,6 @@ const collections = [
         We will have all of the 10,000 NFTs available for sale at launch, there will be 5 price tiers (Thirty NFTs will be reserved for the creators). We will try to distrube them fairly as possible by whitelisting.
       </>
     ),
-  },
-  {
-    canister: "er7d4-6iaaa-aaaaj-qac2q-cai",
-    name: "MoonWalkers",
-    route: "moonwalkers",
-    nftv : false,
-    mature: false,
-    commission: 0,//0.035,
-    comaddress: "2455059d792289741fb4c3128be9dfcf25474e161923c78c37bd53c457b24e60",
-    blurb: false,
   },
   {
     canister: "e3izy-jiaaa-aaaah-qacbq-cai",
