@@ -242,7 +242,7 @@ export default [
     blurb: (
       <>
         To escape from containment and restriction, releasing the stressors held
-        so long in the body, Wings’s ego is jettisoned as she explores a more
+        so long in the body, Wingsï¿½s ego is jettisoned as she explores a more
         fundamental form of existence, expressing her humanity in this elemental
         piece.
         <br />
@@ -390,6 +390,11 @@ export default [
     market : false,
   },
   {
+    canister: "nges7-giaaa-aaaaj-qaiya-cai",
+    name: "Saga Legends: #1 The Fool",
+    market : false,
+  },
+  {
     canister: "xkbqi-2qaaa-aaaah-qbpqq-cai",
     name: "ICPBunny",
     market : false,
@@ -432,7 +437,7 @@ export default [
   
   {
     canister: "cnxby-3qaaa-aaaah-qcdpq-cai",
-    name: "André Wee",
+    name: "Andrï¿½ Wee",
     route: "andrewee",
     market : false,
     nftv : false,
