@@ -14,6 +14,7 @@ var nftAutoSearch = [
   "kss7i-hqaaa-aaaah-qbvmq-cai", 
   "k4qsa-4aaaa-aaaah-qbvnq-cai", 
   "uwroj-kaaaa-aaaaj-qabxa-cai",
+  "nges7-giaaa-aaaaj-qaiya-cai",
   "njgly-uaaaa-aaaah-qb6pa-cai",
   "cihkf-qyaaa-aaaah-qb7jq-cai",
   "sr4qi-vaaaa-aaaah-qcaaq-cai",
