@@ -295,7 +295,7 @@ export default function NFTList(props) {
   React.useEffect(() => {
     loadNfts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount, props.childRefresh]);
+  }, [currentAccount, props.childRefresh, props.collections]);
   React.useEffect(() => {
     setPage(1);
   }, [collection]);
