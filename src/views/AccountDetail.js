@@ -40,6 +40,7 @@ import { clipboardCopy } from '../utils';
 import CANISTERS from '../ic/canisters.js';
 import COLLECTIONS from '../ic/collections.js';
 import { makeStyles } from '@material-ui/core/styles';
+import { getNftsListIntersection, useDab } from '../hooks/useDab';
 function useInterval(callback, delay) {
   const savedCallback = React.useRef();
   // Remember the latest callback.
@@ -84,15 +85,24 @@ function AccountDetail(props) {
   const [nftCount, setNftCount] = React.useState(0);
   const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
   const dispatch = useDispatch()
+  const { dabCollections, dabNfts } = useDab();
   
   React.useEffect(() => {
-    setCollections(COLLECTIONS.concat(account.nfts.filter(a => (a && COLLECTIONS.findIndex(b => b.id === a) < 0)).map(a => {
-      return {
-        canister : a,
-        name : a,
-        market : false,
-      };
-    })));
+    const dab = dabCollections.filter(
+      (a) => a && COLLECTIONS.findIndex((b) => b.id === a.canister) < 0,
+    );
+    const newCollection = COLLECTIONS.concat(dab).concat(
+      account.nfts
+        .filter((a) => a && COLLECTIONS.findIndex((b) => b.id === a) < 0)
+        .map((a) => {
+          return {
+            canister: a,
+            name: a,
+            market: false,
+          };
+        }),
+    );
+    setCollections(newCollection);
     
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
@@ -157,20 +167,23 @@ function AccountDetail(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
-    setCollections(COLLECTIONS.concat(account.nfts.filter(a => (a && COLLECTIONS.findIndex(b => b.id === a) < 0)).map(a => {
-      return {
-        canister : a,
-        name : a,
-        market : false,
-      };
-    })));
-  }, [account.nfts]);
+    setCollections(
+      COLLECTIONS.concat(dabCollections).concat(
+        account.nfts
+          .filter((a) => a && COLLECTIONS.findIndex((b) => b.id === a) < 0)
+          .map((a) => {
+            return {
+              canister: a,
+              name: a,
+              market: false,
+            };
+          }),
+      ),
+    );
+  }, [account.nfts, dabCollections]);
   React.useEffect(() => {
     setNftCount("Loading...");
   }, [currentAccount, currentPrincipal]);
-  React.useEffect(() => {
-    _refresh();
-  }, [collections]);
   React.useEffect(() => {
     setTokens(account.tokens);
     _refresh();
@@ -215,9 +228,6 @@ function AccountDetail(props) {
     setChildRefresh(prev => prev + 1);
     await _refresh();
     props.loader(false);
-  };
-  const _refresh = async () => {
-    await getNftCount();
   };
   const _addToken = (cid, checkBearer) => {
     return new Promise(function(resolve, reject) { 
@@ -268,19 +278,28 @@ function AccountDetail(props) {
       });
     }
   };
-  
-  const getNftCount = async () => {
-    var cc = 0;
-    var ps = [];
-    var scanned = [];
-    collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a => {
-      if (scanned.indexOf(a) >= 0) return;
-      scanned.push(a);
-      ps.push(api.token(a).getTokens(account.address, principal));
-    });
-    await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
-    setNftCount(cc);
-  };
+
+  const getNftCount = React.useCallback(
+    async () => {
+      var ps = [];
+      var scanned = [];
+      collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a => {
+        if (scanned.indexOf(a) >= 0) return;
+        scanned.push(a);
+        ps.push(api.token(a).getTokens(account.address, principal).catch(e => {console.error(e); return [];}));
+      });
+      const stoicNfts = await Promise.all(ps.map(p => p.then(r => r).catch(e => e)));
+      const uinqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
+      setNftCount(uinqueNfts.length);
+    },[account.address, collections, dabNfts, principal]);
+
+    const _refresh = React.useCallback(async () => {
+      await getNftCount();
+    }, [getNftCount]);
+
+    React.useEffect(() => {
+      _refresh();
+    }, [_refresh, collections]);
   return (
     <div style={styles.root}>
       <List>
@@ -409,7 +428,7 @@ function AccountDetail(props) {
         </SnackbarButton>
         <Button onClick={removeToken} color={"primary"} style={{marginLeft:"20px"}} variant={"contained"} size={"small"}>Remove</Button>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
+      {currentToken === 'nft' ? <NFTList nftCount={nftCount} collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>
