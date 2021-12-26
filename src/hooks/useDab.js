@@ -3,6 +3,7 @@ import { Principal } from "@dfinity/principal";
 import { getAllUserNFTs } from "@psychedelic/dab-js";
 import React from "react";
 import { useSelector } from "react-redux";
+import { toHexString } from "../ic/utils";
 
 export const useDab = () => {
   const currentPrincipal = useSelector((state) => state.currentPrincipal);
@@ -44,6 +45,7 @@ const transformDabToStoicCollection = (dabCollection) => {
     nfts: collection.tokens.map((nft) => // this prop is not required in stoic collections but added for convenience
       transformDabToStoicNFT(nft, collection.icon),
     ),
+    standard: collection.standard,
     // comaddress ?
     // commission ?
     // route ?
@@ -56,12 +58,13 @@ const transformDabToStoicNFT = (dabToken, icon) => {
     isDabToken: true,
     allowedToList: false,
     canister: dabToken.canister,
-    id: dabToken.metadata?.id ?? String(index),
+    id: dabToken.metadata?.id ?? String(index), // we need to stringify it since stoic is expecting a string
     url: dabToken.url,
     index,
     listing: false,
-    metadata: "", // TODO defaulting to dummy string until we agree on a metadata format
+    metadata: Array.isArray(dabToken.metadata) ? toHexString(dabToken.metadata) : "", // TODO defaulting to dummy string until we agree on a metadata format
     icon, // icon should be based on content-type i.e html, img, svg, etc
+    standard: dabToken.standard,
   };
 };
 

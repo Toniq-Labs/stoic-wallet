@@ -13,6 +13,9 @@ import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {compressAddress} from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
+import { Principal } from '@dfinity/principal';
+import { getNFTActor } from '@psychedelic/dab-js'
+import { HttpAgent } from '@dfinity/agent';
 
 export default function SendNFTForm(props) {
   const addresses = useSelector(state => state.addresses);
@@ -71,6 +74,38 @@ export default function SendNFTForm(props) {
       props.loader(false);
     });
   };
+
+  const submitToDab = async () => {
+    const id = StoicIdentity.getIdentity(identity.principal);
+    if (!id)
+      return error("Something wrong with your wallet, try logging in again");
+
+    const canisterId = props.nft.canister;
+    const tokenIndex = props.nft.index;
+    const standard = props.nft.standard;
+    const _to_user = to;
+
+    const agent = await Promise.resolve(
+      new HttpAgent({ identity: id, host: "https://ic0.app" }),
+    );
+    const NFTActor = getNFTActor({ canisterId, agent, standard });
+
+    props.loader(true);
+    handleClose();
+
+    try {
+      await NFTActor.transfer(Principal.fromText(_to_user), tokenIndex);
+      props.loader(false);
+      return props.alert(
+        "Transaction complete",
+        "Your transfer was sent successfully",
+      );
+    } catch (e) {
+      props.loader(false);
+      console.error(e);
+      return error("Something went wrong with this transfer");
+    }
+  };
   const handleClose = () => {
     setStep(0);
     setTo('');
@@ -78,7 +113,7 @@ export default function SendNFTForm(props) {
     props.close()
   };
   React.useEffect(() => {
-    if (props.nft) setCanister(extjs.decodeTokenId(props.nft.id).canister);
+    if (props.nft && !props.nft.isDabToken) setCanister(extjs.decodeTokenId(props.nft.id).canister);
     else setCanister("");
     var contacts = [];
     addresses.forEach(el => {
@@ -105,8 +140,9 @@ export default function SendNFTForm(props) {
     <>
       <Dialog open={props.open} onClose={handleClose} maxWidth={'sm'} fullWidth >
         <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Send NFT</DialogTitle>
-        {step === 0 ?
-          <DialogContent>
+        {step === 0 ? 
+          props.nft.isDabToken ? <DabDialogContent setTo={setTo} setToOption={setToOption} to={to} contacts={contacts} toOption={toOption} /> 
+        : <DialogContent>
           { canister  === "bxdf4-baaaa-aaaah-qaruq-cai" ?
           <Alert severity="error">It looks like you are sending a <strong>Wrapped ICPunk</strong> - please note that some wallets (like Plug wallet) do not support Wrapped ICPunks. Please unwrap it first if this is the case.</Alert> : "" }
             <DialogContentText style={{textAlign:'center',fontWeight:'bold', marginTop:10}}>
@@ -158,10 +194,55 @@ export default function SendNFTForm(props) {
           {step === 0 ?
             <Button onClick={review} color="primary">Review Transaction</Button>
             :
-            <Button onClick={submit} color="primary">Confirm Transaction</Button>
+            <Button onClick={props.nft.isDabToken? submitToDab : submit } color="primary">Confirm Transaction</Button>
           }
         </DialogActions>
       </Dialog>
     </>
   );
 }
+
+const DabDialogContent = ({ setTo, setToOption, to, contacts, toOption, }) => {
+  return (
+    <DialogContent>
+      <Alert severity="warning">
+        It looks like you are sending your NFT through <strong>DAB service</strong> - please
+        note that you need to send it to a user Principal and NOT an address.
+      </Alert>
+      <DialogContentText
+        style={{ textAlign: "center", fontWeight: "bold", marginTop: 10 }}
+      >
+        Please enter the recipient Principal that you wish to send to
+        below.
+      </DialogContentText>
+      <Autocomplete
+        freeSolo
+        value={toOption}
+        onChange={(e, v) => {
+          if (v) {
+            setTo(v.address);
+            setToOption(v.address);
+          }
+        }}
+        inputValue={to}
+        onInputChange={(e, v) => setTo(v)}
+        getOptionLabel={(contact) => contact.name || contact}
+        groupBy={(contact) => contact.group}
+        options={contacts}
+        renderInput={(params) => (
+          <TextField
+            {...params}
+            autoFocus
+            margin="dense"
+            label="Principal of the Recipient"
+            type="text"
+            fullWidth
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
+        )}
+      />
+    </DialogContent>
+  );
+};
