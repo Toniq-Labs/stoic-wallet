@@ -428,7 +428,7 @@ function AccountDetail(props) {
         </SnackbarButton>
         <Button onClick={removeToken} color={"primary"} style={{marginLeft:"20px"}} variant={"contained"} size={"small"}>Remove</Button>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList nftCount={nftCount} collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
+      {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

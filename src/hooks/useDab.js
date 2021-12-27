@@ -36,12 +36,12 @@ export const useDab = () => {
 
 const transformDabToStoicCollection = (dabCollection) => {
   return dabCollection.map((collection) => ({
+    isDabCollection: true,
     canister: collection.canisterId,
     name: collection.name,
-    market: true,
+    market: false,
     mature: false,
     nftv: false,
-    isDabCollection: true,
     nfts: collection.tokens.map((nft) => // this prop is not required in stoic collections but added for convenience
       transformDabToStoicNFT(nft, collection.icon),
     ),
@@ -58,13 +58,14 @@ const transformDabToStoicNFT = (dabToken, icon) => {
     isDabToken: true,
     allowedToList: false,
     canister: dabToken.canister,
-    id: dabToken.metadata?.id ?? String(index), // we need to stringify it since stoic is expecting a string
+    id: dabToken.id,
     url: dabToken.url,
     index,
     listing: false,
     metadata: Array.isArray(dabToken.metadata) ? toHexString(dabToken.metadata) : "", // TODO defaulting to dummy string until we agree on a metadata format
-    icon, // icon should be based on content-type i.e html, img, svg, etc
+    icon,
     standard: dabToken.standard,
+    collection: dabToken.collection,
   };
 };
 
@@ -116,7 +117,7 @@ export const getExtraNFTS = (oldList, newList) => {
     return !oldList.some((b) => {
       return (
         // nft could have a an index or an id
-        a.canister === b.canister && (a.index === b.index || a.id === b.id)
+        a.canister === b.canister && (a.id === b.id)
       );
     });
   });
@@ -132,8 +133,7 @@ export const getNftsListIntersection = (array) => {
     if (
       !accumulator.some((x) => {
         if (
-          x.canister === current.canister &&
-          (x.index === current.index || x.id === current.id)
+          x.canister === current.canister && x.id === current.id
         ) {
           return true;
         }

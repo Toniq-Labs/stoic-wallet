@@ -313,6 +313,22 @@ export default function NFTList(props) {
     setPage(1);
   }, [collection]);
 
+  const displayMetadataInfo = (metadata) => {
+    if(typeof metadata === "string"){
+      return metadata.slice(0, 32)+"..."
+    }
+    if(typeof metadata === "object"){
+      let data;
+      try{
+        data = JSON.stringify(metadata, null, 2);
+      }catch{
+        console.error("Could not stringify metadata", metadata);
+        return ""
+      }
+      return <pre>{data}</pre>;
+    }
+  }
+
 
   return (
     <>
@@ -398,7 +414,7 @@ export default function NFTList(props) {
                     </Tooltip>
                   </TableCell>
                   <TableCell>
-                    {nft.metadata.substr(0, 32)+"..."}
+                    {displayMetadataInfo(nft.metadata)}
                     <SnackbarButton
                       message="NFT Metadata Copied"
                       anchorOrigin={{
