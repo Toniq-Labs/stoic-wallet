@@ -242,7 +242,7 @@ export default [
     blurb: (
       <>
         To escape from containment and restriction, releasing the stressors held
-        so long in the body, Wings’s ego is jettisoned as she explores a more
+        so long in the body, Wingsï¿½s ego is jettisoned as she explores a more
         fundamental form of existence, expressing her humanity in this elemental
         piece.
         <br />
@@ -432,7 +432,7 @@ export default [
   
   {
     canister: "cnxby-3qaaa-aaaah-qcdpq-cai",
-    name: "André Wee",
+    name: "Andrï¿½ Wee",
     route: "andrewee",
     market : false,
     nftv : false,
@@ -487,5 +487,16 @@ export default [
     mature: false,
     commission: 0.035,
     comaddress: "09b739076e074550862930ca17f662485076a6af60cc1b0e9a1f50b058d767c9",
+  },
+
+  {
+    canister: "hbi4x-wqaaa-aaaaj-aad7a-cai",
+    name: "BobNFTs",
+    route: "bobnfts",
+    market : false,
+    nftv : false,
+    mature: false,
+    commission: 0.1,
+    comaddress: "32fab7834bbc4c7d1bb9486f9224cd023b6d1cd4c04893bbb4c1107b58727065",
   },
 ];
