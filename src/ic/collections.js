@@ -242,7 +242,7 @@ export default [
     blurb: (
       <>
         To escape from containment and restriction, releasing the stressors held
-        so long in the body, Wings�s ego is jettisoned as she explores a more
+        so long in the body, Wings’s ego is jettisoned as she explores a more
         fundamental form of existence, expressing her humanity in this elemental
         piece.
         <br />
@@ -432,7 +432,7 @@ export default [
   
   {
     canister: "cnxby-3qaaa-aaaah-qcdpq-cai",
-    name: "Andr� Wee",
+    name: "André Wee",
     route: "andrewee",
     market : false,
     nftv : false,
