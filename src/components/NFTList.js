@@ -197,6 +197,11 @@ export default function NFTList(props) {
     props.loader(false);
     props.error(e);
   }
+  const getContentType = async url => {
+    let response = await fetch(url)
+    let contentType = response.headers.get("Content-Type");
+    return contentType
+  }
   const icpbunnyimg = i => {
     const icbstorage = ['efqhu-yqaaa-aaaaf-qaeda-cai',
     'ecrba-viaaa-aaaaf-qaedq-cai',
@@ -374,7 +379,7 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a>
+                    <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><object data={getNftImg(nft)} id={"img-"+nft.id} width="64">{compressAddress(nft.id)}</object></a>
                   </TableCell>
                   <TableCell>
                     
