@@ -197,6 +197,14 @@ export default function NFTList(props) {
     props.loader(false);
     props.error(e);
   }
+  const displayNFT = async nft => {
+    let contentType = await getContentType(getNftLink(nft));
+    if (contentType === "video/mp4") {
+      return (<a href={getNftLink(nft)} target="_blank" rel="noreferrer"><video src={getNftImg(nft)} autoPlay loop preload muted playsInline style={{width:"64px"}} >{compressAddress(nft.id)}</video></a>)
+    } else {
+      return (<a href={getNftLink(nft)} target="_blank" rel="noreferrer" style={{display:'block'}}><object data={getNftImg(nft)} id={"img-"+nft.id} width="64" style={{pointerEvents:'none'}}>{compressAddress(nft.id)}</object></a>)
+    }
+  }
   const getContentType = async url => {
     let response = await fetch(url)
     let contentType = response.headers.get("Content-Type");
