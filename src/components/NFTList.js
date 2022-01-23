@@ -36,6 +36,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
 import { getNftsListIntersection } from '../hooks/useDab';
+import NftThumbnail from './NftThumbnail';
 const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
 const _showListingPrice = n => {
@@ -198,20 +199,7 @@ export default function NFTList(props) {
     props.loader(false);
     props.error(e);
   }
-  const icpbunnyimg = i => {
-    const icbstorage = ['efqhu-yqaaa-aaaaf-qaeda-cai',
-    'ecrba-viaaa-aaaaf-qaedq-cai',
-    'fp7fo-2aaaa-aaaaf-qaeea-cai',
-    'fi6d2-xyaaa-aaaaf-qaeeq-cai',
-    'fb5ig-bqaaa-aaaaf-qaefa-cai',
-    'fg4os-miaaa-aaaaf-qaefq-cai',
-    'ft377-naaaa-aaaaf-qaega-cai',
-    'fu2zl-ayaaa-aaaaf-qaegq-cai',
-    'f5zsx-wqaaa-aaaaf-qaeha-cai',
-    'f2yud-3iaaa-aaaaf-qaehq-cai']
 
-    return "https://" +icbstorage[i % 10]+".raw.ic0.app/Token/"+i;
-  };
   const getMintNumber = nft => {
     if(nft.isDabToken) return nft.index;
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return nft.index;
@@ -222,28 +210,6 @@ export default function NFTList(props) {
     else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return nft.index;
     else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return nft.index;
     else return nft.index+1;
-  }
-  const getNftImg = nft => {
-    if(nft.isDabToken) return nft.icon;
-    if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
-    else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
-    else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
-    else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
-    else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
-    else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return icpbunnyimg(nft.index);
-    else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return icpbunnyimg(nft.index);
-    else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
-  }
-  const getNftLink = nft => {
-    if(nft.isDabToken) return nft.url
-    if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
-    else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
-    else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
-    else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
-    else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai") return "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId="+nft.index;
-    else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai") return icpbunnyimg(nft.index);
-    else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai") return icpbunnyimg(nft.index);
-    else return "https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id;
   }
   const wearableMap = ["accessories","hats","eyewear","pets"];
   const loadNfts = React.useCallback(
@@ -403,7 +369,7 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a>
+                    <NftThumbnail nft={nft} />
                   </TableCell>
                   <TableCell>
                     
