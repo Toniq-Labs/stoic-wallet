@@ -169,6 +169,39 @@ class ExtConnection {
       getTokens : (aid, principal) => {
         return new Promise((resolve, reject) => {
           switch(tokenObj.canister) {
+            //distrikt canister
+            case "ah2fs-fqaaa-aaaak-aalya-cai":
+              if (typeof api.tokens_ext == 'undefined') reject("Not supported");
+              else {
+                try {
+                  api.tokens_ext(aid).then(r => {
+                    if (typeof r.ok != 'undefined') {
+                      resolve(r.ok.map(d => {
+                        let i = -1;
+                        let metadata = "";
+                        while(i++ < d[2][0].length)
+                        {
+                          metadata+=String.fromCharCode(d[2][0][i]); 
+                        }
+                        return {
+                          index : d[0],
+                          id : tokenIdentifier(tokenObj.canister, d[0]),
+                          canister : tokenObj.canister,
+                          listing : d[1].length ? d[1][0] : false,
+                          metadata : d[2].length ? metadata : false,
+                        }
+                      }));
+                    }else if (typeof r.err != 'undefined') {
+                      if (r.err.hasOwnProperty("Other") && r.err.Other === "No tokens") {
+                        resolve([]);
+                      } else reject(r.err)
+                    } else reject(r);
+                  }).catch(reject);
+                } catch(e) {
+                  reject(e);
+                };
+              };
+            break;
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
             case "d3ttm-qaaaa-aaaai-qam4a-cai":
