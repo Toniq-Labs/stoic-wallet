@@ -73,8 +73,8 @@ export default function TopupForm(props) {
     setTo('');
   };
   React.useEffect(() => {
-    api.canister(NNS_CANISTER_ID).get_icp_to_cycles_conversion_rate().then(b => {
-      setRate(Number(b/BigInt(10**10))/(10**2));
+    api.canister("rkp4c-7iaaa-aaaaa-aaaca-cai").get_icp_xdr_conversion_rate().then(b => {
+      setRate(Number(b.data.xdr_permyriad_per_icp)/10000);
     });
     
     api.token().getBalance(props.address, identity.principal).then(b => {

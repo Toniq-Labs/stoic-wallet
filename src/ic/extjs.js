@@ -5,6 +5,7 @@ import { LEDGER_CANISTER_ID, GOVERNANCE_CANISTER_ID, NNS_CANISTER_ID, CYCLES_MIN
 import ledgerIDL from './candid/ledger.did.js';
 import governanceIDL from './candid/governance.did.js';
 import nnsIDL from './candid/nns.did.js';
+import cyclesIDL from './candid/cycles.did.js';
 import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import icpunksIDL from './candid/icpunks.did.js'; //hardcode to icpunks...
 import extIDL from './candid/ext.did.js';
@@ -70,6 +71,7 @@ class ExtConnection {
     [LEDGER_CANISTER_ID] : _preloadedIdls['ledger'],
     [GOVERNANCE_CANISTER_ID] : _preloadedIdls['governance'],
     [NNS_CANISTER_ID] : _preloadedIdls['nns'],
+    "rkp4c-7iaaa-aaaaa-aaaca-cai" : cyclesIDL,
     "qz7gu-giaaa-aaaaf-qaaka-cai" : _preloadedIdls['hzld'],
     "qcg3w-tyaaa-aaaah-qakea-cai" : _preloadedIdls['icpunks'],
     "jzg5e-giaaa-aaaah-qaqda-cai" : _preloadedIdls['icpunks'],
