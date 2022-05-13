@@ -79,21 +79,22 @@ function AccountDetail(props) {
   const apps = useSelector(state => state.principals[currentPrincipal].apps);
   const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
   const account = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {}));
-  const [collections, setCollections] = React.useState(COLLECTIONS);
+  const [collections, setCollections] = React.useState([]);
   const [tokens, setTokens] = React.useState(account.tokens);
   const [nftCount, setNftCount] = React.useState(0);
   const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
   const dispatch = useDispatch()
   
   React.useEffect(() => {
-    setCollections(COLLECTIONS.concat(account.nfts.filter(a => (a && COLLECTIONS.findIndex(b => b.id === a) < 0)).map(a => {
-      return {
-        canister : a,
-        name : a,
-        market : false,
-      };
-    })));
-    
+    fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
+      setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
+        return {
+          canister : a,
+          name : a,
+          market : false,
+        };
+      })));
+    });
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
     const authorizeApp = params.get('authorizeApp');
@@ -157,13 +158,15 @@ function AccountDetail(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
-    setCollections(COLLECTIONS.concat(account.nfts.filter(a => (a && COLLECTIONS.findIndex(b => b.id === a) < 0)).map(a => {
-      return {
-        canister : a,
-        name : a,
-        market : false,
-      };
-    })));
+    fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
+      setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
+        return {
+          canister : a,
+          name : a,
+          market : false,
+        };
+      })));
+    });
   }, [account.nfts]);
   React.useEffect(() => {
     setNftCount("Loading...");
@@ -273,7 +276,8 @@ function AccountDetail(props) {
     var cc = 0;
     var ps = [];
     var scanned = [];
-    collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a => {
+    console.log(collections);
+    collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped])).concat([]).forEach(async a => {
       if (scanned.indexOf(a) >= 0) return;
       scanned.push(a);
       ps.push(api.token(a).getTokens(account.address, principal));
