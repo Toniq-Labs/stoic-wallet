@@ -1,0 +1,35 @@
+name: fleek-iterative-deploy
+
+on:
+    push:
+        branches:
+            - 'main'
+
+jobs:
+    fleek-iterative-deploy:
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ubuntu-latest]
+                node-version: [16.x]
+        concurrency:
+            group: 'fleek-deploy'
+            cancel-in-progress: true
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  fetch-depth: 0
+            - name: Use Node.js ${{ matrix.node-version }}
+              uses: actions/setup-node@v3
+              with:
+                  node-version: ${{ matrix.node-version }}
+            - name: run deploy test
+              env:
+                  FLEEK_API_KEY: ${{ secrets.FLEEK_API_KEY }}
+                  FLEEK_SITE_ID: ${{ secrets.FLEEK_SITE_ID }}
+                  FLEEK_TEAM_ID: ${{ secrets.FLEEK_TEAM_ID }}
+                  GENERATE_SOURCEMAP: false
+              run: |
+                  npm ci
+                  npx @toniq-labs/fleek-iterative-deploy
