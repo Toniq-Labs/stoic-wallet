@@ -1,0 +1,6 @@
+[build]
+    base = "./"
+    publish = "build/"
+    command = "npm run build"
+    # CI set to false until we fix all build warnings
+    environment = {NODE_VERSION = "16", CI = "false" }
