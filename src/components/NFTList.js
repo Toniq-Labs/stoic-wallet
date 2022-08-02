@@ -259,6 +259,25 @@ export default function NFTList(props) {
         api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
           if (nfts.length){
             _nfts = _nfts.concat(nfts.map(nft => {
+              switch (c.canister)
+              {
+                case "ah2fs-fqaaa-aaaak-aalya-cai":
+                  {
+                    return {
+                      ...nft,
+                      metadata : nft.metadata,
+                      allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+                    };
+                  }
+                  default:
+                    {
+                      return {
+                        ...nft,
+                        metadata : toHexString(nft.metadata),
+                        allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+                      };
+                    }
+              }
               return {
                 ...nft,
                 metadata : toHexString(nft.metadata),
