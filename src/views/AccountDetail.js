@@ -40,6 +40,7 @@ import { clipboardCopy } from '../utils';
 import CANISTERS from '../ic/canisters.js';
 import COLLECTIONS from '../ic/collections.js';
 import { makeStyles } from '@material-ui/core/styles';
+import { getNftDabCollections, getNftsListIntersection, useDab } from '../hooks/useDab';
 function useInterval(callback, delay) {
   const savedCallback = React.useRef();
   // Remember the latest callback.
@@ -84,9 +85,39 @@ function AccountDetail(props) {
   const [nftCount, setNftCount] = React.useState(0);
   const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
   const dispatch = useDispatch()
+  const { dabCollections, dabNfts } = useDab();
   
   React.useEffect(() => {
     fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
+      console.log("collections: " + JSON.stringify(entrepotCollections));
+    
+
+      const dab = dabCollections.filter(
+        (a) => a && COLLECTIONS.findIndex((b) => b.id === a.canister) < 0,
+      );
+
+      console.log("dabCollections" + dabCollections);
+      console.log(dabCollections);
+      console.log(COLLECTIONS);
+      console.log(entrepotCollections);
+      
+
+      const newCollection = COLLECTIONS.concat(dab).concat(
+        account.nfts
+          .filter((a) => a && COLLECTIONS.findIndex((b) => b.id === a) < 0)
+          .map((a) => {
+            return {
+              canister: a,
+              name: a,
+              market: false,
+            };
+          }),
+      );
+
+      // console.log(JSON.stringify(newCollection))
+
+      // entrepotCollections.concat()
+
       setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
         return {
           canister : a,

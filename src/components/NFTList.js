@@ -35,6 +35,7 @@ import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
+import { getNftsListIntersection } from '../hooks/useDab';
 const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
 const _showListingPrice = n => {
@@ -212,6 +213,7 @@ export default function NFTList(props) {
     return "https://" +icbstorage[i % 10]+".raw.ic0.app/Token/"+i;
   };
   const getMintNumber = nft => {
+    if(nft.isDabToken) return nft.index;
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return nft.index;
@@ -222,6 +224,7 @@ export default function NFTList(props) {
     else return nft.index+1;
   }
   const getNftImg = nft => {
+    if(nft.isDabToken) return nft.icon;
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
@@ -232,6 +235,7 @@ export default function NFTList(props) {
     else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
   }
   const getNftLink = nft => {
+    if(nft.isDabToken) return nft.url
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
