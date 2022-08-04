@@ -86,25 +86,25 @@ function AccountDetail(props) {
   const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
   const dispatch = useDispatch()
   const { dabCollections, dabNfts } = useDab();
+
+
   
   React.useEffect(() => {
+    console.log("fetch called")
     fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
-      console.log("collections: " + JSON.stringify(entrepotCollections));
-    
+      // console.log("collections: " + JSON.stringify(entrepotCollections));
+      // console.log("dabcoll: " + dabCollections.length);
+
 
       const dab = dabCollections.filter(
-        (a) => a && COLLECTIONS.findIndex((b) => b.id === a.canister) < 0,
+        (a) => a && entrepotCollections.findIndex((b) => b.id === a.canister) < 0,
       );
 
-      console.log("dabCollections" + dabCollections);
-      console.log(dabCollections);
-      console.log(COLLECTIONS);
-      console.log(entrepotCollections);
-      
+      // console.log("dabcoll dab filtered: " + JSON.stringify(dab));
 
-      const newCollection = COLLECTIONS.concat(dab).concat(
+      const newCollection = entrepotCollections.concat(dab).concat(
         account.nfts
-          .filter((a) => a && COLLECTIONS.findIndex((b) => b.id === a) < 0)
+          .filter((a) => a && entrepotCollections.findIndex((b) => b.id === a) < 0)
           .map((a) => {
             return {
               canister: a,
@@ -114,11 +114,9 @@ function AccountDetail(props) {
           }),
       );
 
-      // console.log(JSON.stringify(newCollection))
+      // console.log("dabcoll new collection: " + JSON.stringify(newCollection))
 
-      // entrepotCollections.concat()
-
-      setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
+      setCollections(newCollection.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && newCollection.findIndex(b => b.id === a) < 0)).map(a => {
         return {
           canister : a,
           name : a,
@@ -126,6 +124,9 @@ function AccountDetail(props) {
         };
       })));
     });
+
+
+
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
     const authorizeApp = params.get('authorizeApp');
@@ -166,6 +167,7 @@ function AccountDetail(props) {
       } , false);
       window.opener.postMessage({action : "initiateStoicConnect"}, "*");
     };
+    
     _refresh();
     const nfttransfer = params.get('nftTx');
     if (nfttransfer !== null) {
@@ -187,18 +189,21 @@ function AccountDetail(props) {
       }, 500);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  React.useEffect(() => {
-    fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
-      setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
-        return {
-          canister : a,
-          name : a,
-          market : false,
-        };
-      })));
-    });
-  }, [account.nfts]);
+  }, [dabCollections]);
+
+  // React.useEffect(() => {
+  //   fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
+  //     console.log("set collections")
+  //     setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
+  //       return {
+  //         canister : a,
+  //         name : a,
+  //         market : false,
+  //       };
+  //     })));
+  //   });
+  // }, [account.nfts]);
+
   React.useEffect(() => {
     setNftCount("Loading...");
   }, [currentAccount, currentPrincipal]);
@@ -303,19 +308,39 @@ function AccountDetail(props) {
     }
   };
   
-  const getNftCount = async () => {
-    var cc = 0;
-    var ps = [];
-    var scanned = [];
-    console.log(collections);
-    collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped])).concat([]).forEach(async a => {
-      if (scanned.indexOf(a) >= 0) return;
-      scanned.push(a);
-      ps.push(api.token(a).getTokens(account.address, principal));
-    });
-    await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
-    setNftCount(cc);
-  };
+  // const getNftCount = async () => {
+  //   var cc = 0;
+  //   var ps = [];
+  //   var scanned = [];
+    
+  //   collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped])).concat([]).forEach(async a => {
+  //     if (scanned.indexOf(a) >= 0) return;
+  //     scanned.push(a);
+  //     ps.push(api.token(a).getTokens(account.address, principal));
+  //   });
+  //   await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
+
+  //   setNftCount(cc);
+  // };
+
+  const getNftCount = React.useCallback(
+    async () =>
+    {
+      var ps = [];
+      var scanned = [];
+      collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a =>
+      {
+        if (scanned.indexOf(a) >= 0) return;
+        scanned.push(a);
+        ps.push(api.token(a).getTokens(account.address, principal).catch(e => { console.error(e); return []; }));
+      });
+      const stoicNfts = await Promise.all(ps.map(p => p.then(r => r).catch(e => e)));
+      const uinqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
+      setNftCount(uinqueNfts.length);
+    }, [account.address, collections, dabNfts, principal]);
+
+
+
   return (
     <div style={styles.root}>
       <List>
@@ -444,7 +469,8 @@ function AccountDetail(props) {
         </SnackbarButton>
         <Button onClick={removeToken} color={"primary"} style={{marginLeft:"20px"}} variant={"contained"} size={"small"}>Remove</Button>
       </div>: ""}
-      {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
+      {/* {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""} */}
+      {currentToken === 'nft' ? <NFTList nftCount={nftCount} collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken !== 'nft' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

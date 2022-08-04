@@ -36,6 +36,8 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
 import { getNftsListIntersection } from '../hooks/useDab';
+import NftThumbnail from './NftThumbnail';
+
 const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
 const _showListingPrice = n => {
@@ -246,36 +248,83 @@ export default function NFTList(props) {
     else return "https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id;
   }
   const wearableMap = ["accessories","hats","eyewear","pets"];
-  const loadNfts = async () => {
-    var decoder;
-    var _nfts = [];
-    var _collections = [];
-    try {
-      new Uint8Array([]);
-      decoder = new TextDecoder();
-    } catch (e) { console.log('Browser can\'t decode.'); };
-    var scanned = [];
-    await Promise.all(props.collections.map(c => {
-      return new Promise((resolve, reject) => {
-        if (scanned.indexOf(c.canister) >= 0) return resolve();
-        scanned.push(c.canister);
-        var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
-        api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
-          if (nfts.length){
-            _nfts = _nfts.concat(nfts.map(nft => {
-              return {
-                ...nft,
-                metadata : toHexString(nft.metadata),
-                allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
-              };
-            }));
+
+  // const loadNfts = async () => {
+  //   var decoder;
+  //   var _nfts = [];
+  //   var _collections = [];
+  //   try {
+  //     new Uint8Array([]);
+  //     decoder = new TextDecoder();
+  //   } catch (e) { console.log('Browser can\'t decode.'); };
+  //   var scanned = [];
+  //   await Promise.all(props.collections.map(c => {
+  //     return new Promise((resolve, reject) => {
+  //       if (scanned.indexOf(c.canister) >= 0) return resolve();
+  //       scanned.push(c.canister);
+  //       var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
+  //       api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
+  //         if (nfts.length){
+  //           _nfts = _nfts.concat(nfts.map(nft => {
+  //             return {
+  //               ...nft,
+  //               metadata : toHexString(nft.metadata),
+  //               allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+  //             };
+  //           }));
+  //           _collections = _collections.concat(c.canister);
+  //           setCollections(_collections);
+  //           setNfts(_nfts);
+  //         }
+  //         resolve();
+  //       }).catch(e => {
+  //         api.token(c.canister).getTokensLegacy(account.address, identity.principal).then(nfts => {
+  //           if (nfts.length){
+  //             _nfts = _nfts.concat(nfts.map(nft => {
+  //               return {
+  //                 ...nft,
+  //                 metadata : toHexString(nft.metadata),
+  //                 allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+  //               };
+  //             }));
+  //             _collections = _collections.concat(c.canister);
+  //             setCollections(_collections);
+  //             setNfts(_nfts);
+  //           }
+  //           resolve();
+  //         }).catch(e => {
+  //           resolve();
+  //         });
+  //       });
+  //     });
+  //   }));
+  // };
+
+  const loadNfts = React.useCallback(
+    async () => {
+      var decoder;
+      var _nfts = [];
+      var _collections = [];
+      try {
+        new Uint8Array([]);
+        decoder = new TextDecoder();
+      } catch (e) { console.log('Browser can\'t decode.'); };
+      var scanned = [];
+      await Promise.all(props.collections.map(c => {
+        return new Promise((resolve, reject) => {
+          if(c.isDabCollection)
+          {
             _collections = _collections.concat(c.canister);
-            setCollections(_collections);
-            setNfts(_nfts);
+            _nfts = _nfts.concat(c.nfts);
+            console.log(_nfts);
+            setCollections([...new Set(_collections)]);
+            setNfts(getNftsListIntersection(_nfts));
+            resolve();
           }
-          resolve();
-        }).catch(e => {
-          api.token(c.canister).getTokensLegacy(account.address, identity.principal).then(nfts => {
+          if (scanned.indexOf(c.canister) >= 0) return resolve();
+          scanned.push(c.canister);
+          var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
+          api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
             if (nfts.length){
               _nfts = _nfts.concat(nfts.map(nft => {
                 return {
@@ -285,21 +334,38 @@ export default function NFTList(props) {
                 };
               }));
               _collections = _collections.concat(c.canister);
-              setCollections(_collections);
-              setNfts(_nfts);
+              setCollections([...new Set(_collections)]);
+              setNfts(getNftsListIntersection(_nfts));
             }
             resolve();
           }).catch(e => {
-            resolve();
+            api.token(c.canister).getTokensLegacy(account.address, identity.principal).then(nfts => {
+              if (nfts.length){
+                _nfts = _nfts.concat(nfts.map(nft => {
+                  return {
+                    ...nft,
+                    metadata : toHexString(nft.metadata),
+                    allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+                  };
+                }));
+                _collections = _collections.concat(c.canister);
+                setCollections([...new Set(_collections)]);
+                setNfts(getNftsListIntersection(_nfts));
+              }
+              resolve();
+            }).catch(e => {
+              resolve();
+            });
           });
         });
-      });
-    }));
-  };
+      }));
+    },[account.address, identity.principal, props.collections]);
+
+
   React.useEffect(() => {
     loadNfts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount, props.childRefresh]);
+  }, [currentAccount, props.childRefresh, props.collections.length]);
   React.useEffect(() => {
     setPage(1);
   }, [collection]);
@@ -378,7 +444,8 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a>
+                    {/* <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a> */}
+                    <NftThumbnail nft={nft} />
                   </TableCell>
                   <TableCell>
                     

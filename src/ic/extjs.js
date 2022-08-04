@@ -1,5 +1,6 @@
 /* global BigInt */
-import { Actor, HttpAgent, Principal } from "@dfinity/agent";  
+import { Actor, HttpAgent } from "@dfinity/agent";  
+import { Principal } from "@dfinity/principal";
 import { LEDGER_CANISTER_ID, GOVERNANCE_CANISTER_ID, NNS_CANISTER_ID, CYCLES_MINTING_CANISTER_ID, getCyclesTopupSubAccount, rosettaApi, principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString, validatePrincipal } from "./utils.js";
 
 import ledgerIDL from './candid/ledger.did.js';
@@ -30,13 +31,13 @@ const tokenIdentifier = (principal, index) => {
   const padding = Buffer("\x0Atid");
   const array = new Uint8Array([
       ...padding,
-      ...Principal.fromText(principal).toBlob(),
+      ...Principal.fromText(principal).toUint8Array(),
       ...to32bits(index),
   ]);
-  return Principal.fromBlob(array).toText();
+  return Principal.fromUint8Array(array).toText();
 };
 const decodeTokenId = (tid) => {
-  var p = [...Principal.fromText(tid).toBlob()];
+  var p = [...Principal.fromText(tid).toUint8Array()];
   var padding = p.splice(0, 4);
   if (toHexString(padding) !== toHexString(Buffer("\x0Atid"))) {
     return {
@@ -47,7 +48,7 @@ const decodeTokenId = (tid) => {
   } else {
     return {
       index : from32bits(p.splice(-4)), 
-      canister : Principal.fromBlob(p).toText(),
+      canister : Principal.fromUint8Array(p).toText(),
       token : tid
     };
   }
