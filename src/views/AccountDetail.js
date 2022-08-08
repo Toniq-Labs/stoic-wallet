@@ -303,11 +303,12 @@ function AccountDetail(props) {
     });
     const stoicNfts = await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
 
-    const uinqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
-        console.log(cc, stoicNfts.length, uinqueNfts.length, dabNfts.length)
-        // setNftCount(uinqueNfts.length);
-
-    let dabCount  = uinqueNfts.length - cc;
+    console.log("stoic nfts: " + stoicNfts + "dab nfts: " + dabNfts)
+    const uniqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
+    console.log(cc, stoicNfts.length, uniqueNfts.length, dabNfts.length)
+       
+    let dabCount  = uniqueNfts.length - cc;
+    if (cc < uniqueNfts.length) dabCount--;
     if (dabCount < 0) dabCount = 0  
     setDabCount(dabCount);
     setNftCount(cc);
@@ -325,9 +326,8 @@ function AccountDetail(props) {
   //       ps.push(api.token(a).getTokens(account.address, principal).catch(e => { console.error(e); return []; }));
   //     });
   //     const stoicNfts = await Promise.all(ps.map(p => p.then(r => r).catch(e => e)));
-  //     const uinqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
-  //     console.log(stoicNfts.length, uinqueNfts.length, dabNfts.length)
-  //     setNftCount(uinqueNfts.length);
+  //     const uniqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
+
   //   }, [account.address, collections, dabNfts, principal]);
 
 
