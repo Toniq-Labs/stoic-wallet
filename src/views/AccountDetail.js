@@ -93,8 +93,6 @@ function AccountDetail(props) {
   React.useEffect(() => {
     console.log("fetch called")
     fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
-      // console.log("collections: " + JSON.stringify(entrepotCollections));
-      // console.log("dabcoll: " + dabCollections.length);
 
 
       const dab = dabCollections.filter(
@@ -102,20 +100,6 @@ function AccountDetail(props) {
       );
 
       setDabCollectionList(dab);
-
-      // const newCollection = entrepotCollections.concat(dab).concat(
-      //   account.nfts
-      //     .filter((a) => a && entrepotCollections.findIndex((b) => b.id === a) < 0)
-      //     .map((a) => {
-      //       return {
-      //         canister: a,
-      //         name: a,
-      //         market: false,
-      //       };
-      //     }),
-      // );
-
-      // console.log("dabcoll new collection: " + JSON.stringify(newCollection))
 
       setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
         return {
@@ -125,8 +109,6 @@ function AccountDetail(props) {
         };
       })));
     });
-
-
 
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
@@ -325,8 +307,9 @@ function AccountDetail(props) {
         console.log(cc, stoicNfts.length, uinqueNfts.length, dabNfts.length)
         // setNftCount(uinqueNfts.length);
 
-      
-    setDabCount(uinqueNfts.length - cc);
+    let dabCount  = uinqueNfts.length - cc;
+    if (dabCount < 0) dabCount = 0  
+    setDabCount(dabCount);
     setNftCount(cc);
   };
 
