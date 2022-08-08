@@ -1,0 +1,5 @@
+/**
+ * @file RosettaApi
+ * @copyright Copyright (c) 2018-2021 Dylan Miller and dfinityexplorer contributors
+ * @license MIT License
+ */
