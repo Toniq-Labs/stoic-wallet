@@ -20,6 +20,7 @@
     "axios": "^0.21.1",
     "bigint-conversion": "^2.1.12",
     "bip39": "^3.0.4",
+    "dotenv": "^16.0.1",
     "ethereum-blockies-base64": "^1.0.2",
     "json-bigint": "^1.0.0",
     "query-string": "^4.3.4",
