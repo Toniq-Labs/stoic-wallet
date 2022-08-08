@@ -150,7 +150,7 @@ export const getNftsListIntersection = (array) => {
         return false;
       })
     ) {
-      accumulator.push(current);
+      if (current != 0) accumulator.push(current);
     }
     return accumulator;
   }, []);

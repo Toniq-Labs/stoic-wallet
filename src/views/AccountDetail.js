@@ -303,12 +303,17 @@ function AccountDetail(props) {
     });
     const stoicNfts = await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
 
-    console.log("stoic nfts: " + stoicNfts + "dab nfts: " + dabNfts)
+    // console.log("stoic nfts: " + stoicNfts + "dab nfts: " + dabNfts)
     const uniqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
-    console.log(cc, stoicNfts.length, uniqueNfts.length, dabNfts.length)
-       
+    // console.log(cc, stoicNfts.length, uniqueNfts.length, dabNfts.length )
+
+    // console.log("__________________________")
+    // console.log(...stoicNfts.flatMap(p => p))
+    // console.log("__________________________")
+    // console.log(...dabNfts)
+
+    
     let dabCount  = uniqueNfts.length - cc;
-    if (cc < uniqueNfts.length) dabCount--;
     if (dabCount < 0) dabCount = 0  
     setDabCount(dabCount);
     setNftCount(cc);

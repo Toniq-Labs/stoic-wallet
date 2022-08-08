@@ -38,7 +38,7 @@ export default function NFTCard(props) {
               {props.title}
             </Typography>
             <Typography variant="h6" >
-            {props.count > 0 ? props.count  : ''} {props.count > 0 ? typeof props.count != "string" ? <> NFT{props.count === 1 ? "" : "s"}</> : "" : 'Loading...'}
+            {props.count >= 0 ? props.count  : ''} {props.count >= 0 ? typeof props.count != "string" ? <> NFT{props.count === 1 ? "" : "s"}</> : "" : 'Loading...'}
             </Typography>
             {/*<Typography style={styles.pos} color={props.selected ? "inherit" : "textSecondary"}>
               ~$123.04USD
