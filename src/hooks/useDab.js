@@ -38,7 +38,7 @@ export const useDab = () => {
   };
 };
 
-const transformDabToStoicCollection = (dabCollection) => {
+export const transformDabToStoicCollection = (dabCollection) => {
   return dabCollection.map((collection) => ({
     isDabCollection: true,
     canister: collection.canisterId,
@@ -58,6 +58,11 @@ const transformDabToStoicCollection = (dabCollection) => {
 
 const transformDabToStoicNFT = (dabToken, icon) => {
   const index = Number(BigInt(dabToken.index).toString());
+ 
+  if (!dabToken.id)
+  {
+    dabToken.id = dabToken.index+dabToken.collection;
+  }
 
   return {
     isDabToken: true,

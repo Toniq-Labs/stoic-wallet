@@ -37,6 +37,7 @@ import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
 import { getNftsListIntersection } from '../hooks/useDab';
 import NftThumbnail from './NftThumbnail';
+import { getNftDabCollections, transformDabToStoicCollection, useDab } from '../hooks/useDab';
 
 const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
@@ -65,6 +66,7 @@ export default function NFTList(props) {
   const [collection, setCollection] = React.useState(false);
   const [collections, setCollections] = React.useState([]);
   const [wearableFilter, setWearableFilter] = React.useState('all');
+  const { dabCollections, dabNfts } = useDab();
 
   const changeWearableFilter = async (event) => {
     setPage(1);
@@ -310,8 +312,15 @@ export default function NFTList(props) {
         decoder = new TextDecoder();
       } catch (e) { console.log('Browser can\'t decode.'); };
       var scanned = [];
-      await Promise.all(props.collections.map(c => {
+
+     
+      let selectedCollection = props.collections;
+      console.log(selectedCollection);
+
+      await Promise.all(selectedCollection.map(c => {
+
         return new Promise((resolve, reject) => {
+
           if(c.isDabCollection)
           {
             _collections = _collections.concat(c.canister);
@@ -321,9 +330,10 @@ export default function NFTList(props) {
             setNfts(getNftsListIntersection(_nfts));
             resolve();
           }
+
           if (scanned.indexOf(c.canister) >= 0) return resolve();
           scanned.push(c.canister);
-          var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
+          var allowedForMarket = selectedCollection.filter(a => a.market).map(a => a.canister);
           api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
             if (nfts.length){
               _nfts = _nfts.concat(nfts.map(nft => {
@@ -359,7 +369,7 @@ export default function NFTList(props) {
           });
         });
       }));
-    },[account.address, identity.principal, props.collections]);
+    },[account.address, identity.principal, props.collections, props.currentToken]);
 
 
   React.useEffect(() => {
@@ -368,7 +378,7 @@ export default function NFTList(props) {
   }, [currentAccount, props.childRefresh, props.collections.length]);
   React.useEffect(() => {
     setPage(1);
-  }, [collection]);
+  }, [collection,  props.childRefresh, props.collections.length]);
 
 
   return (
@@ -448,7 +458,6 @@ export default function NFTList(props) {
                     <NftThumbnail nft={nft} />
                   </TableCell>
                   <TableCell>
-                    
                     {props.collections.find(a => a.canister == nft.canister)?.name ?? compressAddress(nft.canister)}<Tooltip title="View in browser">
                       <IconButton size="small" href={"https://" + nft.canister + ".raw.ic0.app"} target="_blank" edge="end" aria-label="search">
                         <LaunchIcon style={{ fontSize: 18 }} />
@@ -478,7 +487,7 @@ export default function NFTList(props) {
                   <TableCell align="right">
                       <>
                         <>
-                          <IconButton id={"more-"+nft.id} size="small" onClick={event => handleClick(nft.id, event.currentTarget)} edge="end">
+                          <IconButton id={"more-"+nft.id} size="small" onClick={ event => {console.log(nft.canister);  handleClick(nft.id, event.currentTarget)} } edge="end">
                             <MoreVertIcon />
                           </IconButton>
                           <Menu
@@ -487,7 +496,7 @@ export default function NFTList(props) {
                             open={(anchorEl !== null && anchorEl.id === nft.id)}
                             onClose={handleClose}
                           >
-                            <MenuItem onClick={() => {handleClose(); sendNft(nft)}}>
+                            <MenuItem onClick={() => {handleClose(); console.log("nft: " + nft.canister); sendNft(nft)}}>
                               <ListItemIcon>
                                 <SendIcon fontSize="small" />
                               </ListItemIcon>
