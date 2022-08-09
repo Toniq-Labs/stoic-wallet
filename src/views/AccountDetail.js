@@ -192,7 +192,7 @@ function AccountDetail(props) {
   }, [currentAccount, currentPrincipal]);
   React.useEffect(() => {
     _refresh();
-  }, [collections]);
+  }, [collections, dabCollectionList]);
   React.useEffect(() => {
     setTokens(account.tokens);
     _refresh();
