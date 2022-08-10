@@ -291,49 +291,38 @@ function AccountDetail(props) {
     }
   };
   
-  const getNftCount = async () => {
-    var cc = 0;
-    var ps = [];
-    var scanned = [];
+  // const getNftCount1 = async () => {
+  //   var cc = 0;
+  //   var ps = [];
+  //   var scanned = [];
     
-    collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped])).concat([]).forEach(async a => {
-      if (scanned.indexOf(a) >= 0) return;
-      scanned.push(a);
-      ps.push(api.token(a).getTokens(account.address, principal));
-    });
-    const stoicNfts = await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
+  //   collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped])).concat([]).forEach(async a => {
+  //     if (scanned.indexOf(a) >= 0) return;
+  //     scanned.push(a);
+  //     ps.push(api.token(a).getTokens(account.address, principal));
+  //   });
+  //   const stoicNfts = await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
 
-    // console.log("stoic nfts: " + stoicNfts + "dab nfts: " + dabNfts)
-    const uniqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
-    // console.log(cc, stoicNfts.length, uniqueNfts.length, dabNfts.length )
+  //   setDabCount(dabCollectionList.length);
+  //   setNftCount(cc);
+  // };
 
-    // console.log("__________________________")
-    // console.log(...stoicNfts.flatMap(p => p))
-    // console.log("__________________________")
-    // console.log(...dabNfts)
-
-    
-    let dabCount  = uniqueNfts.length - cc;
-    if (dabCount < 0) dabCount = 0  
-    setDabCount(dabCount);
-    setNftCount(cc);
-  };
-
-  // const getNftCount = React.useCallback(
-  //   async () =>
-  //   {
-  //     var ps = [];
-  //     var scanned = [];
-  //     collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.canister] : [a.canister, a.wrapped])).concat([]).forEach(async a =>
-  //     {
-  //       if (scanned.indexOf(a) >= 0) return;
-  //       scanned.push(a);
-  //       ps.push(api.token(a).getTokens(account.address, principal).catch(e => { console.error(e); return []; }));
-  //     });
-  //     const stoicNfts = await Promise.all(ps.map(p => p.then(r => r).catch(e => e)));
-  //     const uniqueNfts = getNftsListIntersection([...stoicNfts.flatMap(p => p), ...dabNfts]);
-
-  //   }, [account.address, collections, dabNfts, principal]);
+  const getNftCount = React.useCallback(
+    async () => {
+      var cc = 0;
+      var ps = [];
+      var scanned = [];
+      
+      collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped])).concat([]).forEach(async a => {
+        if (scanned.indexOf(a) >= 0) return;
+        scanned.push(a);
+        ps.push(api.token(a).getTokens(account.address, principal));
+      });
+      const stoicNfts = await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
+  
+      setDabCount(dabCollectionList.length);
+      setNftCount(cc);
+    }, [account.address, dabCollections, collections, dabNfts, principal]);
 
 
 
