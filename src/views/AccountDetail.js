@@ -91,7 +91,6 @@ function AccountDetail(props) {
 
   
   React.useEffect(() => {
-    console.log("fetch called")
     fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
 
 
@@ -174,18 +173,6 @@ function AccountDetail(props) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dabCollections]);
 
-  // React.useEffect(() => {
-  //   fetch("https://us-central1-entrepot-api.cloudfunctions.net/api/collections").then(r => r.json()).then(entrepotCollections => {
-  //     console.log("set collections")
-  //     setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
-  //       return {
-  //         canister : a,
-  //         name : a,
-  //         market : false,
-  //       };
-  //     })));
-  //   });
-  // }, [account.nfts]);
 
   React.useEffect(() => {
     setNftCount("Loading...");
@@ -291,21 +278,6 @@ function AccountDetail(props) {
     }
   };
   
-  // const getNftCount1 = async () => {
-  //   var cc = 0;
-  //   var ps = [];
-  //   var scanned = [];
-    
-  //   collections.flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped])).concat([]).forEach(async a => {
-  //     if (scanned.indexOf(a) >= 0) return;
-  //     scanned.push(a);
-  //     ps.push(api.token(a).getTokens(account.address, principal));
-  //   });
-  //   const stoicNfts = await Promise.all(ps.map(p => p.then(r => cc+=r.length).catch(e => e)));
-
-  //   setDabCount(dabCollectionList.length);
-  //   setNftCount(cc);
-  // };
 
   const getNftCount = React.useCallback(
     async () => {

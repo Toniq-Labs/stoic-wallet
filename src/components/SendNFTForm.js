@@ -123,7 +123,6 @@ export default function SendNFTForm(props) {
     props.close()
   };
   React.useEffect(() => {
-    console.log(props.nft)
     if (props.nft && !props.nft.isDabToken) setCanister(extjs.decodeTokenId(props.nft.id).canister);
     else setCanister("");
     var contacts = [];

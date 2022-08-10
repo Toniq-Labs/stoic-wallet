@@ -170,7 +170,9 @@ class ExtConnection {
         });
       },
       getTokens : (aid, principal) => {
+        // console.log("getTokens call")
         return new Promise((resolve, reject) => {
+          // console.log("getTokens promise")
           switch(tokenObj.canister) {
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
@@ -264,11 +266,11 @@ class ExtConnection {
                     }else if (typeof r.err != 'undefined') {
                       if (r.err.hasOwnProperty("Other") && r.err.Other === "No tokens") {
                         resolve([]);
-                      } else reject(r.err)
-                    } else reject(r);
+                       }// else  reject(r.err) 
+                    } //else reject(r);
                   }).catch(reject);
                 } catch(e) {
-                  reject(e);
+                  //reject(e);
                 };
               };
             break;

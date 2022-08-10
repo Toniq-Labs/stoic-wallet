@@ -251,57 +251,6 @@ export default function NFTList(props) {
   }
   const wearableMap = ["accessories","hats","eyewear","pets"];
 
-  // const loadNfts = async () => {
-  //   var decoder;
-  //   var _nfts = [];
-  //   var _collections = [];
-  //   try {
-  //     new Uint8Array([]);
-  //     decoder = new TextDecoder();
-  //   } catch (e) { console.log('Browser can\'t decode.'); };
-  //   var scanned = [];
-  //   await Promise.all(props.collections.map(c => {
-  //     return new Promise((resolve, reject) => {
-  //       if (scanned.indexOf(c.canister) >= 0) return resolve();
-  //       scanned.push(c.canister);
-  //       var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
-  //       api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
-  //         if (nfts.length){
-  //           _nfts = _nfts.concat(nfts.map(nft => {
-  //             return {
-  //               ...nft,
-  //               metadata : toHexString(nft.metadata),
-  //               allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
-  //             };
-  //           }));
-  //           _collections = _collections.concat(c.canister);
-  //           setCollections(_collections);
-  //           setNfts(_nfts);
-  //         }
-  //         resolve();
-  //       }).catch(e => {
-  //         api.token(c.canister).getTokensLegacy(account.address, identity.principal).then(nfts => {
-  //           if (nfts.length){
-  //             _nfts = _nfts.concat(nfts.map(nft => {
-  //               return {
-  //                 ...nft,
-  //                 metadata : toHexString(nft.metadata),
-  //                 allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
-  //               };
-  //             }));
-  //             _collections = _collections.concat(c.canister);
-  //             setCollections(_collections);
-  //             setNfts(_nfts);
-  //           }
-  //           resolve();
-  //         }).catch(e => {
-  //           resolve();
-  //         });
-  //       });
-  //     });
-  //   }));
-  // };
-
   const loadNfts = React.useCallback(
     async () => {
       var decoder;
@@ -315,7 +264,6 @@ export default function NFTList(props) {
 
      
       let selectedCollection = props.collections;
-      console.log(selectedCollection);
 
       await Promise.all(selectedCollection.map(c => {
 
@@ -325,7 +273,7 @@ export default function NFTList(props) {
           {
             _collections = _collections.concat(c.canister);
             _nfts = _nfts.concat(c.nfts);
-            console.log(_nfts);
+         
             setCollections([...new Set(_collections)]);
             setNfts(getNftsListIntersection(_nfts));
             resolve();
@@ -487,7 +435,7 @@ export default function NFTList(props) {
                   <TableCell align="right">
                       <>
                         <>
-                          <IconButton id={"more-"+nft.id} size="small" onClick={ event => {console.log(nft.canister);  handleClick(nft.id, event.currentTarget)} } edge="end">
+                          <IconButton id={"more-"+nft.id} size="small" onClick={ event => { handleClick(nft.id, event.currentTarget)} } edge="end">
                             <MoreVertIcon />
                           </IconButton>
                           <Menu
@@ -496,7 +444,7 @@ export default function NFTList(props) {
                             open={(anchorEl !== null && anchorEl.id === nft.id)}
                             onClose={handleClose}
                           >
-                            <MenuItem onClick={() => {handleClose(); console.log("nft: " + nft.canister); sendNft(nft)}}>
+                            <MenuItem onClick={() => {handleClose(); sendNft(nft)}}>
                               <ListItemIcon>
                                 <SendIcon fontSize="small" />
                               </ListItemIcon>

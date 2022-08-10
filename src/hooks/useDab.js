@@ -17,9 +17,12 @@ export const useDab = () => {
   React.useEffect(() => {
   
     const getNFTCollections = async () => {
-      const res = await getNftDabCollections(principal).catch((err) => {
-        console.error(err);
-      });
+      // const res = await getNftDabCollections(principal).catch((err) => {
+      //   console.error(err);
+      // });
+           
+      
+      const res = await getNftDabCollections(principal)
      
       if (!res) return;
       const { dabCollections, dabNfts } = res;
@@ -80,9 +83,11 @@ const transformDabToStoicNFT = (dabToken, icon) => {
 };
 
 export const getNftDabCollections = async (principal) => {
+  
   const res = await getAllUserNFTs({
     user: Principal.fromText(principal),
   }).catch((e) => {
+    
     console.warn("Error getting NFT collections from DAB", e);
   });
   if (!res) return;
