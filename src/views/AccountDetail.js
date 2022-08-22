@@ -24,6 +24,7 @@ import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
 import NFTCard from '../components/NFTCard';
+import OtherTokenCard from '../components/OtherTokenCard';
 import SendForm from '../components/SendForm';
 import TopupForm from '../components/TopupForm';
 import Transactions from '../components/Transactions';
@@ -41,6 +42,9 @@ import CANISTERS from '../ic/canisters.js';
 import COLLECTIONS from '../ic/collections.js';
 import { makeStyles } from '@material-ui/core/styles';
 import { getNftDabCollections, getNftsListIntersection, useDab } from '../hooks/useDab';
+import {useDip20} from '../hooks/useDip20';
+import FungibleTokenList from '../components/FungibleTokenList';
+
 function useInterval(callback, delay) {
   const savedCallback = React.useRef();
   // Remember the latest callback.
@@ -88,6 +92,7 @@ function AccountDetail(props) {
   const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
   const dispatch = useDispatch()
   const { dabCollections, dabNfts } = useDab();
+  const dabTokens = useDip20();
 
   
   React.useEffect(() => {
@@ -330,8 +335,8 @@ function AccountDetail(props) {
                   </IconButton>
                 </Tooltip>
               </InputForm>
-              <Tooltip title="View in explorer (ic.rocks)">
-                <IconButton href={"https://ic.rocks/account/"+account.address} target="_blank" edge="end" aria-label="search">
+              <Tooltip title="View in explorer (ICScan)">
+                <IconButton href={"https://icscan.io/account/"+account.address} target="_blank" edge="end" aria-label="search">
                   <LaunchIcon />
                 </IconButton>
               </Tooltip>
@@ -394,6 +399,7 @@ function AccountDetail(props) {
           })}
           <NFTCard title={'Entrepot NFT'} count={nftCount} address={account.address} onClick={() => changeToken('nft')} selected={currentToken === 'nft'} />
           <NFTCard title={'DAB NFT'} count={dabCount} address={account.address} onClick={() => changeToken('dab')} selected={currentToken === 'dab'} />
+          <OtherTokenCard tokenCount={dabTokens.length} onClick={() => changeToken('other')} selected={currentToken === 'other'}></OtherTokenCard>
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
             <AddTokenForm onClick={addToken}>
               <Tooltip title="Add a new token to this account">
@@ -410,7 +416,7 @@ function AccountDetail(props) {
           </Grid>
         </Grid>
       </div>
-      {currentToken !== 0 && currentToken !== 'nft' && currentToken !== 'dab'?
+      {currentToken !== 0 && currentToken !== 'nft' && currentToken !== 'dab' && currentToken !== 'other'?
       <div style={{marginLeft:'15px', color:'rgba(0, 0, 0, 0.54)'}}>
         <strong>Token ID:</strong> {account.tokens[currentToken].id}
         <SnackbarButton
@@ -430,14 +436,15 @@ function AccountDetail(props) {
       {/* {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""} */}
       {currentToken === 'nft' ? <NFTList currentToken={currentToken} nftCount={nftCount} collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken === 'dab' ? <NFTList currentToken={currentToken} nftCount={dabCount} collections={dabCollectionList} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
-      {currentToken !== 'nft' && currentToken !== 'dab'? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
+      {currentToken === 'other' ? <FungibleTokenList> </FungibleTokenList> : ""}
+      {currentToken !== 'nft' && currentToken !== 'dab' && currentToken !== 'other' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>
           { currentToken === 0 ?
           <TopupForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
               <MainFab style={{inset: "auto 12px 80px auto",position:"fixed"}} color="primary" aria-label="send"><EvStationIcon /></MainFab>
           </TopupForm> : "" }
-          { (currentToken !== 'nft' && currentToken !== 'dab') ? 
+          { (currentToken !== 'nft' && currentToken !== 'dab' && currentToken !== 'other') ? 
           <SendForm alert={alert} loader={props.loader} error={error} address={account.address} data={account.tokens[currentToken]}>
             <MainFab color="primary" aria-label="send"><SendIcon /></MainFab>
           </SendForm> : "" }
