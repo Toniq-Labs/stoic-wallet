@@ -82,24 +82,25 @@ const transformDabToStoicNFT = (dabToken, icon) => {
   };
 };
 
-export const getNftDabCollections = async (principal) => {
-  
-  const res = await getAllUserNFTs({
-    user: Principal.fromText(principal),
-  }).catch((e) => {
-    
+export const getNftDabCollections = async (principal) => {  
+  try
+  {
+    const res = await getAllUserNFTs({
+      user: Principal.fromText(principal),
+    })
+    if (!res) return;
+    const dabCollections = transformDabToStoicCollection(res);
+    const dabNfts = res.flatMap((col) =>
+      col.tokens.map((nft) => transformDabToStoicNFT(nft, col.icon)),
+    );
+    return {
+      dabCollections,
+      dabNfts,
+    };
+  } catch (e) 
+  {  
     console.warn("Error getting NFT collections from DAB", e);
-  });
-  if (!res) return;
- 
-  const dabCollections = transformDabToStoicCollection(res);
-
-  const dabNfts = res.flatMap((col) =>
-    col.tokens.map((nft) => transformDabToStoicNFT(nft, col.icon)),
-  );
-  return {
-    dabCollections,
-    dabNfts,
+    return
   };
 };
 

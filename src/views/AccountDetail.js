@@ -92,7 +92,7 @@ function AccountDetail(props) {
   const [childRefresh, setChildRefresh] = React.useState(0);//Ugly don't judge
   const dispatch = useDispatch()
   const { dabCollections, dabNfts } = useDab();
-  const dabTokens = useDip20();
+  const dabTokens = useDip20(childRefresh);
 
   
   React.useEffect(() => {
@@ -436,7 +436,7 @@ function AccountDetail(props) {
       {/* {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""} */}
       {currentToken === 'nft' ? <NFTList currentToken={currentToken} nftCount={nftCount} collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
       {currentToken === 'dab' ? <NFTList currentToken={currentToken} nftCount={dabCount} collections={dabCollectionList} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""}
-      {currentToken === 'other' ? <FungibleTokenList> </FungibleTokenList> : ""}
+      {currentToken === 'other' ? <FungibleTokenList setChildRefresh={setChildRefresh} childRefresh={childRefresh} alert={alert} loader={props.loader}> </FungibleTokenList> : ""}
       {currentToken !== 'nft' && currentToken !== 'dab' && currentToken !== 'other' ? <Transactions data={account.tokens[currentToken]} address={account.address} /> : ""}
       {idtype === 'watch' ? "" :
         <>

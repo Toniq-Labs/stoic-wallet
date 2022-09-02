@@ -31,8 +31,6 @@ export default function OtherTokenCard(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal)
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
 
-  const {dabTokens, tokenAmounts} = useDip20();
-
   const handleClick = () => {
     props.onClick();
   };

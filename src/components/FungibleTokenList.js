@@ -12,14 +12,46 @@ import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import SendIcon from '@material-ui/icons/Send'
 import Timestamp from 'react-timestamp';
-import {useDip20} from '../hooks/useDip20'
+import {useDip20, getTokenMetadata} from '../hooks/useDip20'
+import SendFormDAB from '../components/SendFormDAB';
+
+
 
 export default function FungibleTokenList(props)
 {
-    const {dabTokens, tokenAmounts} = useDip20();
+    const {dabTokens, tokenAmounts, tokenMetadata} = useDip20(props.childRefresh);
 
-    console.log(dabTokens)
-    console.log(tokenAmounts)
+
+    let fees = tokenMetadata.map(metadata => {
+      if (metadata!=null) {
+        // console.log(metadata)
+        if (metadata.fungible.fee==null) return 0
+        return metadata.fungible.fee;
+      }
+      return metadata;
+    })
+    
+    let decimals = tokenMetadata.map(metadata => {
+      if (metadata!=null) {
+        if (metadata.fungible.decimals==null) return 0
+        return metadata.fungible.decimals;
+      }
+      return metadata;
+    })
+
+    // const tokenMetadata1 = async () => {
+      
+    //     const metadata = await getTokenMetadata(dabTokens);
+    //     console.log(metadata);
+      
+    // }
+
+    // tokenMetadata();
+
+    const error = (e) => {
+      props.alert("There was an error", e);
+    };
+
 
     const styles = {
         empty : {
@@ -27,7 +59,7 @@ export default function FungibleTokenList(props)
           margin : "0 auto",
         },
         table: {
-          minWidth: 250,
+          minWidth: 450,
         },
         button: {
             height: "100%",
@@ -46,15 +78,32 @@ export default function FungibleTokenList(props)
                   <TableCell>Name</TableCell>
                   <TableCell>Description</TableCell>
                   <TableCell>Amount</TableCell>
-                  {/* <TableCell align="right"></TableCell> */}
+                  <TableCell></TableCell>
                 </TableRow>
               </TableHead>
               <TableBody>
                 {
                     dabTokens && dabTokens.map((token, index) => 
                     {
-                        console.log(index)
-                        console.log(tokenAmounts[index]);
+                     
+                      let valueShown = 0;
+                      let fee = 0;
+                      let symbol = "";
+                      if (tokenAmounts[index])
+                      {
+                        if (tokenAmounts[index].value>0){
+                          valueShown = (tokenAmounts[index].value / Math.pow(10, tokenAmounts[index].decimals)).toFixed(6);
+                        }
+                      }
+                      if (tokenMetadata[index])
+                      {
+                        symbol = tokenMetadata[index].fungible.symbol
+                        fee = tokenMetadata[index].fungible.fee;
+                        if (fee==undefined) fee = 0;
+                        decimals = tokenMetadata[index].fungible.decimals
+                      }
+
+                      
                         return (
                                 <TableRow key={index}>
                                 <TableCell>
@@ -64,13 +113,18 @@ export default function FungibleTokenList(props)
                                     {token.description}
                                 </TableCell>
                                 <TableCell>
-                                    {tokenAmounts && tokenAmounts[index] && tokenAmounts[index].value}
+                                    {valueShown + " " + symbol}
                                 </TableCell>
-                                {/* <TableCell align="right">
+                                {token && tokenAmounts && tokenAmounts[index] && valueShown > 0  ?
+                                <TableCell>
+                                <SendFormDAB setChildRefresh={props.setChildRefresh} childRefresh={props.childRefresh} alert={props.alert} error={error} loader={props.loader} token={token} value={ valueShown } minFee={fee} balance={valueShown} decimals={decimals}>
                                     <Button style={styles.button} color="inherit" variant="contained" endIcon={<SendIcon />}>
                                         Send
                                     </Button>
-                                </TableCell> */}
+                                 </SendFormDAB>
+                                </TableCell> : ""
+                                 }
+
                             </TableRow>
                         )
                     }
