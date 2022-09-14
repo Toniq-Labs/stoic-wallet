@@ -3,6 +3,7 @@ import React from 'react';
 import { useSelector } from 'react-redux'
 import Typography from '@material-ui/core/Typography';
 import Table from '@material-ui/core/Table';
+import Box from '@material-ui/core/Box';
 import TableBody from '@material-ui/core/TableBody';
 import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
@@ -39,14 +40,6 @@ export default function FungibleTokenList(props)
       return metadata;
     })
 
-    // const tokenMetadata1 = async () => {
-      
-    //     const metadata = await getTokenMetadata(dabTokens);
-    //     console.log(metadata);
-      
-    // }
-
-    // tokenMetadata();
 
     const error = (e) => {
       props.alert("There was an error", e);
@@ -75,6 +68,7 @@ export default function FungibleTokenList(props)
             <Table style={styles.table} aria-label="simple table">
               <TableHead>
                 <TableRow>
+                  <TableCell>Icon</TableCell>
                   <TableCell>Name</TableCell>
                   <TableCell>Description</TableCell>
                   <TableCell>Amount</TableCell>
@@ -106,6 +100,17 @@ export default function FungibleTokenList(props)
                       
                         return (
                                 <TableRow key={index}>
+                                  <TableCell>
+                                    <Box
+                                    component="img"
+                                    sx={{
+                                      height: 32,
+                                      width: 32,
+                                    }}
+                                    alt=""
+                                    src={token.icon}
+                                  />
+                                  </TableCell>
                                 <TableCell>
                                     {token.name}
                                 </TableCell>
