@@ -1,3 +1,4 @@
+/* global BigInt */
 import React from 'react';
 import { useSelector } from "react-redux";
 import { getTokenActor } from '@psychedelic/dab-js'
@@ -6,6 +7,10 @@ import {StoicIdentity} from '../ic/identity.js';
 import { Principal } from '@dfinity/principal';
 import { getCanisterInfo } from '@psychedelic/dab-js';
 import {dab_tokens_json} from '../ic/dab_tokens';
+import extjs from '../ic/extjs.js';
+import { Actor } from '@dfinity/agent';
+import dip20_idl from '../ic/candid/dip20.did';
+import ext_fungible from '../ic/candid/ext_fungible.did';
 
 export const useDip20 = (reload) => {
     const addresses = useSelector(state => state.addresses);
@@ -17,14 +22,11 @@ export const useDip20 = (reload) => {
     const [dabTokens, setDabTokens] = React.useState([])
     const [tokenAmounts, setTokenAmounts] = React.useState([])
     const [tokenMetadata, setTokenMetadata] = React.useState([])
+    const [tokenFees, setTokenfees] = React.useState([])
     
     React.useEffect(() =>  {
-        console.log(dab_tokens_json)
 
-
-
-        // fetch("https://raw.githubusercontent.com/Psychedelic/dab/main/registries/tokens/list.json").then(r => r.json()).then(async tokens => {
-       let tokens = dab_tokens_json
+            let tokens = dab_tokens_json
 
             
             async function fetchData()
@@ -53,28 +55,27 @@ export const useDip20 = (reload) => {
                                 resolve( getTokenMetadata(token, identity));
                         })
                         }));
+                        setTokenAmounts(tokenAmounts)
+                        setTokenMetadata(tokenMetadata);
+
+                    let tokenFees = await Promise.all(
+                        tokens.map(async (token,index) =>  {
+                            return new Promise(async (resolve, reject) => {
+                                resolve( getTokenFees(token, identity, index, tokenMetadata));
+                        })
+                        }));
                     
-        
-                    setTokenAmounts(tokenAmounts)
-                    setTokenMetadata(tokenMetadata);
-        
-                    console.log(tokenAmounts)
+                        console.log(tokenFees);
+                        setTokenfees(tokenFees);
             }
 
             fetchData()
-
-            
-
-
-
-        // })
-    // })
     }, [currentPrincipal, reload])
 
  
 
 
-    return {dabTokens, tokenAmounts, tokenMetadata,};
+    return {dabTokens, tokenAmounts, tokenMetadata, tokenFees};
 
 
  
@@ -92,8 +93,6 @@ export const getTokenMetadata = async (token, identity) => {
     
     try {
         let metadata = await tokenActor.getMetadata()
-       
-        // console.log(token.name, metadata);
         return metadata;
     } catch (err) {
         console.error(err);
@@ -107,12 +106,56 @@ export const getTokenBalance = async (token, identity) => {
 
     try {
         let balance = await tokenActor.getBalance(Principal.fromText(identity.principal))
-       
-        // console.log(token.name, balance);
         return balance;
     } catch (err) {
         console.error(err);
     }
+}
+
+export const getTokenFees = async (token, identity, index, tokenMetadata) => {
+    
+    if (tokenMetadata[index].fungible.fee)
+    {
+        let fee =  BigInt(Math.round(tokenMetadata[index].fungible.fee*(10**Number(tokenMetadata[index].fungible.decimals))));
+        return fee;
+    } 
+    const canisterId = (token.id);
+    const id = StoicIdentity.getIdentity(identity.principal);
+    const agent = await Promise.resolve(
+        new HttpAgent({ identity: id, host: "https://ic0.app" }),
+      );
+    const standard = token.standard;
+
+    let api = null
+
+    if (standard==="DIP20")
+    {
+       
+        if (token.name == "WICP") return 0;
+        if (token.name == "Cycles") return 0;
+        if (token.name == "BOX") return 0;
+
+        api = Actor.createActor(dip20_idl, 
+        {
+            agent,
+            canisterId
+        });
+        let x = await api.getTokenFee()
+        return BigInt(x);
+    }
+    else if (standard == "EXT")
+    {
+        api = Actor.createActor(ext_fungible, 
+            {
+                agent,
+                canisterId
+            });
+            let x = await api.getFee();
+
+            return BigInt(x.ok);
+    }
+
+    return BigInt(0);
 }
 
 const getParticularTokenActor = async (token, identity) => {

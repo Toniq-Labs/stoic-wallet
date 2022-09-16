@@ -20,17 +20,9 @@ import SendFormDAB from '../components/SendFormDAB';
 
 export default function FungibleTokenList(props)
 {
-    const {dabTokens, tokenAmounts, tokenMetadata} = useDip20(props.childRefresh);
+    const {dabTokens, tokenAmounts, tokenMetadata, tokenFees} = useDip20(props.childRefresh);
 
-
-    let fees = tokenMetadata.map(metadata => {
-      if (metadata!=null) {
-        // console.log(metadata)
-        if (metadata.fungible.fee==null) return 0
-        return metadata.fungible.fee;
-      }
-      return metadata;
-    })
+    let fees = tokenFees
     
     let decimals = tokenMetadata.map(metadata => {
       if (metadata!=null) {
@@ -60,6 +52,7 @@ export default function FungibleTokenList(props)
             color: 'white'
           },
       };
+      
 
     return (
         <>
@@ -77,9 +70,10 @@ export default function FungibleTokenList(props)
               </TableHead>
               <TableBody>
                 {
-                    dabTokens && dabTokens.map((token, index) => 
+                    dabTokens && fees && dabTokens.map((token, index) => 
                     {
                      
+                      
                       let valueShown = 0;
                       let fee = 0;
                       let symbol = "";
@@ -92,12 +86,12 @@ export default function FungibleTokenList(props)
                       if (tokenMetadata[index])
                       {
                         symbol = tokenMetadata[index].fungible.symbol
-                        fee = tokenMetadata[index].fungible.fee;
+                        fee = fees[index];
                         if (fee==undefined) fee = 0;
                         decimals = tokenMetadata[index].fungible.decimals
                       }
 
-                      
+                      if (valueShown <= 0) return null
                         return (
                                 <TableRow key={index}>
                                   <TableCell>
@@ -122,7 +116,7 @@ export default function FungibleTokenList(props)
                                 </TableCell>
                                 {token && tokenAmounts && tokenAmounts[index] && valueShown > 0  ?
                                 <TableCell>
-                                <SendFormDAB setChildRefresh={props.setChildRefresh} childRefresh={props.childRefresh} alert={props.alert} error={error} loader={props.loader} token={token} value={ valueShown } minFee={fee} balance={valueShown} decimals={decimals}>
+                                <SendFormDAB styles={styles} setChildRefresh={props.setChildRefresh} childRefresh={props.childRefresh} alert={props.alert} error={error} loader={props.loader} token={token} value={ valueShown } minFee={fee} balance={valueShown} decimals={decimals}>
                                     <Button style={styles.button} color="inherit" variant="contained" endIcon={<SendIcon />}>
                                         Send
                                     </Button>

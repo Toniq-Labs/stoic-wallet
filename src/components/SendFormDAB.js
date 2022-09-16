@@ -1,10 +1,12 @@
 /* global BigInt */
 import React from 'react';
 import Button from '@material-ui/core/Button';
+import Box from '@material-ui/core/Box';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
+import Typography from '@material-ui/core/Typography';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -36,16 +38,17 @@ export default function SendFormDAB(props) {
   const [notify, setNotify] = React.useState(false);
   
   const [contacts, setContacts] = React.useState([]);
-  const [fee, setFee] = React.useState(0);
+  const [fee, setFee] = React.useState(props.minFee);
   const [minFee, setMinFee] = React.useState(props.minFee);
+
+  
   
   const error = (e) => {
-    console.log(e)
     props.alert(e);
   }
   const review = () => {
-    console.log(amount, fee, minFee, balance)
 
+    if (!validatePrincipal(to)) return error("Please enter a valid principal to send to");
     if (isNaN(amount)) return error("Please enter a valid amount to send");
     if (isNaN(fee)) return error("Please enter a valid fee to use");
     if ((Number(amount)+Number(fee)) > props.balance)  return error("You have insufficient token balance"); 
@@ -69,13 +72,11 @@ export default function SendFormDAB(props) {
 
     setOpen(false);
 
-
-    console.log("token: ", props.token, "\nidentity: ", identity, "to user: ", to, "from principal", _from_principal, "amount: ", _amount)
     let res =  await sendDipToken(props.token, identity, _to_user, _from_principal, _amount )
-   
-    if (res.transactionId)
+
+    if (res.transactionId || res.amount)
     {
-      props.alert("Sent " + _amount + " to " + to);
+      props.alert("Success!", "Sent " + amount + " " + props.token.name +  " to " + to);
     }
     else
     {
@@ -93,13 +94,12 @@ export default function SendFormDAB(props) {
   };
   const handleClick = () => {
     setOpen(true);
-  
   };
   const handleClose = () => {
     setOpen(false);
     setStep(0);
     setAmount(0);
-    setBalance(false);
+    // setBalance(false);
     setTo('');
     setToOption('');
     setAdvanced(false);
@@ -107,21 +107,15 @@ export default function SendFormDAB(props) {
     setNotify(false);
   };
 
-  // React.useEffect(() => {
-    
-  //   var contacts = [];
-  //   principals.forEach(p => {
-  //     p.accounts.forEach(a => {
-  //       contacts.push({
-  //         group : p.identity.principal,
-  //         name : a.name,
-  //         address : a.address,
-  //       });
-  //     });
-  //   });
-  //   setContacts(contacts);
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [props.token, open]);
+  const setMax = () => {
+    setAmount(balance - fee)
+  }
+
+  React.useEffect(() => {
+    setBalance(props.balance)
+    setMinFee(Number(props.minFee)/(10**props.decimals));
+    setFee(Number(props.minFee)/(10**props.decimals));
+  }, [props.balance, props.minFee, props.fee]);
 
   return (
     <>
@@ -171,20 +165,30 @@ export default function SendFormDAB(props) {
                   shrink: true,
                 }}
               />
+              
               { minFee > -1 ?
               <TextField
+                id="outlined-disabled"
                 style={{width:'49%'}}
                 margin="dense"
                 label="Fee"
                 value={fee}
                 onChange={(e) => setFee(e.target.value)}
                 type="text"
-                InputLabelProps={{
-                  shrink: true,
+                disabled
+                inputProps={{
+                  readOnly: true,
                 }}
-              /> : "" }
+              /> : "" }           
 
-              <DialogContentText style={{fontSize:'small',textAlign:'center', marginTop:"20px"}}>
+              <Typography align="center">
+                <Box mt = {2}>
+                  <Button style={props.styles.button} onClick={setMax} color="primary">MAX</Button>
+                </Box>
+              </Typography>
+            
+
+              <DialogContentText style={{fontSize:'small',textAlign:'center', marginTop:"10px"}}>
                 { balance !== false ? "Balance: "+balance+" "+props.token.name +" ": ""}
               </DialogContentText>
             </>
@@ -194,7 +198,7 @@ export default function SendFormDAB(props) {
             <DialogContentText style={{textAlign:'center'}}>
             Please confirm that you are about to send <br />
             <strong style={{color:'red'}}>{amount} {props.token.name}</strong><br /> 
-            from <strong style={{color:'red'}}>{compressAddress(props.address)}</strong><br />
+            from <strong style={{color:'red'}}>{compressAddress(identity.principal)}</strong><br />
             to <strong style={{color:'red'}}>{compressAddress(to)}</strong><br />
             </DialogContentText>
             <DialogContentText style={{textAlign:'center'}}>
