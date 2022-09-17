@@ -5,3 +5,4 @@ Note: the redirect does not require any approvals or whitelisting from Stoic. It
 
 # Update
 Added dab tabs
+Small update
