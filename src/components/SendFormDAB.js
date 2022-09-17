@@ -39,9 +39,7 @@ export default function SendFormDAB(props) {
   
   const [contacts, setContacts] = React.useState([]);
   const [fee, setFee] = React.useState(props.minFee);
-  const [minFee, setMinFee] = React.useState(props.minFee);
-
-  
+  const [minFee, setMinFee] = React.useState(props.minFee);  
   
   const error = (e) => {
     props.alert(e);
@@ -59,7 +57,7 @@ export default function SendFormDAB(props) {
     //Submit to blockchain here
     var _from_principal = identity.principal;
     var _to_user = to;
-    var _amount = Math.floor( amount * Math.pow(10, props.decimals) ) ;
+    var _amount = Math.floor( amount * Math.pow(10, Number(props.decimals)) ) ;
     var _memo = memo;
     var _notify = notify;
     
@@ -73,8 +71,8 @@ export default function SendFormDAB(props) {
     setOpen(false);
 
     let res =  await sendDipToken(props.token, identity, _to_user, _from_principal, _amount )
-
-    if (res.transactionId || res.amount)
+    console.log(res);
+    if (res.transactionId || res.amount || res.height)
     {
       props.alert("Success!", "Sent " + amount + " " + props.token.name +  " to " + to);
     }
@@ -108,13 +106,13 @@ export default function SendFormDAB(props) {
   };
 
   const setMax = () => {
-    setAmount(balance - fee)
+    setAmount( Number(balance - fee).toFixed(5) )
   }
 
   React.useEffect(() => {
     setBalance(props.balance)
-    setMinFee(Number(props.minFee)/(10**props.decimals));
-    setFee(Number(props.minFee)/(10**props.decimals));
+    setMinFee(Number(props.minFee)/(10**Number(props.decimals)));
+    setFee(Number(props.minFee)/(10**Number(props.decimals)));
   }, [props.balance, props.minFee, props.fee]);
 
   return (

@@ -35,7 +35,7 @@ export const useDip20 = (reload) => {
                 const agent = new HttpAgent({ host: "https://ic0.app" });
                 const canId = 'lzvjb-wyaaa-aaaam-qarua-cai';
                 const canMeta = await getCanisterInfo({ canisterId: canId, agent });
-                console.log(canMeta);
+                // console.log(canMeta);
     
                 // tokens.push({name:"Boxy", id:'lzvjb-wyaaa-aaaam-qarua-cai', standard:"DIP20"})
                 // console.log(tokens);
@@ -132,8 +132,8 @@ export const getTokenFees = async (token, identity, index, tokenMetadata) => {
     {
        
         if (token.name == "WICP") return 0;
-        if (token.name == "Cycles") return 0;
-        if (token.name == "BOX") return 0;
+        if (token.name == "Cycles") return 0.002*(10**12);
+        if (token.name == "BOX") return 0.00001*(10**6);
 
         api = Actor.createActor(dip20_idl, 
         {

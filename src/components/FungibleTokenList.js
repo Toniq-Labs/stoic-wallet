@@ -11,9 +11,12 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
-import SendIcon from '@material-ui/icons/Send'
+import SendIcon from '@material-ui/icons/Send';
+import FormGroup from '@material-ui/core/FormGroup';
+import FormControlLabel from '@material-ui/core/FormControlLabel';
+import Checkbox from '@material-ui/core/Checkbox';
 import Timestamp from 'react-timestamp';
-import {useDip20, getTokenMetadata} from '../hooks/useDip20'
+import {useDip20, getTokenMetadata} from '../hooks/useDip20';
 import SendFormDAB from '../components/SendFormDAB';
 
 
@@ -21,6 +24,12 @@ import SendFormDAB from '../components/SendFormDAB';
 export default function FungibleTokenList(props)
 {
     const {dabTokens, tokenAmounts, tokenMetadata, tokenFees} = useDip20(props.childRefresh);
+    const [checked, setChecked] = React.useState(() => {
+      const saved = localStorage.getItem("hide0balancetokens");
+      if (saved===null) return true;
+      if (saved==="true") return true;
+      return false;
+    });
 
     let fees = tokenFees
     
@@ -52,6 +61,12 @@ export default function FungibleTokenList(props)
             color: 'white'
           },
       };
+
+      
+  const handleChange = (event) => {
+    setChecked(event.target.checked);
+    localStorage.setItem("hide0balancetokens", event.target.checked);
+  };
       
 
     return (
@@ -91,7 +106,7 @@ export default function FungibleTokenList(props)
                         decimals = tokenMetadata[index].fungible.decimals
                       }
 
-                      if (valueShown <= 0) return null
+                      if (valueShown <= 0 && checked) return null
                         return (
                                 <TableRow key={index}>
                                   <TableCell>
@@ -131,6 +146,12 @@ export default function FungibleTokenList(props)
                 }
               </TableBody>
             </Table>
+            <FormGroup>
+               <Box sx={{ m: 1 }}>
+               <FormControlLabel control={<Checkbox checked={checked} onChange={handleChange} size="small"/>}  label={<Typography variant="body2" color="textSecondary">Hide 0 Balance Tokens</Typography>} />
+               </Box>
+               
+            </FormGroup>
           </TableContainer>
         </>
     );
