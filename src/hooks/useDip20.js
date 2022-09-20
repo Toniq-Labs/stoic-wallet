@@ -65,7 +65,7 @@ export const useDip20 = (reload) => {
                         })
                         }));
                     
-                        console.log(tokenFees);
+                        // console.log(tokenFees);
                         setTokenfees(tokenFees);
             }
 
@@ -83,7 +83,7 @@ export const useDip20 = (reload) => {
 
 export const sendDipToken = async (token, identity, to, from, amount) => {
     let tokenActor = await getParticularTokenActor(token, identity);
-    console.log(tokenActor);
+    // console.log(tokenActor);
     return tokenActor.send({to, from, amount});
 
 } 
@@ -114,7 +114,7 @@ export const getTokenBalance = async (token, identity) => {
 
 export const getTokenFees = async (token, identity, index, tokenMetadata) => {
     
-    console.log(tokenMetadata[index]);
+    // console.log(tokenMetadata[index]);
     if (tokenMetadata[index] && tokenMetadata[index].fungible && tokenMetadata[index].fungible.fee)
     {
         let fee =  BigInt(Math.round(tokenMetadata[index].fungible.fee*(10**Number(tokenMetadata[index].fungible.decimals))));
@@ -157,11 +157,6 @@ export const getTokenFees = async (token, identity, index, tokenMetadata) => {
 
            
             let x = await api.getFee();
-            if (token.name === "DOGMI") 
-            {
-                console.log(x);
-            }
-
             return BigInt(x.ok);
     }
 
