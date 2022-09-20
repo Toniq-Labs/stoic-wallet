@@ -1,9 +1,8 @@
 /* global BigInt */
-import { Principal } from "@dfinity/agent";  
+import { Principal } from "@dfinity/principal";  
 import { GOVERNANCE_CANISTER_ID, LEDGER_CANISTER_ID, rosettaApi, amountToBigInt, principalToAccountIdentifier, toHexString, to32bits, getSubAccountArray } from "./utils.js";
 import extjs from "./extjs.js";
 import { sha256 as jsSha256 } from 'js-sha256';
-import { blobFromUint8Array } from '@dfinity/agent/lib/esm/types';
 //import {StoicIdentity} from "./identity.js";
 
 const topics = [
@@ -22,7 +21,7 @@ const topics = [
 const sha256 = (data) => {
     const shaObj = jsSha256.create();
     shaObj.update(data);
-    return blobFromUint8Array(new Uint8Array(shaObj.array()));
+    return Buffer.from(new Uint8Array(shaObj.array()));
 }
 const getStakingAddress = (principal, nonce) => {
   if (typeof nonce == 'string') nonce = Buffer(nonce);
@@ -30,7 +29,7 @@ const getStakingAddress = (principal, nonce) => {
   const array = new Uint8Array([
       [0x0c],
       ...Buffer("neuron-stake"),
-      ...Principal.fromText(principal).toBlob(),
+      ...Principal.fromText(principal).toUint8Array(),
       ...nonce
   ]);
   const hash = sha256(array);

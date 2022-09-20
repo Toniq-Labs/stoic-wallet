@@ -263,6 +263,7 @@ export default function WalletDialog(props) {
               })}
             </div>
             <p>Write your mnemonic down on a physical piece of paper and store it somewhere safe and private. Anyone who knows this can transfer funds out of your account.</p>
+            <p style={{fontWeight:'bold'}}>Note: Stoic does not store your seed phrase anywhere and cannot recover it for you in case you lose it.</p>
             <p style={{textAlign:"center"}}>
               <SnackbarButton
                     message="Seed Words Copied"

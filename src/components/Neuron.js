@@ -129,7 +129,7 @@ export default function Neuron(props) {
           subheader={
             <Typography style={{fontSize: 14}} color={"primary"}>
               {"#"+props.neuron.id}
-              <IconButton href={"https://ic.rocks/neuron/"+props.neuron.id} target="_blank" size="small" edge="end" aria-label="copy">
+              <IconButton href={"https://icscan.io/neuron/"+props.neuron.id} target="_blank" size="small" edge="end" aria-label="copy">
                 <LaunchIcon style={{ fontSize: 18 }} />
               </IconButton>
             </Typography>}

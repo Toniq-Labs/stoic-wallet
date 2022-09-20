@@ -50,7 +50,8 @@ export default function App() {
     } else {
       loader(true);
       StoicIdentity.load(principals[currentPrincipal].identity).then(i => {
-        extjs.connect("https://boundary.ic0.app/", StoicIdentity.getIdentity(principals[currentPrincipal].identity.principal)).canister("qgsqp-byaaa-aaaah-qbi4q-cai").log();
+        // extjs.connect("https://boundary.ic0.app/", StoicIdentity.getIdentity(principals[currentPrincipal].identity.principal)).canister("qgsqp-byaaa-aaaah-qbi4q-cai").log();
+        extjs.connect("https://boundary.ic0.app/", StoicIdentity.getIdentity(principals[currentPrincipal].identity.principal));
         setAppState(2);
       }).catch(e => {
         setAppState(1);
