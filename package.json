@@ -63,6 +63,8 @@
     ]
   },
   "devDependencies": {
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "redux": "^4.1.0",
     "webpack": "4.44.2"
   }
