@@ -398,8 +398,8 @@ function AccountDetail(props) {
             return (<TokenCard key={account.address + token.id} address={account.address} data={token} onClick={() => changeToken(index)} selected={index === currentToken} />)
           })}
           <NFTCard title={'Entrepot NFT'} count={nftCount} address={account.address} onClick={() => changeToken('nft')} selected={currentToken === 'nft'} />
-          <NFTCard title={'DAB NFT'} count={dabCount} address={account.address} onClick={() => changeToken('dab')} selected={currentToken === 'dab'} />
-          <OtherTokenCard tokenCount={dabTokens.length} onClick={() => changeToken('other')} selected={currentToken === 'other'}></OtherTokenCard>
+          { currentAccount === 0 ? <NFTCard title={'DAB NFT'} count={dabCount} address={account.address} onClick={() => changeToken('dab')} selected={currentToken === 'dab'} /> : ""} 
+          { currentAccount === 0 ? <OtherTokenCard tokenCount={dabTokens.length} onClick={() => changeToken('other')} selected={currentToken === 'other'}></OtherTokenCard> : ""} 
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
             <AddTokenForm onClick={addToken}>
               <Tooltip title="Add a new token to this account">

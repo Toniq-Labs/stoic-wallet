@@ -65,7 +65,7 @@ export const useDip20 = (reload) => {
                         })
                         }));
                     
-                        console.log(tokenFees);
+                        // console.log(tokenFees);
                         setTokenfees(tokenFees);
             }
 
@@ -83,7 +83,7 @@ export const useDip20 = (reload) => {
 
 export const sendDipToken = async (token, identity, to, from, amount) => {
     let tokenActor = await getParticularTokenActor(token, identity);
-
+    // console.log(tokenActor);
     return tokenActor.send({to, from, amount});
 
 } 
@@ -114,7 +114,8 @@ export const getTokenBalance = async (token, identity) => {
 
 export const getTokenFees = async (token, identity, index, tokenMetadata) => {
     
-    if (tokenMetadata[index].fungible.fee)
+    // console.log(tokenMetadata[index]);
+    if (tokenMetadata[index] && tokenMetadata[index].fungible && tokenMetadata[index].fungible.fee)
     {
         let fee =  BigInt(Math.round(tokenMetadata[index].fungible.fee*(10**Number(tokenMetadata[index].fungible.decimals))));
         return fee;
@@ -140,7 +141,10 @@ export const getTokenFees = async (token, identity, index, tokenMetadata) => {
             agent,
             canisterId
         });
+
+    
         let x = await api.getTokenFee()
+        if (token.name == "PLAT") return BigInt(10);
         return BigInt(x);
     }
     else if (standard == "EXT")
@@ -150,8 +154,9 @@ export const getTokenFees = async (token, identity, index, tokenMetadata) => {
                 agent,
                 canisterId
             });
-            let x = await api.getFee();
 
+           
+            let x = await api.getFee();
             return BigInt(x.ok);
     }
 

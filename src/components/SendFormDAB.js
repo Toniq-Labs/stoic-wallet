@@ -69,9 +69,9 @@ export default function SendFormDAB(props) {
 
 
     setOpen(false);
-
+    // console.log(props.token)
     let res =  await sendDipToken(props.token, identity, _to_user, _from_principal, _amount )
-    console.log(res);
+    // console.log(res);
     if (res.transactionId || res.amount || res.height)
     {
       props.alert("Success!", "Sent " + amount + " " + props.token.name +  " to " + to);
@@ -106,7 +106,7 @@ export default function SendFormDAB(props) {
   };
 
   const setMax = () => {
-    setAmount( Number(balance - fee).toFixed(5) )
+    setAmount( Number(balance - fee).toFixed(10) )
   }
 
   React.useEffect(() => {
