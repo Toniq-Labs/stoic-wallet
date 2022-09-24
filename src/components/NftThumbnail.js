@@ -120,7 +120,10 @@ const icpbunnyimg = (i) => {
 };
 
 const getNftImg = (nft) => {
-  if (nft.isDabToken) return nft.url;
+  if (nft.isDabToken) 
+  {
+    return nft.icon;
+  }
   if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai")
     return "https://" + nft.canister + ".raw.ic0.app/Token/" + nft.index;
   else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai")
