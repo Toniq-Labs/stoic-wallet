@@ -15,7 +15,8 @@ export default function NftThumbnail({ nft }) {
     getContentTypeAsync();
   }, [nft]);
 
-  if (contentType === "video/mp4") {
+
+  if (contentType === "video/mp4" ) {
     return (
       <a href={getNftLink(nft)} target="_blank" rel="noreferrer">
         <video
@@ -31,7 +32,8 @@ export default function NftThumbnail({ nft }) {
         </video>
       </a>
     );
-  } else if (imageContentType.includes(contentType)) {
+  }
+  else if (imageContentType.includes(contentType)) {
     return (
       <a href={getNftLink(nft)} target="_blank" rel="noreferrer">
         <img
@@ -51,22 +53,23 @@ export default function NftThumbnail({ nft }) {
         style={{ display: "block" }}
       >
         {
-        /* <object
+         <object
           data={getNftImg(nft)}
           id={"img-" + nft.id}
-          // width="64"
+          width="64"
+          height="64"
           overflow="hidden"
           display="block"
           style={{ pointerEvents: "none" }}
         >
           {compressAddress(nft.id)}
-        </object> */
-        <img
-        id={"img-" + nft.id}
-        alt={compressAddress(nft.id)}
-        src={getNftImg(nft)}
-        style={{ width: 64 }}
-      />
+        </object> 
+      //   <img
+      //   id={"img-" + nft.id}
+      //   alt={compressAddress(nft.id)}
+      //   src={getNftImg(nft)}
+      //   style={{ width: 64 }}
+      // />
         }
       </a>
     );
@@ -122,7 +125,7 @@ const icpbunnyimg = (i) => {
 const getNftImg = (nft) => {
   if (nft.isDabToken) 
   {
-    return nft.icon;
+    return nft.url;
   }
   if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai")
     return "https://" + nft.canister + ".raw.ic0.app/Token/" + nft.index;
