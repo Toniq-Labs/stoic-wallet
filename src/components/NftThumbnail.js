@@ -15,7 +15,6 @@ export default function NftThumbnail({ nft }) {
     getContentTypeAsync();
   }, [nft]);
 
-
   if (contentType === "video/mp4" ) {
     return (
       <a href={getNftLink(nft)} target="_blank" rel="noreferrer">
@@ -33,7 +32,7 @@ export default function NftThumbnail({ nft }) {
       </a>
     );
   }
-  else if (imageContentType.includes(contentType)) {
+  else if (imageContentType.includes(contentType)||nft.collection==="ICPunks"||nft.collection==="ICats") {
     return (
       <a href={getNftLink(nft)} target="_blank" rel="noreferrer">
         <img
@@ -123,10 +122,13 @@ const icpbunnyimg = (i) => {
 };
 
 const getNftImg = (nft) => {
+
+  
   if (nft.isDabToken) 
   {
     return nft.url;
   }
+  
   if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai")
     return "https://" + nft.canister + ".raw.ic0.app/Token/" + nft.index;
   else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai")
