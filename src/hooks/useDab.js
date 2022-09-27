@@ -23,6 +23,7 @@ export const useDab = () => {
            
       
       const res = await getNftDabCollections(principal)
+      
      
       if (!res) return;
       const { dabCollections, dabNfts } = res;
@@ -64,7 +65,7 @@ const transformDabToStoicNFT = (dabToken, icon) => {
  
   if (!dabToken.id)
   {
-    dabToken.id = dabToken.index+dabToken.collection;
+    dabToken.id = dabToken.index+"-"+dabToken.collection;
   }
 
   return {
@@ -85,7 +86,7 @@ const transformDabToStoicNFT = (dabToken, icon) => {
 export const getNftDabCollections = async (principal) => {  
   try
   {
-    const res = await getAllUserNFTs({
+    let res = await getAllUserNFTs({
       user: Principal.fromText(principal),
     })
     if (!res) return;

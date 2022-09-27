@@ -38,6 +38,7 @@ import { useSelector, useDispatch } from 'react-redux'
 import { getNftsListIntersection } from '../hooks/useDab';
 import NftThumbnail from './NftThumbnail';
 import { getNftDabCollections, transformDabToStoicCollection, useDab } from '../hooks/useDab';
+import { ContactSupportOutlined } from '@material-ui/icons';
 
 const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
@@ -276,9 +277,12 @@ export default function NFTList(props) {
           {
             _collections = _collections.concat(c.canister);
             _nfts = _nfts.concat(c.nfts);
+            // console.log(c);
          
             setCollections([...new Set(_collections)]);
-            setNfts(getNftsListIntersection(_nfts));
+            let nfts = getNftsListIntersection(_nfts)
+            console.log(nfts);
+            setNfts(nfts);
             resolve();
           }
 
@@ -287,6 +291,7 @@ export default function NFTList(props) {
           var allowedForMarket = selectedCollection.filter(a => a.market).map(a => a.canister);
           api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
             if (nfts.length){
+              nfts = nfts.filter(val => val.canister !== 'qcg3w-tyaaa-aaaah-qakea-cai') //hardcoded remove icpunks given we get it over dab
               _nfts = _nfts.concat(nfts.map(nft => {
                 return {
                   ...nft,
