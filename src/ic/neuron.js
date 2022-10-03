@@ -74,7 +74,9 @@ class ICNeuron {
   };
   async spawn() { //TODO TEST
     var commandArgs = {
-      new_controller  : []
+      percentage_to_spawn: [],
+      new_controller  : [],
+      nonce: []
     };
     var cmdId = "Spawn";
     var cmdBody = {};
