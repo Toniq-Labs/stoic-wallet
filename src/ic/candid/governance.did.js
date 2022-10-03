@@ -39,7 +39,11 @@ export default ({ IDL }) => {
     'total' : IDL.Nat64,
     'timestamp_seconds' : IDL.Nat64,
   });
-  const Spawn = IDL.Record({ 'new_controller' : IDL.Opt(IDL.Principal) });
+  const Spawn = IDL.Record({
+    'percentage_to_spawn' : IDL.Opt(IDL.Nat32),
+    'new_controller' : IDL.Opt(IDL.Principal),
+    'nonce' : IDL.Opt(IDL.Nat64)
+    });
   const Split = IDL.Record({ 'amount_e8s' : IDL.Nat64 });
   const Follow = IDL.Record({
     'topic' : IDL.Int32,
@@ -350,7 +354,11 @@ export const init = ({ IDL }) => {
     'total' : IDL.Nat64,
     'timestamp_seconds' : IDL.Nat64,
   });
-  const Spawn = IDL.Record({ 'new_controller' : IDL.Opt(IDL.Principal) });
+  const Spawn = IDL.Record({
+    'percentage_to_spawn' : IDL.Opt(IDL.Nat32),
+    'new_controller' : IDL.Opt(IDL.Principal),
+    'nonce' : IDL.Opt(IDL.Nat64)
+    });
   const Split = IDL.Record({ 'amount_e8s' : IDL.Nat64 });
   const Follow = IDL.Record({
     'topic' : IDL.Int32,
