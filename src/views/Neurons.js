@@ -116,7 +116,7 @@ function Neurons(props) {
               alignItems="flex-start"
             >
             {neurons.map(n => {
-            return (<Neuron showNeuronTopupForm={showNeuronTopupForm} showNeuronDelayForm={showNeuronDelayForm} loader={props.loader} error={error} key={n.id} neuron={n} />)})}
+            return (<Neuron alert={alert} showNeuronTopupForm={showNeuronTopupForm} showNeuronDelayForm={showNeuronDelayForm} loader={props.loader} error={error} key={n.id} neuron={n} />)})}
             </Grid>
           </div>
         </>

@@ -406,9 +406,34 @@ class ExtConnection {
           var args;
           switch(tokenObj.canister) {
             case LEDGER_CANISTER_ID:
-              rosettaApi.getAccountBalance(address).then(b => {       
-                resolve(b)
-              });
+              // rosettaApi.getAccountBalance(address).then(b => {       
+              //   resolve(b)
+              // });
+            const Http = new XMLHttpRequest();
+            const url='https://ledger-api.internetcomputer.org/accounts/'+address;
+            Http.open("GET", url);
+            Http.send();
+            Http.onreadystatechange = ((e) => {
+              if (Http.responseText.length > 0) 
+              {
+                try
+                {
+                  if(Http.responseText=="An error occurred while retrieving the account.")
+                  {
+                    resolve(0);
+                  }
+                  else
+                  {
+                    let r = JSON.parse(Http.responseText)
+                    resolve(r.balance);
+                  }
+
+                } catch(e) {
+                  reject(e);
+                }
+
+              }
+            });
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
               args = {
