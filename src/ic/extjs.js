@@ -416,8 +416,22 @@ class ExtConnection {
             Http.onreadystatechange = ((e) => {
               if (Http.responseText.length > 0) 
               {
-                let r = JSON.parse(Http.responseText)
-                resolve(r.balance);
+                try
+                {
+                  if(Http.responseText=="An error occurred while retrieving the account.")
+                  {
+                    resolve(0);
+                  }
+                  else
+                  {
+                    let r = JSON.parse(Http.responseText)
+                    resolve(r.balance);
+                  }
+
+                } catch(e) {
+                  reject(e);
+                }
+
               }
             });
             break;

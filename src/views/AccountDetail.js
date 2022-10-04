@@ -103,7 +103,7 @@ function AccountDetail(props) {
         (a) => a && entrepotCollections.findIndex((b) => b.id === a.canister) < 0,
       );
 
-      console.log(dab)
+      // console.log(dab)
       setDabCollectionList(dab);
 
       setCollections(entrepotCollections.map(a => ({...a, canister : a.id})).concat(account.nfts.filter(a => (a && entrepotCollections.findIndex(b => b.id === a) < 0)).map(a => {
