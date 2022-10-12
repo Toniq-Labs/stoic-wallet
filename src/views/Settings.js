@@ -149,7 +149,7 @@ function Settings(props) {
               </>
             } />
           <ListItemSecondaryAction>
-            <IconButton href={"https://ic.rocks/principal/"+identity.principal} target="_blank" edge="end" aria-label="search">
+            <IconButton href={"https://icscan.io/principal/"+identity.principal} target="_blank" edge="end" aria-label="search">
               <LaunchIcon />
             </IconButton>
           </ListItemSecondaryAction>
@@ -204,7 +204,7 @@ function Settings(props) {
                 <IconButton onClick={() => clipboardCopy(principal.identity.principal)} edge="end">
                   <FileCopyIcon />
                 </IconButton>
-                <IconButton href={"https://ic.rocks/principal/"+principal.identity.principal} target="_blank" edge="end" aria-label="search">
+                <IconButton href={"https://icscan.io/principal/"+principal.identity.principal} target="_blank" edge="end" aria-label="search">
                   <LaunchIcon />
                 </IconButton>
                 { principals.length > 1 ?

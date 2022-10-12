@@ -1,5 +1,6 @@
 /* global BigInt */
-import { Actor, HttpAgent, Principal } from "@dfinity/agent";  
+import { Actor, HttpAgent } from "@dfinity/agent";  
+import { Principal } from "@dfinity/principal";
 import { LEDGER_CANISTER_ID, GOVERNANCE_CANISTER_ID, NNS_CANISTER_ID, CYCLES_MINTING_CANISTER_ID, getCyclesTopupSubAccount, rosettaApi, principalToAccountIdentifier, toHexString, from32bits, to32bits, isHex, getSubAccountArray, fromHexString, validatePrincipal } from "./utils.js";
 
 import ledgerIDL from './candid/ledger.did.js';
@@ -30,13 +31,13 @@ const tokenIdentifier = (principal, index) => {
   const padding = Buffer("\x0Atid");
   const array = new Uint8Array([
       ...padding,
-      ...Principal.fromText(principal).toBlob(),
+      ...Principal.fromText(principal).toUint8Array(),
       ...to32bits(index),
   ]);
-  return Principal.fromBlob(array).toText();
+  return Principal.fromUint8Array(array).toText();
 };
 const decodeTokenId = (tid) => {
-  var p = [...Principal.fromText(tid).toBlob()];
+  var p = [...Principal.fromText(tid).toUint8Array()];
   var padding = p.splice(0, 4);
   if (toHexString(padding) !== toHexString(Buffer("\x0Atid"))) {
     return {
@@ -47,7 +48,7 @@ const decodeTokenId = (tid) => {
   } else {
     return {
       index : from32bits(p.splice(-4)), 
-      canister : Principal.fromBlob(p).toText(),
+      canister : Principal.fromUint8Array(p).toText(),
       token : tid
     };
   }
@@ -169,7 +170,9 @@ class ExtConnection {
         });
       },
       getTokens : (aid, principal) => {
+        // console.log("getTokens call")
         return new Promise((resolve, reject) => {
+          // console.log("getTokens promise")
           switch(tokenObj.canister) {
             case "qcg3w-tyaaa-aaaah-qakea-cai":
             case "jzg5e-giaaa-aaaah-qaqda-cai":
@@ -263,11 +266,11 @@ class ExtConnection {
                     }else if (typeof r.err != 'undefined') {
                       if (r.err.hasOwnProperty("Other") && r.err.Other === "No tokens") {
                         resolve([]);
-                      } else reject(r.err)
-                    } else reject(r);
+                       }// else  reject(r.err) 
+                    } //else reject(r);
                   }).catch(reject);
                 } catch(e) {
-                  reject(e);
+                  //reject(e);
                 };
               };
             break;
@@ -403,9 +406,34 @@ class ExtConnection {
           var args;
           switch(tokenObj.canister) {
             case LEDGER_CANISTER_ID:
-              rosettaApi.getAccountBalance(address).then(b => {       
-                resolve(b)
-              });
+              // rosettaApi.getAccountBalance(address).then(b => {       
+              //   resolve(b)
+              // });
+            const Http = new XMLHttpRequest();
+            const url='https://ledger-api.internetcomputer.org/accounts/'+address;
+            Http.open("GET", url);
+            Http.send();
+            Http.onreadystatechange = ((e) => {
+              if (Http.responseText.length > 0) 
+              {
+                try
+                {
+                  if(Http.responseText=="An error occurred while retrieving the account.")
+                  {
+                    resolve(0);
+                  }
+                  else
+                  {
+                    let r = JSON.parse(Http.responseText)
+                    resolve(r.balance);
+                  }
+
+                } catch(e) {
+                  reject(e);
+                }
+
+              }
+            });
             break;
             case "qz7gu-giaaa-aaaaf-qaaka-cai":
               args = {

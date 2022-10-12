@@ -31,16 +31,16 @@ export default [
     ),
   },
   
-  {
-    canister: "nfvlz-jaaaa-aaaah-qcciq-cai",
-    name: "IC3D",
-    route: "ic3d",
-    market : false,
-    nftv : false,
-    mature: false,
-    commission: 0.035,
-    comaddress: "b29f5dc935f0457df12c9f91a58d77e192a0acb00694ca473d342063d375656c",
-  },
+  // {
+  //   canister: "nfvlz-jaaaa-aaaah-qcciq-cai",
+  //   name: "IC3D",
+  //   route: "ic3d",
+  //   market : false,
+  //   nftv : false,
+  //   mature: false,
+  //   commission: 0.035,
+  //   comaddress: "b29f5dc935f0457df12c9f91a58d77e192a0acb00694ca473d342063d375656c",
+  // },
   
   {
     canister: "dknxi-2iaaa-aaaah-qceuq-cai",
@@ -99,18 +99,18 @@ export default [
       "b53a735c40994ddbc7bb4f6dbfbf9b2c67052842241f1c445f2255bdf4bd8982",
     blurb: false,
   },
-  {
-    canister: "sr4qi-vaaaa-aaaah-qcaaq-cai",
-    market : true,
-    name: "Internet Astronauts",
-    route: "interastrosc",
-    nftv : true,
-    mature: false,
-    commission: 0.035,
-    comaddress:
-      "2be01f5e8f081c6e8784b087fb1a88dac92fdd29203c1e456a6e90950c6e6e21",
-    blurb: (<>Internet Astronauts is a collection of 10,000 unique digital NFT collectibles only found on the Internet Computer! Internet Astronauts can have advantages for various dapps on the Internet Computer Protocol(ICP) since all dapps on-chain.<br /><br />Holders will receive the Space Center membership where they can have fun. It lives on the Internet Computer Platform!</>),
-  },
+  // {
+  //   canister: "sr4qi-vaaaa-aaaah-qcaaq-cai",
+  //   market : true,
+  //   name: "Internet Astronauts",
+  //   route: "interastrosc",
+  //   nftv : true,
+  //   mature: false,
+  //   commission: 0.035,
+  //   comaddress:
+  //     "2be01f5e8f081c6e8784b087fb1a88dac92fdd29203c1e456a6e90950c6e6e21",
+  //   blurb: (<>Internet Astronauts is a collection of 10,000 unique digital NFT collectibles only found on the Internet Computer! Internet Astronauts can have advantages for various dapps on the Internet Computer Protocol(ICP) since all dapps on-chain.<br /><br />Holders will receive the Space Center membership where they can have fun. It lives on the Internet Computer Platform!</>),
+  // },
   {
     canister: "oeee4-qaaaa-aaaak-qaaeq-cai",
     market : true,
@@ -242,7 +242,7 @@ export default [
     blurb: (
       <>
         To escape from containment and restriction, releasing the stressors held
-        so long in the body, Wings’s ego is jettisoned as she explores a more
+        so long in the body, Wingsï¿½s ego is jettisoned as she explores a more
         fundamental form of existence, expressing her humanity in this elemental
         piece.
         <br />
@@ -432,7 +432,7 @@ export default [
   
   {
     canister: "cnxby-3qaaa-aaaah-qcdpq-cai",
-    name: "André Wee",
+    name: "Andrï¿½ Wee",
     route: "andrewee",
     market : false,
     nftv : false,

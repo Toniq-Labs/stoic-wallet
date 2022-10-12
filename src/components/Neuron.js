@@ -33,25 +33,25 @@ export default function Neuron(props) {
     switch(t){
       case 0: //Start dissolve
         props.loader(true);
-        await props.neuron.startDissolving();
+        await props.neuron.startDissolving(props.error);
         await props.neuron.update();
         props.loader(false);
       break;
       case 1: //Stop dissolve
         props.loader(true);
-        await props.neuron.stopDissolving();
+        await props.neuron.stopDissolving(props.error);
         await props.neuron.update();
         props.loader(false);
       break;
       case 2: //Disburse
         props.loader(true);
-        await props.neuron.disburse();
+        await props.neuron.disburse(props.error);
         await props.neuron.update();
         props.loader(false);
       break;
       case 3: //Spawn rewards
         props.loader(true);
-        await props.neuron.spawn();
+        await props.neuron.spawn(props.error);
         await props.neuron.update();
         props.loader(false);
       break;
@@ -59,14 +59,14 @@ export default function Neuron(props) {
         var currentDelay = Number(props.neuron.data.dissolve_delay);
         var increasedDelay = await props.showNeuronDelayForm(currentDelay);
         props.loader(true);
-        await props.neuron.increaseDissolveDelay(increasedDelay);
+        await props.neuron.increaseDissolveDelay(increasedDelay, props.error);
         await props.neuron.update();
         props.loader(false);
       break;
       case 5: //Topup neuron
         var [subaccount, topupamount] = await props.showNeuronTopupForm();
         props.loader(true);
-        await props.neuron.topup(subaccount, topupamount);
+        await props.neuron.topup(subaccount, topupamount, props.error);
         await props.neuron.update();
         props.loader(false);
       break;
@@ -129,7 +129,7 @@ export default function Neuron(props) {
           subheader={
             <Typography style={{fontSize: 14}} color={"primary"}>
               {"#"+props.neuron.id}
-              <IconButton href={"https://ic.rocks/neuron/"+props.neuron.id} target="_blank" size="small" edge="end" aria-label="copy">
+              <IconButton href={"https://icscan.io/neuron/"+props.neuron.id} target="_blank" size="small" edge="end" aria-label="copy">
                 <LaunchIcon style={{ fontSize: 18 }} />
               </IconButton>
             </Typography>}

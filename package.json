@@ -3,13 +3,16 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@dfinity/agent": "^0.8.9",
-    "@dfinity/auth-client": "^0.8.9",
-    "@dfinity/identity": "^0.8.9",
+    "@dfinity/agent": "0.9.3",
+    "@dfinity/auth-client": "0.9.3",
+    "@dfinity/authentication": "0.9.3",
+    "@dfinity/identity": "0.9.3",
+    "@dfinity/principal": "0.9.3",
     "@fontsource/roboto": "^4.4.5",
     "@material-ui/core": "^4.11.4",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.60",
+    "@psychedelic/dab-js": "^1.4.4",
     "@testing-library/jest-dom": "^5.11.4",
     "@testing-library/react": "^11.1.0",
     "@testing-library/user-event": "^12.1.10",
@@ -17,6 +20,7 @@
     "axios": "^0.21.1",
     "bigint-conversion": "^2.1.12",
     "bip39": "^3.0.4",
+    "dotenv": "^16.0.1",
     "ethereum-blockies-base64": "^1.0.2",
     "json-bigint": "^1.0.0",
     "query-string": "^4.3.4",
@@ -29,13 +33,15 @@
     "sjcl": "^1.0.8",
     "starkbank-ecdsa": "^1.1.2",
     "use-file-picker": "^1.3.0",
+    "patch-package": "^6.4.7",
+    "postinstall-postinstall": "^2.1.0",
     "web-vitals": "^1.0.1"
   },
   "scripts": {
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",
-    "prebuild": "react-scripts build && serve -s build",
+    "prebuild": "react-scripts build",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -59,6 +65,7 @@
     ]
   },
   "devDependencies": {
+
     "redux": "^4.1.0",
     "webpack": "4.44.2"
   }

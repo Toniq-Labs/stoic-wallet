@@ -35,6 +35,11 @@ import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import { compressAddress, clipboardCopy } from '../utils.js';
 import { useSelector, useDispatch } from 'react-redux'
+import { getNftsListIntersection } from '../hooks/useDab';
+import NftThumbnail from './NftThumbnail';
+import { getNftDabCollections, transformDabToStoicCollection, useDab } from '../hooks/useDab';
+import { ContactSupportOutlined } from '@material-ui/icons';
+
 const perPage = 20;
 const api = extjs.connect("https://boundary.ic0.app/");
 const _showListingPrice = n => {
@@ -62,6 +67,7 @@ export default function NFTList(props) {
   const [collection, setCollection] = React.useState(false);
   const [collections, setCollections] = React.useState([]);
   const [wearableFilter, setWearableFilter] = React.useState('all');
+  const { dabCollections, dabNfts } = useDab();
 
   const changeWearableFilter = async (event) => {
     setPage(1);
@@ -212,6 +218,7 @@ export default function NFTList(props) {
     return "https://" +icbstorage[i % 10]+".raw.ic0.app/Token/"+i;
   };
   const getMintNumber = nft => {
+    if(nft.isDabToken) return nft.index;
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return nft.index;
@@ -222,6 +229,7 @@ export default function NFTList(props) {
     else return nft.index+1;
   }
   const getNftImg = nft => {
+    if(nft.isDabToken) return nft.icon;
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
@@ -232,6 +240,10 @@ export default function NFTList(props) {
     else return "https://" + nft.canister + ".raw.ic0.app/?type=thumbnail&tokenid="+nft.id;
   }
   const getNftLink = nft => {
+    if(nft.isDabToken) 
+    {
+      return nft.url
+    }
     if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai") return "https://" + nft.canister + ".raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
     else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai") return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/"+nft.index;
@@ -242,37 +254,44 @@ export default function NFTList(props) {
     else return "https://" + nft.canister + ".raw.ic0.app/?tokenid="+nft.id;
   }
   const wearableMap = ["accessories","hats","eyewear","pets"];
-  const loadNfts = async () => {
-    var decoder;
-    var _nfts = [];
-    var _collections = [];
-    try {
-      new Uint8Array([]);
-      decoder = new TextDecoder();
-    } catch (e) { console.log('Browser can\'t decode.'); };
-    var scanned = [];
-    await Promise.all(props.collections.map(c => {
-      return new Promise((resolve, reject) => {
-        if (scanned.indexOf(c.canister) >= 0) return resolve();
-        scanned.push(c.canister);
-        var allowedForMarket = props.collections.filter(a => a.market).map(a => a.canister);
-        api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
-          if (nfts.length){
-            _nfts = _nfts.concat(nfts.map(nft => {
-              return {
-                ...nft,
-                metadata : toHexString(nft.metadata),
-                allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
-              };
-            }));
+
+  const loadNfts = React.useCallback(
+    async () => {
+      var decoder;
+      var _nfts = [];
+      var _collections = [];
+      try {
+        new Uint8Array([]);
+        decoder = new TextDecoder();
+      } catch (e) { console.log('Browser can\'t decode.'); };
+      var scanned = [];
+
+     
+      let selectedCollection = props.collections;
+
+      await Promise.all(selectedCollection.map(c => {
+
+        return new Promise((resolve, reject) => {
+
+          if(c.isDabCollection)
+          {
             _collections = _collections.concat(c.canister);
-            setCollections(_collections);
-            setNfts(_nfts);
+            _nfts = _nfts.concat(c.nfts);
+            // console.log(c);
+         
+            setCollections([...new Set(_collections)]);
+            let nfts = getNftsListIntersection(_nfts)
+            console.log(nfts);
+            setNfts(nfts);
+            resolve();
           }
-          resolve();
-        }).catch(e => {
-          api.token(c.canister).getTokensLegacy(account.address, identity.principal).then(nfts => {
+
+          if (scanned.indexOf(c.canister) >= 0) return resolve();
+          scanned.push(c.canister);
+          var allowedForMarket = selectedCollection.filter(a => a.market).map(a => a.canister);
+          api.token(c.canister).getTokens(account.address, identity.principal).then(nfts => {
             if (nfts.length){
+              nfts = nfts.filter(val => val.canister !== 'qcg3w-tyaaa-aaaah-qakea-cai') //hardcoded remove icpunks given we get it over dab
               _nfts = _nfts.concat(nfts.map(nft => {
                 return {
                   ...nft,
@@ -281,24 +300,41 @@ export default function NFTList(props) {
                 };
               }));
               _collections = _collections.concat(c.canister);
-              setCollections(_collections);
-              setNfts(_nfts);
+              setCollections([...new Set(_collections)]);
+              setNfts(getNftsListIntersection(_nfts));
             }
             resolve();
           }).catch(e => {
-            resolve();
+            api.token(c.canister).getTokensLegacy(account.address, identity.principal).then(nfts => {
+              if (nfts.length){
+                _nfts = _nfts.concat(nfts.map(nft => {
+                  return {
+                    ...nft,
+                    metadata : toHexString(nft.metadata),
+                    allowedToList : allowedForMarket.indexOf(nft.canister) >= 0,
+                  };
+                }));
+                _collections = _collections.concat(c.canister);
+                setCollections([...new Set(_collections)]);
+                setNfts(getNftsListIntersection(_nfts));
+              }
+              resolve();
+            }).catch(e => {
+              resolve();
+            });
           });
         });
-      });
-    }));
-  };
+      }));
+    },[account.address, identity.principal, props.collections, props.currentToken]);
+
+
   React.useEffect(() => {
     loadNfts();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount, props.childRefresh]);
+  }, [currentAccount, props.childRefresh, props.collections.length]);
   React.useEffect(() => {
     setPage(1);
-  }, [collection]);
+  }, [collection,  props.childRefresh, props.collections.length]);
 
 
   return (
@@ -374,10 +410,10 @@ export default function NFTList(props) {
                     </SnackbarButton>
                   </TableCell>
                   <TableCell>
-                    <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a>
+                    {/* <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a> */}
+                    <NftThumbnail nft={nft} />
                   </TableCell>
                   <TableCell>
-                    
                     {props.collections.find(a => a.canister == nft.canister)?.name ?? compressAddress(nft.canister)}<Tooltip title="View in browser">
                       <IconButton size="small" href={"https://" + nft.canister + ".raw.ic0.app"} target="_blank" edge="end" aria-label="search">
                         <LaunchIcon style={{ fontSize: 18 }} />
@@ -407,7 +443,7 @@ export default function NFTList(props) {
                   <TableCell align="right">
                       <>
                         <>
-                          <IconButton id={"more-"+nft.id} size="small" onClick={event => handleClick(nft.id, event.currentTarget)} edge="end">
+                          <IconButton id={"more-"+nft.id} size="small" onClick={ event => { handleClick(nft.id, event.currentTarget)} } edge="end">
                             <MoreVertIcon />
                           </IconButton>
                           <Menu
