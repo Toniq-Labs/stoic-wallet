@@ -505,16 +505,36 @@ class ExtConnection {
           var args;
           switch(tokenObj.canister) {
             case LEDGER_CANISTER_ID:
+              var toAddress = to_user;
+              var toPrincpal;
+              if (notify) {
+                if (!validatePrincipal(toAddress)) reject("You can only use notify when specifying a Principal as the To address");
+                toPrincpal = toAddress;
+                toAddress = principalToAccountIdentifier(toPrincpal, 0);
+              } else {
+                 if (validatePrincipal(toAddress)) toAddress = principalToAccountIdentifier(toAddress, 0);
+              };
               args = {
                 "from_subaccount" : [getSubAccountArray(from_sa ?? 0)], 
-                "to" : to_user, //Should be an address
+                "to" : toAddress, //Should be an address
                 "amount" : { "e8s" : amount },
                 "fee" : { "e8s" : fee }, 
                 "memo" : memo ? Number(BigInt(memo)) : 0, 
                 "created_at_time" : []
               };
               api.send_dfx(args).then(bh => {
-                resolve(true);
+                if (notify) {
+                  var args = {
+                    "block_height" : bh,
+                    "max_fee": {e8s: fee},
+                    "from_subaccount": [getSubAccountArray(from_sa ?? 0)],
+                    "to_subaccount": [getSubAccountArray(0)],
+                    "to_canister": Principal.fromText(toPrincpal)
+                  };
+                  api.notify_dfx(args).then(resolve).catch(reject);
+                } else {                  
+                  resolve(true);
+                };
               }).catch(reject);
               //Notify here
             break;

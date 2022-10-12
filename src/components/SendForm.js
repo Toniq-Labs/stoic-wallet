@@ -49,9 +49,6 @@ export default function SendForm(props) {
     if (isNaN(fee)) return error("Please enter a valid fee to use");
     if (fee !== minFee) return error("The fee must be " + minFee);
     switch(props.data.symbol){
-      case "ICP":
-        if (!validateAddress(to)) return error("Please enter a valid address");      
-      break;
       case "HZLD":
         if (!validatePrincipal(to)) return error("Please enter a valid principal to send to");      
       break;
