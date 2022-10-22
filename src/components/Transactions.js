@@ -14,35 +14,38 @@ const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
 var intervalId = 0;
-const api = extjs.connect("https://boundary.ic0.app/");
+const api = extjs.connect('https://ic0.app/');
 const perPage = 10;
 export default function Transactions(props) {
   const [transactions, setTransactions] = React.useState(false);
   const [page, setPage] = React.useState(1);
   const styles = {
-    empty : {
-      maxWidth:400,
-      margin : "0 auto",
+    empty: {
+      maxWidth: 400,
+      margin: '0 auto',
     },
     table: {
       minWidth: 650,
     },
   };
   const updateTransactions = (_id, _address) => {
-    return api.token(_id).getTransactions(_address).then(txs => {
-      return [txs, _id, _address];
-    });
-  }
+    return api
+      .token(_id)
+      .getTransactions(_address)
+      .then(txs => {
+        return [txs, _id, _address];
+      });
+  };
   const stopPoll = () => {
     if (intervalId) clearInterval(intervalId);
     intervalId = 0;
-  }
+  };
   const startPoll = () => {
     if (intervalId) stopPoll();
     fetchTx();
     intervalId = setInterval(fetchTx, 10000);
   };
-  
+
   const fetchTx = () => {
     //console.log("Fetching for " + props.data.id);
     updateTransactions(props.data.id, props.address).then(txs => {
@@ -56,13 +59,12 @@ export default function Transactions(props) {
     startPoll();
     return () => {
       stopPoll();
-    }
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
-    
     stopPoll();
-    setTimeout( () => {
+    setTimeout(() => {
       setTransactions(false);
       startPoll();
     }, 100);
@@ -71,21 +73,31 @@ export default function Transactions(props) {
 
   return (
     <>
-      {transactions === false ?
-      <div style={styles.empty}>
-        <Typography paragraph style={{paddingTop:20,fontWeight:"bold"}} align="center">
-          Loading transactions...
-        </Typography>
-      </div> : (transactions.length === 0 ?
+      {transactions === false ? (
         <div style={styles.empty}>
-          <Typography paragraph style={{paddingTop:20,fontWeight:"bold"}} align="center">
+          <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
+            Loading transactions...
+          </Typography>
+        </div>
+      ) : transactions.length === 0 ? (
+        <div style={styles.empty}>
+          <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
             No transactions available
           </Typography>
-        </div> :
+        </div>
+      ) : (
         <>
-          {transactions.length > perPage ?
-          <Pagination style={{float:"right",marginTop:"10px",marginBottom:"20px"}} size="small" count={Math.ceil(transactions.length/perPage)} page={page} onChange={(e, v) => setPage(v)} />
-          : ""}
+          {transactions.length > perPage ? (
+            <Pagination
+              style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
+              size="small"
+              count={Math.ceil(transactions.length / perPage)}
+              page={page}
+              onChange={(e, v) => setPage(v)}
+            />
+          ) : (
+            ''
+          )}
           <TableContainer component={Paper}>
             <Table style={styles.table} aria-label="simple table">
               <TableHead>
@@ -96,28 +108,72 @@ export default function Transactions(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {transactions.filter((tx,i) => (i >= ((page-1)*perPage) && i < ((page)*perPage))).map((tx, i) => (
-                  <TableRow key={props.data.id + props.address + tx.hash + i}>
-                    <TableCell component="th" scope="row">
-                      <Timestamp relative autoUpdate date={tx.timestamp} />
-                    </TableCell>
-                    <TableCell>
-                      {tx.from === props.address ?
-                        <>Sent <strong>{tx.amount} {props.data.symbol}</strong> to {tx.to} with a <strong>{tx.fee} {props.data.symbol}</strong> Fee<br />(<a href={"https://icscan.io/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> :
-                        <>Received <strong>{tx.amount} {props.data.symbol}</strong> from {tx.from}<br />(<a href={"https://icscan.io/transaction/"+tx.hash} target="_blank" rel="noreferrer">View Transaction</a>)</> }
-                    </TableCell>
-                    <TableCell align="right">
-                      {tx.from === props.address ? 
-                        <span style={{color:'red',fontWeight:'bold'}}>-{formatNumber(tx.amount + tx.fee)}</span> : 
-                        <span style={{color:'#00b894',fontWeight:'bold'}}>+{formatNumber(tx.amount)}</span>
-                      }
-                    </TableCell>
-                  </TableRow>
-                ))}
+                {transactions
+                  .filter((tx, i) => i >= (page - 1) * perPage && i < page * perPage)
+                  .map((tx, i) => (
+                    <TableRow key={props.data.id + props.address + tx.hash + i}>
+                      <TableCell component="th" scope="row">
+                        <Timestamp relative autoUpdate date={tx.timestamp} />
+                      </TableCell>
+                      <TableCell>
+                        {tx.from === props.address ? (
+                          <>
+                            Sent{' '}
+                            <strong>
+                              {tx.amount} {props.data.symbol}
+                            </strong>{' '}
+                            to {tx.to} with a{' '}
+                            <strong>
+                              {tx.fee} {props.data.symbol}
+                            </strong>{' '}
+                            Fee
+                            <br />(
+                            <a
+                              href={'https://icscan.io/transaction/' + tx.hash}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View Transaction
+                            </a>
+                            )
+                          </>
+                        ) : (
+                          <>
+                            Received{' '}
+                            <strong>
+                              {tx.amount} {props.data.symbol}
+                            </strong>{' '}
+                            from {tx.from}
+                            <br />(
+                            <a
+                              href={'https://icscan.io/transaction/' + tx.hash}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              View Transaction
+                            </a>
+                            )
+                          </>
+                        )}
+                      </TableCell>
+                      <TableCell align="right">
+                        {tx.from === props.address ? (
+                          <span style={{color: 'red', fontWeight: 'bold'}}>
+                            -{formatNumber(tx.amount + tx.fee)}
+                          </span>
+                        ) : (
+                          <span style={{color: '#00b894', fontWeight: 'bold'}}>
+                            +{formatNumber(tx.amount)}
+                          </span>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>
-        </>) }
+        </>
+      )}
     </>
   );
 }
