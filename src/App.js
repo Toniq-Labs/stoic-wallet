@@ -10,6 +10,7 @@ import {StoicIdentity} from './ic/identity.js';
 import extjs from './ic/extjs.js';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
+import {AngelInvestorDialog} from './components/AngelInvestorDialog';
 
 const useStyles = makeStyles(theme => ({
   backdrop: {
@@ -26,6 +27,11 @@ export default function App() {
   const [loaderOpen, setLoaderOpen] = React.useState(false);
   const [appState, setAppState] = React.useState(false); //0 = nologin, 1 = locked, 2 = unlocked
   const principals = useSelector(state => state.principals);
+  const account = useSelector(state =>
+    state.principals.length
+      ? state.principals[state.currentPrincipal].accounts[state.currentAccount]
+      : {},
+  );
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const dispatch = useDispatch();
   const [loaderText, setLoaderText] = React.useState('');
@@ -139,7 +145,10 @@ export default function App() {
         ''
       )}
       {appState === 2 ? (
-        <Wallet alert={alert} confirm={confirm} logout={logout} remove={remove} loader={loader} />
+        <>
+          <Wallet alert={alert} confirm={confirm} logout={logout} remove={remove} loader={loader} />
+          <AngelInvestorDialog address={account?.address} />
+        </>
       ) : (
         ''
       )}
