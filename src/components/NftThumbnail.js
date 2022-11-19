@@ -3,6 +3,8 @@ import React from "react";
 import { compressAddress } from "../utils.js";
 
 let imageContentType = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"];
+let canisterCacheList = ["a6gca-6yaaa-aaaam-qa4fa-cai", "fc5yf-vqaaa-aaaam-qa42q-cai", "4odun-ayaaa-aaaak-aarbq-cai", "4fcza-biaaa-aaaah-abi4q-cai", "tde7l-3qaaa-aaaah-qansa-cai", "zydwz-laaaa-aaaam-qasuq-cai"]
+
 
 export default function NftThumbnail({ nft }) {
   const [contentType, setContentType] = React.useState("");
@@ -147,6 +149,8 @@ const getNftImg = (nft) => {
     return icpbunnyimg(nft.index);
   else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai")
     return icpbunnyimg(nft.index);
+  else if (canisterCacheList.includes(nft.canister))
+    return ('https://images.entrepot.app/t/'+nft.canister+ '/' + nft.id);
   else
     return (
       "https://" +
