@@ -2,7 +2,7 @@ import React from "react";
 
 import { compressAddress } from "../utils.js";
 
-let imageContentType = ["image/jpeg", "image/png", "image/gif", "image/svg+xml"];
+let imageContentType = ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "img/jpg"];
 
 export default function NftThumbnail({ nft }) {
   const [contentType, setContentType] = React.useState("");
