@@ -54,7 +54,7 @@ const StoicIdentity = {
           var auth = await AuthClient.create();
           auth.login({
             maxTimeToLive : BigInt(24*60*60*1000000000),
-            identityProvider: "https://identity.icp0.io/",
+            identityProvider: "https://identity.ic0.app/",
             onSuccess: async () => {
               id = await auth.getIdentity()
               return resolve(processId(id, type));
@@ -179,7 +179,7 @@ const StoicIdentity = {
             var auth = await AuthClient.create();
             auth.login({
               maxTimeToLive : BigInt(24*60*60*1000000000),
-              identityProvider: "https://identity.icp0.io/",
+              identityProvider: "https://identity.ic0.app/",
               onSuccess: async () => {
                 id = await auth.getIdentity()
                 if (id.getPrincipal().toString() === '2vxsx-fae') return reject("Not logged in");
