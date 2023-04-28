@@ -27,7 +27,7 @@ const styles = {
   },
 };
 var intervalId = 0;
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 export default function TokenCard(props) {
   const [balance, setBalance] = React.useState(false);
   const currentPrincipal = useSelector(state => state.currentPrincipal);

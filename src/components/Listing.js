@@ -43,7 +43,7 @@ export default function Listing(props) {
     try {
       var acc = await props.showListingBuyForm();
       const id = StoicIdentity.getIdentity(identity.principal);
-      const api = extjs.connect('https://ic0.app/', id);
+      const api = extjs.connect('https://icp0.io/', id);
       props.loader(true);
       var bal = await api.token().getBalance(accounts[acc].address, identity.principal);
       props.loader(false);
@@ -110,7 +110,7 @@ export default function Listing(props) {
             <Tooltip title="View in browser">
               <a
                 style={{color: 'black', textDecoration: 'none'}}
-                href={'https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=' + tokenid}
+                href={'https://e3izy-jiaaa-aaaah-qacbq-cai.raw.icp0.io/?tokenid=' + tokenid}
                 rel="noreferrer"
                 target="_blank"
               >
@@ -120,14 +120,14 @@ export default function Listing(props) {
           </Typography>
 
           <a
-            href={'https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=' + tokenid}
+            href={'https://e3izy-jiaaa-aaaah-qacbq-cai.raw.icp0.io/?tokenid=' + tokenid}
             target="_blank"
             rel="noreferrer"
           >
             <img
               alt={tokenid}
               style={{display: imgLoaded ? 'block' : 'none'}}
-              src={'https://e3izy-jiaaa-aaaah-qacbq-cai.raw.ic0.app/?tokenid=' + tokenid}
+              src={'https://e3izy-jiaaa-aaaah-qacbq-cai.raw.icp0.io/?tokenid=' + tokenid}
               onLoad={() => setImgLoaded(true)}
             />
             <Skeleton

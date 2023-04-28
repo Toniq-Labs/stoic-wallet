@@ -73,7 +73,7 @@ const useStyles = makeStyles(theme => ({
     },
   },
 }));
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 function AccountDetail(props) {
   const classes = useStyles();
   const currentToken = useSelector(state => state.currentToken);
@@ -192,7 +192,7 @@ function AccountDetail(props) {
         console.log(_d);
         var id = mnemonicToId(_d.seed);
         extjs
-          .connect('https://ic0.app/', id)
+          .connect('https://icp0.io/', id)
           .token(extjs.encodeTokenId(_d.canister, _d.token))
           .transfer(id.getPrincipal().toText(), 0, account.address, BigInt(1), BigInt(0), '', false)
           .then(r => {

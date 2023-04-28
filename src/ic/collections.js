@@ -220,7 +220,7 @@ export default [
         intentionally omitted for others to interpret. Feel free to use IC Drip
         in any way you want.{" "}
         <a
-          href="https://dvr6e-lqaaa-aaaai-qam5a-cai.raw.ic0.app/"
+          href="https://dvr6e-lqaaa-aaaai-qam5a-cai.raw.icp0.io/"
           target="_blank"
           rel="noreferrer"
         >

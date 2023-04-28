@@ -32,7 +32,7 @@ export const useDip20 = (reload) => {
             async function fetchData()
             {
 
-                const agent = new HttpAgent({ host: "https://ic0.app" });
+                const agent = new HttpAgent({ host: "https://icp0.io" });
                 const canId = 'lzvjb-wyaaa-aaaam-qarua-cai';
                 const canMeta = await getCanisterInfo({ canisterId: canId, agent });
                 // console.log(canMeta);
@@ -123,7 +123,7 @@ export const getTokenFees = async (token, identity, index, tokenMetadata) => {
     const canisterId = (token.id);
     const id = StoicIdentity.getIdentity(identity.principal);
     const agent = await Promise.resolve(
-        new HttpAgent({ identity: id, host: "https://ic0.app" }),
+        new HttpAgent({ identity: id, host: "https://icp0.io" }),
       );
     const standard = token.standard;
 
@@ -167,7 +167,7 @@ const getParticularTokenActor = async (token, identity) => {
     const canisterId = (token.id);
     const id = StoicIdentity.getIdentity(identity.principal);
     const agent = await Promise.resolve(
-        new HttpAgent({ identity: id, host: "https://ic0.app" }),
+        new HttpAgent({ identity: id, host: "https://icp0.io" }),
       );
     const standard = token.standard;
     let tokenActor = await getTokenActor({canisterId, agent, standard});

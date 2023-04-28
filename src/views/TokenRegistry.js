@@ -29,7 +29,7 @@ const formatNumber = n => {
   return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 };
 const perPage = 10;
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 function TokenRegistry(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const account = useSelector(state => state.principals[currentPrincipal].accounts[0]);

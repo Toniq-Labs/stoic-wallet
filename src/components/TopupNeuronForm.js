@@ -15,7 +15,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Blockie from '../components/Blockie';
 import extjs from '../ic/extjs.js';
 import {principalToAccountIdentifier} from '../ic/utils.js';
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 export default function NeuronDelayForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const accounts = useSelector(state =>

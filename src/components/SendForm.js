@@ -41,7 +41,7 @@ export default function SendForm(props) {
   const [contacts, setContacts] = React.useState([]);
 
   //cold API
-  const api = extjs.connect('https://ic0.app/');
+  const api = extjs.connect('https://icp0.io/');
 
   const error = e => {
     props.error(e);
@@ -82,7 +82,7 @@ export default function SendForm(props) {
 
     //hot api, will sign as identity - BE CAREFUL
     extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .token(props.data.id)
       .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify)
       .then(r => {
