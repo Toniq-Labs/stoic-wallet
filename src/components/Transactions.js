@@ -14,7 +14,7 @@ const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
 var intervalId = 0;
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 const perPage = 10;
 export default function Transactions(props) {
   const [transactions, setTransactions] = React.useState(false);

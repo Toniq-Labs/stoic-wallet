@@ -60,7 +60,7 @@ export default function SendNFTForm(props) {
 
     //hot api, will sign as identity - BE CAREFUL
     extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .token(props.nft.id)
       .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify)
       .then(r => {
@@ -92,7 +92,7 @@ export default function SendNFTForm(props) {
     const standard = props.nft.standard;
     const _to_user = to;
 
-    const agent = await Promise.resolve(new HttpAgent({identity: id, host: 'https://ic0.app'}));
+    const agent = await Promise.resolve(new HttpAgent({identity: id, host: 'https://icp0.io'}));
 
     console.log(canisterId, tokenIndex, standard, _to_user, agent);
 

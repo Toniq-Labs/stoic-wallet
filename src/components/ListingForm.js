@@ -39,7 +39,7 @@ export default function ListingForm(props) {
     props.loader(true, 'Listing NFT...');
     handleClose();
     extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .token(props.nft.id)
       .list(_from_sa, _price)
       .then(r => {

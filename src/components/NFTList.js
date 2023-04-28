@@ -41,7 +41,7 @@ import {getNftDabCollections, transformDabToStoicCollection, useDab} from '../ho
 import {ContactSupportOutlined} from '@material-ui/icons';
 
 const perPage = 20;
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 const _showListingPrice = n => {
   n = Number(n) / 100000000;
   return n.toFixed(8).replace(/0{1,6}$/, '');
@@ -105,7 +105,7 @@ export default function NFTList(props) {
     props.loader(true, 'Unwrapping NFT...');
     //hot api, will sign as identity - BE CAREFUL
     var r = await extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .canister(canister)
       .unwrap(tokenid, [extjs.toSubaccount(currentAccount ?? 0)]);
     if (!r) return error('There was an error!');
@@ -127,11 +127,11 @@ export default function NFTList(props) {
 
     try {
       var wrappedCanister = props.collections.find(a => a.wrapped == canister).canister;
-      var r = await extjs.connect('https://ic0.app/', id).canister(wrappedCanister).wrap(tokenid);
+      var r = await extjs.connect('https://icp0.io/', id).canister(wrappedCanister).wrap(tokenid);
       if (!r) return error('There was an error wrapping this NFT!');
       props.loader(true, 'Sending NFT to wrapper...');
       var r2 = await extjs
-        .connect('https://ic0.app/', id)
+        .connect('https://icp0.io/', id)
         .token(tokenid)
         .transfer(
           identity.principal,
@@ -144,7 +144,7 @@ export default function NFTList(props) {
         );
       if (!r2) return error('There was an error wrapping this NFT!');
       props.loader(true, 'Wrapping NFT...');
-      var r3 = await extjs.connect('https://ic0.app/', id).canister(wrappedCanister).mint(tokenid);
+      var r3 = await extjs.connect('https://icp0.io/', id).canister(wrappedCanister).mint(tokenid);
       if (!r) return error('There was an error wrapping this NFT!');
       await loadNfts();
       props.loader(false);
@@ -176,7 +176,7 @@ export default function NFTList(props) {
     props.loader(true, 'Processing NFT action...');
     //hot api, will sign as identity - BE CAREFUL
     extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .token(tokenid)
       .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify)
       .then(async r => {
@@ -250,7 +250,7 @@ export default function NFTList(props) {
       'f2yud-3iaaa-aaaaf-qaehq-cai',
     ];
 
-    return 'https://' + icbstorage[i % 10] + '.raw.ic0.app/Token/' + i;
+    return 'https://' + icbstorage[i % 10] + '.raw.icp0.io/Token/' + i;
   };
   const getMintNumber = nft => {
     if (nft.isDabToken) return nft.index;
@@ -266,36 +266,36 @@ export default function NFTList(props) {
   const getNftImg = nft => {
     if (nft.isDabToken) return nft.icon;
     if (nft.canister === 'qcg3w-tyaaa-aaaah-qakea-cai')
-      return 'https://' + nft.canister + '.raw.ic0.app/Token/' + nft.index;
+      return 'https://' + nft.canister + '.raw.icp0.io/Token/' + nft.index;
     else if (nft.canister === 'jzg5e-giaaa-aaaah-qaqda-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/' + nft.index;
+      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
     else if (nft.canister === 'bxdf4-baaaa-aaaah-qaruq-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/' + nft.index;
+      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
     else if (nft.canister === 'd3ttm-qaaaa-aaaai-qam4a-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId=' + nft.index;
+      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
     else if (nft.canister === '3db6u-aiaaa-aaaah-qbjbq-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId=' + nft.index;
+      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
     else if (nft.canister === 'xkbqi-2qaaa-aaaah-qbpqq-cai') return icpbunnyimg(nft.index);
     else if (nft.canister === 'q6hjz-kyaaa-aaaah-qcama-cai') return icpbunnyimg(nft.index);
-    else return 'https://' + nft.canister + '.raw.ic0.app/?type=thumbnail&tokenid=' + nft.id;
+    else return 'https://' + nft.canister + '.raw.icp0.io/?type=thumbnail&tokenid=' + nft.id;
   };
   const getNftLink = nft => {
     if (nft.isDabToken) {
       return nft.url;
     }
     if (nft.canister === 'qcg3w-tyaaa-aaaah-qakea-cai')
-      return 'https://' + nft.canister + '.raw.ic0.app/Token/' + nft.index;
+      return 'https://' + nft.canister + '.raw.icp0.io/Token/' + nft.index;
     else if (nft.canister === 'jzg5e-giaaa-aaaah-qaqda-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/' + nft.index;
+      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
     else if (nft.canister === 'bxdf4-baaaa-aaaah-qaruq-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.ic0.app/Token/' + nft.index;
+      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
     else if (nft.canister === 'd3ttm-qaaaa-aaaai-qam4a-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId=' + nft.index;
+      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
     else if (nft.canister === '3db6u-aiaaa-aaaah-qbjbq-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.ic0.app/?tokenId=' + nft.index;
+      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
     else if (nft.canister === 'xkbqi-2qaaa-aaaah-qbpqq-cai') return icpbunnyimg(nft.index);
     else if (nft.canister === 'q6hjz-kyaaa-aaaah-qcama-cai') return icpbunnyimg(nft.index);
-    else return 'https://' + nft.canister + '.raw.ic0.app/?tokenid=' + nft.id;
+    else return 'https://' + nft.canister + '.raw.icp0.io/?tokenid=' + nft.id;
   };
   const wearableMap = ['accessories', 'hats', 'eyewear', 'pets'];
 
@@ -504,7 +504,7 @@ export default function NFTList(props) {
                           <Tooltip title="View in browser">
                             <IconButton
                               size="small"
-                              href={'https://' + nft.canister + '.raw.ic0.app'}
+                              href={'https://' + nft.canister + '.raw.icp0.io'}
                               target="_blank"
                               edge="end"
                               aria-label="search"

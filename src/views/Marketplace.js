@@ -16,7 +16,7 @@ import ListingBuyForm from '../components/ListingBuyForm';
 import {useSelector} from 'react-redux';
 import Listing from '../components/Listing';
 const perPage = 30;
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 const collections = [
   // {
   // canister: "bid2t-gyaaa-aaaah-qcdea-cai",
@@ -166,7 +166,7 @@ const collections = [
         IC Drip are randomly generated meta-commerce shopping carts for outfits and personas stored
         on chain. Stats, images, and other functionality are intentionally omitted for others to
         interpret. Feel free to use IC Drip in any way you want.{' '}
-        <a href="https://dvr6e-lqaaa-aaaai-qam5a-cai.raw.ic0.app/" target="_blank" rel="noreferrer">
+        <a href="https://dvr6e-lqaaa-aaaai-qam5a-cai.raw.icp0.io/" target="_blank" rel="noreferrer">
           IC Drip Website
         </a>
       </>
@@ -325,7 +325,7 @@ export default function Marketplace(props) {
 
   const processPayments = async () => {
     const id = StoicIdentity.getIdentity(identity.principal);
-    const _api = extjs.connect('https://ic0.app/', id);
+    const _api = extjs.connect('https://icp0.io/', id);
     for (var j = 0; j < collections.length; j++) {
       var payments = await _api.canister(collections[j].canister).payments();
       if (payments.length === 0) continue;

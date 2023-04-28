@@ -19,7 +19,7 @@ import ListItem from '@material-ui/core/ListItem';
 import Blockie from '../components/Blockie';
 import NeuronManager from '../ic/neuron.js';
 
-const api = extjs.connect('https://ic0.app/');
+const api = extjs.connect('https://icp0.io/');
 export default function NeuronForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const identity = useSelector(state =>

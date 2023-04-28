@@ -57,7 +57,7 @@ class ICNeuron {
     this.id = neuronid.toString();
     this.#identity = identity;
     this.data = neurondata;
-    this.#api = extjs.connect('https://ic0.app/', this.#identity).canister(GOVERNANCE_CANISTER_ID);
+    this.#api = extjs.connect('https://icp0.io/', this.#identity).canister(GOVERNANCE_CANISTER_ID);
   }
   async topup(from_sa, amount) {
     var args = {
@@ -69,7 +69,7 @@ class ICNeuron {
       created_at_time: [],
     };
     await extjs
-      .connect('https://ic0.app/', this.#identity)
+      .connect('https://icp0.io/', this.#identity)
       .canister(LEDGER_CANISTER_ID)
       .send_dfx(args);
     var memo = await rosettaApi
@@ -80,7 +80,7 @@ class ICNeuron {
       memo: memo,
     };
     await extjs
-      .connect('https://ic0.app/', this.#identity)
+      .connect('https://icp0.io/', this.#identity)
       .canister(GOVERNANCE_CANISTER_ID)
       .claim_or_refresh_neuron_from_account(args);
     return true;
@@ -232,7 +232,7 @@ class ICNeuron {
 const NeuronManager = {
   scan: async id => {
     var ns = await extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .canister(GOVERNANCE_CANISTER_ID)
       .list_neurons({
         include_neurons_readable_by_caller: true,
@@ -279,7 +279,7 @@ const NeuronManager = {
     };
 
     //Call
-    await extjs.connect('https://ic0.app/', id).canister(LEDGER_CANISTER_ID).send_dfx(args);
+    await extjs.connect('https://icp0.io/', id).canister(LEDGER_CANISTER_ID).send_dfx(args);
     args = {
       controller: [principal],
       memo: Number(memo),
@@ -287,7 +287,7 @@ const NeuronManager = {
 
     //Call
     var nd = await extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .canister(GOVERNANCE_CANISTER_ID)
       .claim_or_refresh_neuron_from_account(args);
     if (nd.result[0].hasOwnProperty('Error')) {
@@ -302,7 +302,7 @@ const NeuronManager = {
   },
   getData: async (neuronid, id) => {
     var ns = await extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .canister(GOVERNANCE_CANISTER_ID)
       .list_neurons({
         neuron_ids: [neuronid],

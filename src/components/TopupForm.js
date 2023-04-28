@@ -29,7 +29,7 @@ export default function TopupForm(props) {
 
   //cold API
   const fee = 0.0002;
-  const api = extjs.connect('https://ic0.app/');
+  const api = extjs.connect('https://icp0.io/');
 
   const error = e => {
     props.error(e);
@@ -57,7 +57,7 @@ export default function TopupForm(props) {
 
     //hot api, will sign as identity - BE CAREFUL
     extjs
-      .connect('https://ic0.app/', id)
+      .connect('https://icp0.io/', id)
       .token()
       .mintCycles(_from_principal, _from_sa, _canister, _amount, _fee)
       .then(r => {

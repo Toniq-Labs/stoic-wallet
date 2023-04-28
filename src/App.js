@@ -57,9 +57,9 @@ export default function App() {
       loader(true);
       StoicIdentity.load(principals[currentPrincipal].identity)
         .then(i => {
-          // extjs.connect("https://ic0.app/", StoicIdentity.getIdentity(principals[currentPrincipal].identity.principal)).canister("qgsqp-byaaa-aaaah-qbi4q-cai").log();
+          // extjs.connect("https://icp0.io/", StoicIdentity.getIdentity(principals[currentPrincipal].identity.principal)).canister("qgsqp-byaaa-aaaah-qbi4q-cai").log();
           extjs.connect(
-            'https://ic0.app/',
+            'https://icp0.io/',
             StoicIdentity.getIdentity(principals[currentPrincipal].identity.principal),
           );
           setAppState(2);
