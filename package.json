@@ -71,8 +71,5 @@
     "react-scripts": "^5.0.1",
     "redux": "^4.2.1",
     "webpack": "^5.88.2"
-  },
-  "browser": {
-    "crypto": false
   }
 }
