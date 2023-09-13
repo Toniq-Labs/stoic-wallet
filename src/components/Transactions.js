@@ -29,12 +29,21 @@ export default function Transactions(props) {
     },
   };
   const updateTransactions = (_id, _address) => {
-    return api
-      .token(_id)
-      .getTransactions(_address)
-      .then(txs => {
-        return [txs, _id, _address];
-      });
+    return fetch('https://api.nftgeek.app/api/1/toniq/accountIdentifier/'+_address+'/tokenTransactions').then(response => response.json()).then(data => {
+      var txs = []
+      if (data.hasOwnProperty('transactions') && data.transactions.hasOwnProperty(_id)){
+        txs = data.transactions[_id].map(a => ({
+          amount : a.amount,
+          fee : 0,
+          from : a.uniqueIdentifierFrom.id,
+          hash : a.id,
+          memo : 0,
+          timestamp : new Date(a.timeMillis),
+          to : a.uniqueIdentifierTo.id,
+        })
+      };
+      return [txs, _id, _address];
+    });
   };
   const stopPoll = () => {
     if (intervalId) clearInterval(intervalId);
@@ -87,17 +96,20 @@ export default function Transactions(props) {
         </div>
       ) : (
         <>
-          {transactions.length > perPage ? (
-            <Pagination
-              style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
-              size="small"
-              count={Math.ceil(transactions.length / perPage)}
-              page={page}
-              onChange={(e, v) => setPage(v)}
-            />
-          ) : (
-            ''
-          )}
+          <div style={{float:"right", marginTop: '13px', marginBottom: '20px'}}>
+            <span style={{display:"inline-block", paddingTop: '3px'}}>Data powered by <a href="https://nftgeek.app/" target="_blank">NFT Geek</a></span>
+            {transactions.length > perPage ? (
+              <Pagination
+                style={{float: 'right', marginLeft:"10px"}}
+                size="small"
+                count={Math.ceil(transactions.length / perPage)}
+                page={page}
+                onChange={(e, v) => setPage(v)}
+              />
+            ) : (
+              ''
+            )}
+          </div>
           <TableContainer component={Paper}>
             <Table style={styles.table} aria-label="simple table">
               <TableHead>
