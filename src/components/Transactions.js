@@ -40,7 +40,7 @@ export default function Transactions(props) {
           memo : 0,
           timestamp : new Date(a.timeMillis),
           to : a.uniqueIdentifierTo.id,
-        }));
+        })).reverse();
       };
       return [txs, _id, _address];
     });
