@@ -21,6 +21,7 @@
     "dotenv": "^16.3.1",
     "ethereum-blockies-base64": "^1.0.2",
     "json-bigint": "^1.0.0",
+    "patch-package": "^8.0.0",
     "pbkdf2": "^3.1.2",
     "process": "^0.11.10",
     "query-string": "^4.3.4",
@@ -38,7 +39,6 @@
     "start": "react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "react-app-rewired test",
-    "prebuild": "react-app-rewired build",
     "eject": "react-app-rewired eject"
   },
   "eslintConfig": {
