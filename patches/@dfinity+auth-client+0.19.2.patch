@@ -1,0 +1,17 @@
+diff --git a/node_modules/@dfinity/auth-client/lib/cjs/index.js b/node_modules/@dfinity/auth-client/lib/cjs/index.js
+index f47f0e1..aee27d1 100644
+--- a/node_modules/@dfinity/auth-client/lib/cjs/index.js
++++ b/node_modules/@dfinity/auth-client/lib/cjs/index.js
+@@ -153,8 +153,10 @@ class AuthClient {
+                     chain = identity_1.DelegationChain.fromJSON(chainStorage);
+                     // Verify that the delegation isn't expired.
+                     if (!(0, identity_1.isDelegationValid)(chain)) {
+-                        await _deleteStorage(storage);
+-                        key = null;
++                        alert('would _deleteStorage() here, commented out and passing the delegation to identity for testing...', JSON.stringify(storage));
++                        //await _deleteStorage(storage);
++                        identity = identity_1.DelegationIdentity.fromDelegation(key, chain);
++                        //key = null;
+                     }
+                     else {
+                         identity = identity_1.DelegationIdentity.fromDelegation(key, chain);
