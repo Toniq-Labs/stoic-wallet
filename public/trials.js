@@ -1,7 +1,7 @@
 // Base-64 encoded 
 // Third-party matching
 // DisableThirdPartyStoragePartitioning Deprecation Trial (Good until September 2024, v126)
-const TOKEN = 'AxsDw7DRRGnUd/uCwS377hC/w8d+4Necn0LJNDbISunhVsLPD93lSjF2AB7GOatx1YD4DYRJl5+ZTSaeRwo+3wgAAACFeyJvcmlnaW4iOiJodHRwczovL3d3dy5zdG9pY3dhbGxldC5jb206NDQzIiwiZmVhdHVyZSI6IkRpc2FibGVUaGlyZFBhcnR5U3RvcmFnZVBhcnRpdGlvbmluZyIsImV4cGlyeSI6MTcyNTQwNzk5OSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ==';
+const TOKEN = 'A9w/5kIDoN3pHZBOFwUHJhRxquUb/HT7mYokKy/zslmTKnopv9SIYB+6NYwlaQDsKqFTjSNG4RB4boZKB6PlcA8AAACUeyJvcmlnaW4iOiJodHRwczovL3N0b2ljd2FsbGV0LmNvbTo0NDMiLCJmZWF0dXJlIjoiRGlzYWJsZVRoaXJkUGFydHlTdG9yYWdlUGFydGl0aW9uaW5nIiwiZXhwaXJ5IjoxNzI1NDA3OTk5LCJpc1N1YmRvbWFpbiI6dHJ1ZSwiaXNUaGlyZFBhcnR5Ijp0cnVlfQ==';
 const otMeta = document.createElement('meta');
 otMeta.httpEquiv = 'origin-trial';
 otMeta.content = TOKEN;
