@@ -2,3 +2,4 @@ const TOKEN = 'A9w/5kIDoN3pHZBOFwUHJhRxquUb/HT7mYokKy/zslmTKnopv9SIYB+6NYwlaQDsK
 const otMeta = document.createElement('meta');
 otMeta.httpEquiv = 'origin-trial';
 otMeta.content = TOKEN;
+document.head.append(otMeta);
