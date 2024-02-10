@@ -13,10 +13,8 @@ import AccountDrawer from '../components/AccountDrawer';
 import AccountDetail from '../views/AccountDetail';
 import AddressBook from '../views/AddressBook';
 import Neurons from '../views/Neurons';
-import TokenRegistry from '../views/TokenRegistry';
 import Applications from '../views/Applications';
 import Settings from '../views/Settings';
-import Marketplace from '../views/Marketplace';
 
 import { makeStyles } from '@material-ui/core/styles';
 
@@ -60,14 +58,6 @@ const useStyles = makeStyles((theme) => ({
     'applications' : {
       title : "Applications",
       view : Applications
-    },
-    'tokenregistry' : {
-      title : "Token Registry",
-      view : TokenRegistry
-    },
-    'marketplace' : {
-      title : "Marketplace",
-      view : Marketplace
     },
     'addressBook' : {
       title : "Address Book",
