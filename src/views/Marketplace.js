@@ -258,8 +258,6 @@ const collections = [
 var cb = null;
 const txfee = 10000;
 const txmin = 100000;
-const txcomm = 0.015;
-var intv = false;
 export default function Marketplace(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const identity = useSelector(state =>

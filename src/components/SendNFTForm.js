@@ -12,7 +12,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {compressAddress} from '../utils.js';
-import {useSelector, useDispatch} from 'react-redux';
+import {useSelector} from 'react-redux';
 import {Principal} from '@dfinity/principal';
 import {getNFTActor} from '@psychedelic/dab-js';
 import {HttpAgent} from '@dfinity/agent';
@@ -32,8 +32,6 @@ export default function SendNFTForm(props) {
   const [canister, setCanister] = React.useState('');
 
   const [contacts, setContacts] = React.useState([]);
-
-  const dispatch = useDispatch();
 
   const error = e => {
     props.error(e);

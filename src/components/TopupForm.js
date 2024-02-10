@@ -9,7 +9,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
-import {validatePrincipal, NNS_CANISTER_ID} from '../ic/utils.js';
+import {validatePrincipal} from '../ic/utils.js';
 import {compressAddress} from '../utils.js';
 import {useSelector} from 'react-redux';
 
