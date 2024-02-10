@@ -8,13 +8,11 @@ import AppsIcon from '@material-ui/icons/Apps';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
-import StorefrontIcon from '@material-ui/icons/Storefront';
 import Avatar from '@material-ui/core/Avatar';
 import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import LockIcon from '@material-ui/icons/Lock';
-import ListIcon from '@material-ui/icons/List';
 import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux'
 
@@ -97,14 +95,6 @@ export default function AccountDrawer(props) {
         <ListItem button onClick={() => {props.onClose(); props.changeRoute('neurons')}}>
           <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
           <ListItemText primary="Neurons" />
-        </ListItem>
-        <ListItem button onClick={() => {props.onClose(); props.changeRoute('marketplace')}}>
-          <ListItemIcon><StorefrontIcon /></ListItemIcon>
-          <ListItemText primary="Marketplace *BETA*" />
-        </ListItem>
-        <ListItem button onClick={() => {props.onClose(); props.changeRoute('tokenregistry')}}>
-          <ListItemIcon><ListIcon /></ListItemIcon>
-          <ListItemText primary="Token Registry" />
         </ListItem>
         <ListItem button onClick={() => {props.onClose(); props.changeRoute('applications')}}>
           <ListItemIcon><AppsIcon /></ListItemIcon>
