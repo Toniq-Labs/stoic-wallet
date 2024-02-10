@@ -39,7 +39,7 @@ const getNftLink = (nft) => {
   else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai")
     return icpbunnyimg(nft.tokenindex);
   else if (nft.standard === "EXT")
-    return "https://" + nft.canister + ".raw.icp0.io/?tokenid=" + nft.tokenindex;
+    return "https://" + nft.canister + ".raw.icp0.io/?tokenid=" + nft.tokenid;
   else return false;
 };
 
