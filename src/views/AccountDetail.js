@@ -66,7 +66,6 @@ const useStyles = makeStyles(theme => ({
     },
   },
 }));
-const api = extjs.connect('https://icp0.io/');
 function AccountDetail(props) {
   const classes = useStyles();
   const currentToken = useSelector(state => state.currentToken);
@@ -258,58 +257,18 @@ function AccountDetail(props) {
     return [txs, _id, _address, _principal];
   };
 
-
-  //TODO Add fungible tokens
-  const _addToken = (cid, checkBearer) => {
-    return new Promise(function (resolve, reject) {
-      api
-        .token(cid)
-        .getMetadata()
-        .then(md => {
-          if (md.type === 'fungible') {
-            md.id = cid;
-            dispatch({
-              type: 'account/token/add',
-              payload: {
-                metadata: md,
-              },
-            });
-            resolve(account.tokens.length);
-          } else {
-            var d = extjs.decodeTokenId(cid);
-            console.log(d);
-            dispatch({
-              type: 'account/nft/add',
-              payload: {
-                canister: d.canister,
-              },
-            });
-            resolve('nft');
-          }
-        })
-        .catch(reject);
+  const addToken = async (cid, standard) => {
+    if (!validatePrincipal(cid)) return error('Please enter a valid canister ID');
+    dispatch({
+      type: 'account/token/add',
+      payload: {
+        metadata: {
+          id : cid,
+          standard: standard
+        },
+      },
     });
-  };
-  const addToken = (cid, type) => {
-    //TODO
-    if (type === 'add') {
-      var d = extjs.decodeTokenId(cid);
-      if (!validatePrincipal(cid)) return error('Please enter a valid canister ID');
-      if (account.tokens.findIndex(x => x.id === cid) >= 0)
-        return error('Token has already been added');
-      if (account.tokens.findIndex(x => x.id === d.canister) >= 0)
-        return error('Token has already been added');
-      if (account.nfts.findIndex(x => x === d.canister) >= 0)
-        return error('Token has already been added');
-      props.loader(true);
-      _addToken(cid, true)
-        .then(nt => {
-          dispatch({type: 'currentToken', payload: {index: nt}});
-        })
-        .finally(() => {
-          props.loader(false);
-        });
-    };
+    dispatch({type: 'currentToken', payload: {index: account.tokens.length}});
   };
 
   return (
@@ -456,7 +415,7 @@ function AccountDetail(props) {
             selected={currentToken === 'nft'}
           />
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
-            <AddTokenForm onClick={addToken}>
+            <AddTokenForm loader={props.loader} onClick={addToken}>
               <Tooltip title="Add a new token to this account">
                 <Fab color="primary" aria-label="add">
                   <AddIcon />

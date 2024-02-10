@@ -14,7 +14,6 @@ function initDb(_db){
     db = JSON.parse(db);
     //db versioning
     var savenow = false;
-    var clearnfts = false;
     if (!Array.isArray(db)) {
       db = [[db],[]];
       console.log("Converting old DB to new");
@@ -28,7 +27,20 @@ function initDb(_db){
     if (db.length === 3) {
       db.push(DBVERSION);
       console.log("Converting old DB to new");
-      clearnfts = true;
+      savenow = true;
+    }
+    let dbCurrentVersion = db[3];
+    if (true || dbCurrentVersion < 2) {
+      //This DB upgrade adds nftgeek NFT support
+      db[3] = 2;
+      db[0] = db[0].map(({accounts, ...principalRest}) => ({
+        ...principalRest,
+        accounts: accounts.map(([accountName, tokens]) => ([
+          accountName, // Preserve the accountName
+          tokens.map(token => ({...token, standard: "ext"})) // Update tokens
+          // The nfts element is omitted, effectively removing it from the structure
+        ]))
+      }));
       savenow = true;
     }
     var loadedPrincipals = [];
@@ -51,8 +63,6 @@ function initDb(_db){
       principal.accounts.forEach((account, subaccount) => {
         //savenow = true;
         //if (subaccount >= 2) return;
-        if (account.length === 2) account[2] = [];
-        if (clearnfts) account[2] = [];
         _principal.accounts.push({
           name : account[0],
           address : principalToAccountIdentifier(principal.identity.principal, subaccount),
@@ -61,11 +71,11 @@ function initDb(_db){
               id : LEDGER_CANISTER_ID,
               name : "Internet Computer",
               symbol : "ICP",
+              standard : 'ledger',
               decimals : 8,
             }, 
             ...account[1]
-          ],
-          nfts : account[2] ?? []
+          ]
         });    
         return true;
       });
@@ -144,7 +154,7 @@ function saveDb(newState){
       identity : principal.identity
     };
     principal.accounts.forEach(account => {
-      var _a = [account.name, [], account.nfts];
+      var _a = [account.name, []];
       account.tokens.map((b, i) => {
         if (i === 0) return false;
         _a[1].push(b);
@@ -258,29 +268,6 @@ function rootReducer(state = initDb(), action) {
           }
         }),
       });
-    case "account/nft/remove":
-      return saveDb({
-        ...state,
-        principals : state.principals.map((principal,i) => {
-          if (i === state.currentPrincipal) {
-            return {
-              ...principal,
-              accounts : principal.accounts.map((account,ii) => {
-                if (ii === state.currentAccount) {
-                  return {
-                    ...account,
-                    nfts : account.nfts.filter(e => (e && e.id !== action.payload.id)),
-                  }
-                } else {
-                  return account;
-                }
-              }),
-            }
-          } else {
-            return principal;
-          }
-        }),
-      });
     case "removewallet":
       return clearDb();
     case "createwallet":
@@ -331,11 +318,11 @@ function rootReducer(state = initDb(), action) {
                     id : LEDGER_CANISTER_ID,
                     name : "Internet Computer",
                     symbol : "ICP",
+                    standard : 'ledger',
                     decimals : 8,
                     type : 'fungible',
                   }
                 ],
-                nfts : []
               }
             ],
             identity : action.payload.identity,
@@ -397,11 +384,12 @@ function rootReducer(state = initDb(), action) {
                 name : "Account " + action.payload.id,
                 address : principalToAccountIdentifier(action.payload.principal, action.payload.id),
                 tokens : [{
+                  id : LEDGER_CANISTER_ID,
+                  standard : "ledger",
                   name : "Internet Computer",
                   symbol : "ICP",
                   decimals : 8,
                 }],
-                nfts : []
               }]
             }
           } else {
@@ -432,62 +420,7 @@ function rootReducer(state = initDb(), action) {
           }
         }),
       });
-    case "account/nft/add":
-      return saveDb({
-        ...state,
-        principals : state.principals.map((principal,i) => {
-          if (i === state.currentPrincipal) {
-            return {
-              ...principal,
-              accounts : principal.accounts.map((account,ii) => {
-                if (ii === state.currentAccount) {
-                  if (account.nfts.findIndex(x => x === action.payload.canister) >= 0) return account;
-                  if (!action.payload.canister) return account;
-                  return {
-                    ...account,
-                    nfts : [...account.nfts, action.payload.canister]
-                  }
-                } else {
-                  return account;
-                }
-              }),
-            }
-          } else {
-            return principal;
-          }
-        }),
-      });
-      
-    case "account/nft/addToAccount":
-      return saveDb({
-        ...state,
-        principals : state.principals.map((principal,i) => {
-          if (i === action.payload.principal) {
-            return {
-              ...principal,
-              accounts : principal.accounts.map((account,ii) => {
-                if (ii === action.payload.account) {
-                  if (account.nfts.find(nft => nft.id === action.payload.nft.id)) {
-                    return {
-                      ...account,
-                      nfts : account.nfts
-                    }
-                  } else {                    
-                    return {
-                      ...account,
-                      nfts : [...account.nfts, action.payload.nft]
-                    }
-                  }
-                } else {
-                  return account;
-                }
-              }),
-            }
-          } else {
-            return principal;
-          }
-        }),
-      });
+    
     case "addresses/add":
       return saveDb({
         ...state,

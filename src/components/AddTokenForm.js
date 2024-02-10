@@ -5,19 +5,30 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
-import Tabs from '@material-ui/core/Tabs';
-import Tab from '@material-ui/core/Tab';
-
+import FormControl from '@material-ui/core/FormControl';
+import InputLabel from '@material-ui/core/InputLabel';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+const standards = [
+  ["ext", "EXT"],
+  ["icrc", "ICRC"],
+  ["dip20", "DIP20"],
+  ["ledger", "ICP Ledger"],
+];
 export default function AddTokenForm(props) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(props.defaultValue ?? "");
-  const [tabValue, setTabValue] = React.useState("add");
+  const [canisterId, setCanisterId] = React.useState("");
+  const [standard, setStandard] = React.useState("ext");
 
-  const submit = () => {
-    if (typeof props.onClick != 'undefined') props.onClick(value, tabValue);
+  const submit = async () => {
+    if (typeof props.onClick != 'undefined') {
+      props.loader("Loading token data...")
+      await props.onClick(canisterId, standard);
+      props.loader(false);
+    };
     setOpen(false);
-    setValue(props.defaultValue ?? "");
-    setTabValue("add");
+    setCanisterId("");
+    setStandard("ext");
   };
   const handleClick = () => {
     setOpen(true);
@@ -32,57 +43,40 @@ export default function AddTokenForm(props) {
       {React.cloneElement(props.children, {onClick: handleClick})}
       <Dialog maxWidth={'sm'} fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
         <DialogContent>
-          <div style={{marginBottom:"20px"}}>
-            <Tabs
-              value={tabValue}
-              indicatorColor="primary"
-              textColor="primary"
-              onChange={(e,v) => setTabValue(v)}
-              aria-label="disabled tabs example"
-            >
-              <Tab value="add" label="Add Token" />
-              <Tab value="find" label="Find Tokens" />
-            </Tabs>
+          <h3>Add Token</h3>
+          <div>
+            <DialogContentText>Add the Canister ID and the Token Standard for the token you wish to add</DialogContentText>
+            <FormControl style={{width:'49%',top:0, marginRight:5}}>
+              <TextField
+                autoFocus
+                margin="dense"
+                label="Canister ID"
+                value={canisterId}
+                onChange={(e) => setCanisterId(e.target.value)}
+                type="text"
+                InputLabelProps={{
+                  shrink: true,
+                }}
+              />
+            </FormControl>
+            <FormControl style={{width:'49%',top:5}}>
+              <InputLabel shrink id="">Standard</InputLabel>
+              <Select
+                value={standard}
+                onChange={(e) => setStandard(e.target.value)}
+              >
+                {standards.map((s, i) => (
+                  <MenuItem key={i} value={s[0]}>{s[1]}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
           </div>
-          { tabValue === "add" ? 
-          <div>
-            <DialogContentText>Add the Canister ID/Token ID for the token you wish to add</DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Canister/Token ID"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              type="text"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              fullWidth
-            />
-          </div> : "" }
-          { tabValue === "find" ? 
-          <div>
-            <DialogContentText>Enter the Canister ID of an NFT or Multi-token canister to attempt to find your tokens. You can enter an existing NFT Token ID to discover others from the same collection (if auto-discover is supported)</DialogContentText>
-            <TextField
-              autoFocus
-              margin="dense"
-              label="Canister/Token ID"
-              value={value}
-              onChange={(e) => setValue(e.target.value)}
-              type="text"
-              InputLabelProps={{
-                shrink: true,
-              }}
-              fullWidth
-            />
-          </div> : ""}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          { tabValue === "add" ? <Button onClick={submit} color="primary">Add</Button> : ""}
-          { tabValue === "find" ? <Button onClick={submit} color="primary">Find</Button> : ""}
+          <Button onClick={submit} color="primary">Add</Button>
         </DialogActions>
       </Dialog>
     </>

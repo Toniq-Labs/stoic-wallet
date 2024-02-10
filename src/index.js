@@ -96,7 +96,6 @@ if (params.get('stoicTunnel') !== null) {
               }, 
               ...account[1]
             ],
-            nfts : account[2] ?? []
           });    
           return true;
         });
