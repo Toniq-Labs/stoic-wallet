@@ -9,15 +9,11 @@ import Paper from '@material-ui/core/Paper';
 import Pagination from '@material-ui/lab/Pagination';
 import Typography from '@material-ui/core/Typography';
 import Timestamp from 'react-timestamp';
-import extjs from '../ic/extjs.js';
 const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
-var intervalId = 0;
-const api = extjs.connect('https://icp0.io/');
-const perPage = 10;
+const perPage = 20;
 export default function Transactions(props) {
-  const [transactions, setTransactions] = React.useState(false);
   const [page, setPage] = React.useState(1);
   const styles = {
     empty: {
@@ -28,67 +24,15 @@ export default function Transactions(props) {
       minWidth: 650,
     },
   };
-  const updateTransactions = (_id, _address) => {
-    return fetch('https://api.nftgeek.app/api/1/toniq/accountIdentifier/'+_address+'/tokenTransactions').then(response => response.json()).then(data => {
-      var txs = []
-      if (data.hasOwnProperty('transactions') && data.transactions.hasOwnProperty(_id)){
-        txs = data.transactions[_id].map(a => ({
-          amount : a.amount,
-          fee : 0,
-          from : a.uniqueIdentifierFrom.id,
-          hash : a.id,
-          memo : 0,
-          timestamp : new Date(a.timeMillis),
-          to : a.uniqueIdentifierTo.id,
-        })).reverse();
-      };
-      return [txs, _id, _address];
-    });
-  };
-  const stopPoll = () => {
-    if (intervalId) clearInterval(intervalId);
-    intervalId = 0;
-  };
-  const startPoll = () => {
-    if (intervalId) stopPoll();
-    fetchTx();
-    intervalId = setInterval(fetchTx, 10000);
-  };
-
-  const fetchTx = () => {
-    //console.log("Fetching for " + props.data.id);
-    updateTransactions(props.data.id, props.address).then(txs => {
-      //console.log("Fetched for " + txs[1]);
-      //console.log("Current " + props.data.id);
-      if (txs[1] !== props.data.id || txs[2] !== props.address) return;
-      setTransactions(txs[0]);
-    });
-  };
-  React.useEffect(() => {
-    startPoll();
-    return () => {
-      stopPoll();
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  React.useEffect(() => {
-    stopPoll();
-    setTimeout(() => {
-      setTransactions(false);
-      startPoll();
-    }, 100);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.address, props.data.id]);
-
   return (
     <>
-      {transactions === false ? (
+      {props.transactions === false ? (
         <div style={styles.empty}>
           <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
             Loading transactions...
           </Typography>
         </div>
-      ) : transactions.length === 0 ? (
+      ) : props.transactions.length === 0 ? (
         <div style={styles.empty}>
           <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
             No transactions available
@@ -97,12 +41,12 @@ export default function Transactions(props) {
       ) : (
         <>
           <div style={{float:"right", marginTop: '13px', marginBottom: '20px'}}>
-            <span style={{display:"inline-block", paddingTop: '3px'}}>Data powered by <a href="https://nftgeek.app/" target="_blank">NFT Geek</a></span>
-            {transactions.length > perPage ? (
+            <span style={{display:"inline-block", paddingTop: '3px'}}>Data powered by <a href="https://nftgeek.app/" target="_blank" rel="noreferrer">NFT Geek</a></span>
+            {props.transactions.length > perPage ? (
               <Pagination
                 style={{float: 'right', marginLeft:"10px"}}
                 size="small"
-                count={Math.ceil(transactions.length / perPage)}
+                count={Math.ceil(props.transactions.length / perPage)}
                 page={page}
                 onChange={(e, v) => setPage(v)}
               />
@@ -120,7 +64,7 @@ export default function Transactions(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {transactions
+                {props.transactions
                   .filter((tx, i) => i >= (page - 1) * perPage && i < page * perPage)
                   .map((tx, i) => (
                     <TableRow key={props.data.id + props.address + tx.hash + i}>
@@ -141,7 +85,7 @@ export default function Transactions(props) {
                             Fee
                             <br />(
                             <a
-                              href={'https://icscan.io/transaction/' + tx.hash}
+                              href={'https://ic.house/ICP/tx/' + tx.hash}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -158,7 +102,7 @@ export default function Transactions(props) {
                             from {tx.from}
                             <br />(
                             <a
-                              href={'https://icscan.io/transaction/' + tx.hash}
+                              href={'https://ic.house/ICP/tx/' + tx.hash}
                               target="_blank"
                               rel="noreferrer"
                             >

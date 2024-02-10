@@ -2,106 +2,45 @@ import React from "react";
 
 import { compressAddress } from "../utils.js";
 
-let imageContentType = ["image/jpeg", "image/png", "image/gif", "image/svg+xml", "img/jpg"];
-
 export default function NftThumbnail({ nft }) {
-  const [contentType, setContentType] = React.useState("");
-
-  React.useEffect(() => {
-    let getContentTypeAsync = async () => {
-      let contentType = await getContentType(getNftLink(nft));
-      setContentType(contentType);
-    };
-    getContentTypeAsync();
-  }, [nft]);
-
-  if (contentType === "video/mp4" ) {
-    return (
-      <a href={getNftLink(nft)} target="_blank" rel="noreferrer">
-        <video
-          src={getNftImg(nft)}
-          autoPlay
-          loop
-          preload
-          muted
-          playsInline
-          style={{ width: "64px" }}
-        >
-          {compressAddress(nft.id)}
-        </video>
-      </a>
-    );
-  }
-  else if (imageContentType.includes(contentType)||nft.collection==="ICPunks"||nft.collection==="ICats") {
-    return (
-      <a href={getNftLink(nft)} target="_blank" rel="noreferrer">
-        <img
-          id={"img-" + nft.id}
-          alt={compressAddress(nft.id)}
-          src={getNftImg(nft)}
-          style={{ width: 64 }}
-        />
+  let link = getNftLink(nft);
+  let img = getNftImg(nft);
+  if (link) {
+    return (<a href={link} target="_blank" rel="noreferrer" style={{ display: "block" }} >
+        {img ? (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} style={{width:64}} />) : (<p>No preview available</p>)}
       </a>
     );
   } else {
-    return (
-      <a
-        href={getNftLink(nft)}
-        target="_blank"
-        rel="noreferrer"
-        style={{ display: "block" }}
-      >
-        {
-         <object
-          data={getNftImg(nft)}
-          id={"img-" + nft.id}
-          width="64"
-          height="64"
-          overflow="hidden"
-          display="block"
-          style={{ pointerEvents: "none" }}
-        >
-          {compressAddress(nft.id)}
-        </object> 
-      //   <img
-      //   id={"img-" + nft.id}
-      //   alt={compressAddress(nft.id)}
-      //   src={getNftImg(nft)}
-      //   style={{ width: 64 }}
-      // />
-        }
-      </a>
-    );
+    if (img) {
+      return (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} style={{width:64}} />);
+    } else {
+      return (<p>No preview available</p>);
+    }
   }
 }
 
-const getContentType = async (url) => {
-  let response = await fetch(url);
-  let contentType = response.headers.get("Content-Type");
-  return contentType;
-};
-
 const getNftLink = (nft) => {
-  if (nft.isDabToken) return nft.url;
   if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai")
-    return "https://" + nft.canister + ".raw.icp0.io/Token/" + nft.index;
+    return "https://" + nft.canister + ".raw.icp0.io/Token/" + nft.tokenindex;
   else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai")
-    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.index;
+    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.tokenindex;
   else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai")
-    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.index;
+    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.tokenindex;
   else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai")
     return (
-      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.index
+      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.tokenindex
     );
   else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai")
     return (
-      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.index
+      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.tokenindex
     );
   else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai")
-    return icpbunnyimg(nft.index);
+    return icpbunnyimg(nft.tokenindex);
   else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai")
-    return icpbunnyimg(nft.index);
-  else return "https://" + nft.canister + ".raw.icp0.io/?tokenid=" + nft.id;
+    return icpbunnyimg(nft.tokenindex);
+  else if (nft.standard === "EXT")
+    return "https://" + nft.canister + ".raw.icp0.io/?tokenid=" + nft.tokenindex;
+  else return false;
 };
 
 const icpbunnyimg = (i) => {
@@ -122,36 +61,31 @@ const icpbunnyimg = (i) => {
 };
 
 const getNftImg = (nft) => {
-
-  
-  if (nft.isDabToken) 
-  {
-    return nft.url;
-  }
   
   if (nft.canister === "qcg3w-tyaaa-aaaah-qakea-cai")
-    return "https://" + nft.canister + ".raw.icp0.io/Token/" + nft.index;
+    return "https://" + nft.canister + ".raw.icp0.io/Token/" + nft.tokenindex;
   else if (nft.canister === "jzg5e-giaaa-aaaah-qaqda-cai")
-    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.index;
+    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.tokenindex;
   else if (nft.canister === "bxdf4-baaaa-aaaah-qaruq-cai")
-    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.index;
+    return "https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/" + nft.tokenindex;
   else if (nft.canister === "d3ttm-qaaaa-aaaai-qam4a-cai")
     return (
-      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.index
+      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.tokenindex
     );
   else if (nft.canister === "3db6u-aiaaa-aaaah-qbjbq-cai")
     return (
-      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.index
+      "https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=" + nft.tokenindex
     );
   else if (nft.canister === "xkbqi-2qaaa-aaaah-qbpqq-cai")
-    return icpbunnyimg(nft.index);
+    return icpbunnyimg(nft.tokenindex);
   else if (nft.canister === "q6hjz-kyaaa-aaaah-qcama-cai")
-    return icpbunnyimg(nft.index);
-  else
+    return icpbunnyimg(nft.tokenindex);
+  else if (nft.standard === "EXT")
     return (
       "https://" +
       nft.canister +
       ".raw.icp0.io/?type=thumbnail&tokenid=" +
-      nft.id
+      nft.tokenid
     );
+  else return false;
 };

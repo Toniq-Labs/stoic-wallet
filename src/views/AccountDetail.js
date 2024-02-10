@@ -1,7 +1,6 @@
 /* global BigInt */
 import React from 'react';
 import {useSelector, useDispatch} from 'react-redux';
-import Alert from '@material-ui/lab/Alert';
 import Button from '@material-ui/core/Button';
 import Grid from '@material-ui/core/Grid';
 import List from '@material-ui/core/List';
@@ -24,7 +23,6 @@ import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
 import NFTCard from '../components/NFTCard';
-import OtherTokenCard from '../components/OtherTokenCard';
 import SendForm from '../components/SendForm';
 import TopupForm from '../components/TopupForm';
 import Transactions from '../components/Transactions';
@@ -38,12 +36,7 @@ import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, mnemonicToId} from '../ic/utils.js';
 import {clipboardCopy} from '../utils';
-import CANISTERS from '../ic/canisters.js';
-import COLLECTIONS from '../ic/collections.js';
 import {makeStyles} from '@material-ui/core/styles';
-import {getNftDabCollections, getNftsListIntersection, useDab} from '../hooks/useDab';
-import {useDip20} from '../hooks/useDip20';
-import FungibleTokenList from '../components/FungibleTokenList';
 
 function useInterval(callback, delay) {
   const savedCallback = React.useRef();
@@ -87,44 +80,14 @@ function AccountDetail(props) {
   const account = useSelector(state =>
     state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {},
   );
-  const [collections, setCollections] = React.useState([]);
-  const [dabCollectionList, setDabCollectionList] = React.useState([]);
+
   const [tokens, setTokens] = React.useState(account.tokens);
-  const [nftCount, setNftCount] = React.useState(0);
-  const [dabCount, setDabCount] = React.useState(0);
-  const [childRefresh, setChildRefresh] = React.useState(0); //Ugly don't judge
+  const [nfts, setNfts] = React.useState(false);
+  const [transactions, setTransactions] = React.useState(false);
+  const [collections, setCollections] = React.useState([]);
   const dispatch = useDispatch();
-  const {dabCollections, dabNfts} = useDab();
-  const dabTokens = useDip20(childRefresh);
 
   React.useEffect(() => {
-    fetch('https://us-central1-entrepot-api.cloudfunctions.net/api/collections')
-      .then(r => r.json())
-      .then(entrepotCollections => {
-        const dab = dabCollections.filter(
-          a => a && entrepotCollections.findIndex(b => b.id === a.canister) < 0,
-        );
-
-        // console.log(dab)
-        setDabCollectionList(dab);
-
-        setCollections(
-          entrepotCollections
-            .map(a => ({...a, canister: a.id}))
-            .concat(
-              account.nfts
-                .filter(a => a && entrepotCollections.findIndex(b => b.id === a) < 0)
-                .map(a => {
-                  return {
-                    canister: a,
-                    name: a,
-                    market: false,
-                  };
-                }),
-            ),
-        );
-      });
-
     const windowUrl = window.location.search;
     const params = new URLSearchParams(windowUrl);
     const authorizeApp = params.get('authorizeApp');
@@ -182,8 +145,6 @@ function AccountDetail(props) {
       );
       window.opener.postMessage({action: 'initiateStoicConnect'}, '*');
     }
-
-    _refresh();
     const nfttransfer = params.get('nftTx');
     if (nfttransfer !== null) {
       setTimeout(() => {
@@ -209,21 +170,21 @@ function AccountDetail(props) {
           });
       }, 500);
     }
+    refresh(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dabCollections]);
+  }, []);
 
   React.useEffect(() => {
-    setNftCount('Loading...');
-  }, [currentAccount, currentPrincipal]);
-  React.useEffect(() => {
-    _refresh();
-  }, [collections, dabCollectionList]);
+    setTokens(account.tokens);
+    refresh();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentToken]);
   React.useEffect(() => {
     setTokens(account.tokens);
-    _refresh();
+    refresh(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentToken, currentAccount, currentPrincipal]);
-  useInterval(() => _refresh(), 10 * 1000);
+  }, [currentAccount, currentPrincipal]);
+  useInterval(() => refresh(), 60 * 1000);
   const theme = useTheme();
   const styles = {
     root: {
@@ -245,9 +206,6 @@ function AccountDetail(props) {
   const removeToken = i => {
     dispatch({type: 'deleteToken'});
   };
-  const gotomain = () => {
-    dispatch({type: 'currentAccount', payload: {index: 0}});
-  };
   const changeToken = i => {
     dispatch({type: 'currentToken', payload: {index: i}});
   };
@@ -256,16 +214,52 @@ function AccountDetail(props) {
     if (name.length > 20) return error('Max length or account names is 20 characters');
     dispatch({type: 'account/edit', payload: {name: name}});
   };
-  var ignoreOwnership = false;
-  const refreshTokens = async () => {
+  const reloadAccount = async () => {
     props.loader(true);
-    setChildRefresh(prev => prev + 1);
-    await _refresh();
+    await refresh(true);
     props.loader(false);
   };
-  const _refresh = async () => {
-    await getNftCount();
+  const refresh = async (hardRefresh) => {
+    let ps = [];
+    if (hardRefresh) {
+      setNfts(false);
+      setCollections([]);
+    }
+    ps.push(loadNfts());
+    if (currentToken !== 'nft') {
+      if (hardRefresh) {
+        setTransactions(false);
+      }
+      ps.push(loadTransactions());
+    };
+    await Promise.all(ps);
   };
+  const loadNfts = async () => {
+    await updateNfts(account.address, principal).then(nfts => {
+      if (nfts[2] !== account.address || nfts[3] !== principal) return;
+      setNfts(nfts[0]);
+      setCollections(nfts[1]);
+    });
+  };
+  
+  const loadTransactions = async () => {
+    await updateTransactions(account.tokens[currentToken].id, account.address, principal).then(txs => {
+      if (txs[1] !== account.tokens[currentToken].id || txs[2] !== account.address || txs[3] !== principal) return;
+      setTransactions(txs[0]);
+    });
+  };
+  const updateNfts = async (_address, _principal) => {
+    let res = await (await fetch('https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/'+_principal+'/'+_address+'/nfts')).json();
+    return [res.nfts, res.collections, _address, _principal];
+  };
+  
+  const updateTransactions = async (_id, _address, _principal) => {
+    let txs = await (await fetch('https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/'+_principal+'/'+_address+'/'+_id+'/transactions')).json();
+    return [txs, _id, _address, _principal];
+  };
+
+
+  //TODO Add fungible tokens
   const _addToken = (cid, checkBearer) => {
     return new Promise(function (resolve, reject) {
       api
@@ -297,6 +291,7 @@ function AccountDetail(props) {
     });
   };
   const addToken = (cid, type) => {
+    //TODO
     if (type === 'add') {
       var d = extjs.decodeTokenId(cid);
       if (!validatePrincipal(cid)) return error('Please enter a valid canister ID');
@@ -314,57 +309,8 @@ function AccountDetail(props) {
         .finally(() => {
           props.loader(false);
         });
-    } else if (type === 'find') {
-      if (!validatePrincipal(cid)) return error('Please enter a valid canister ID');
-      props.loader(true);
-      api
-        .token(cid)
-        .getTokens(account.address, principal)
-        .then(async tokens => {
-          var d = extjs.decodeTokenId(cid);
-          await Promise.all(
-            tokens
-              .filter(
-                (ct, i) =>
-                  account.tokens.findIndex(x => x.id === ct) < 0 &&
-                  account.tokens.findIndex(x => x.id === d.canister) < 0 &&
-                  account.nfts.findIndex(x => x === d.canister) < 0,
-              )
-              .map((ct, i) => {
-                return _addToken(ct, false);
-              }),
-          );
-          dispatch({type: 'currentToken', payload: {index: 'nft'}});
-        })
-        .catch(e => {
-          return error(
-            'This canister does not support auto-discovery of tokens or you do not have any available',
-          );
-        })
-        .finally(() => {
-          props.loader(false);
-        });
-    }
+    };
   };
-
-  const getNftCount = React.useCallback(async () => {
-    var cc = 0;
-    var ps = [];
-    var scanned = [];
-
-    collections
-      .flatMap(a => (typeof a.wrapped == 'undefined' ? [a.id] : [a.id, a.wrapped]))
-      .concat([])
-      .forEach(async a => {
-        if (scanned.indexOf(a) >= 0) return;
-        scanned.push(a);
-        ps.push(api.token(a).getTokens(account.address, principal));
-      });
-    const stoicNfts = await Promise.all(ps.map(p => p.then(r => (cc += r.length)).catch(e => e)));
-
-    setDabCount(dabCollectionList.length);
-    setNftCount(cc);
-  }, [account.address, dabCollections, collections, dabNfts, principal]);
 
   return (
     <div style={styles.root}>
@@ -503,32 +449,12 @@ function AccountDetail(props) {
             );
           })}
           <NFTCard
-            title={'Entrepot NFT'}
-            count={nftCount}
+            title={'NFTs'}
+            count={(nfts === false ? "Loading..." : nfts.length)}
             address={account.address}
             onClick={() => changeToken('nft')}
             selected={currentToken === 'nft'}
           />
-          {currentAccount === 0 ? (
-            <NFTCard
-              title={'DAB NFT'}
-              count={dabCount}
-              address={account.address}
-              onClick={() => changeToken('dab')}
-              selected={currentToken === 'dab'}
-            />
-          ) : (
-            ''
-          )}
-          {currentAccount === 0 ? (
-            <OtherTokenCard
-              tokenCount={dabTokens.length}
-              onClick={() => changeToken('other')}
-              selected={currentToken === 'other'}
-            ></OtherTokenCard>
-          ) : (
-            ''
-          )}
           <Grid style={styles.root} item xl={2} lg={3} md={4}>
             <AddTokenForm onClick={addToken}>
               <Tooltip title="Add a new token to this account">
@@ -539,7 +465,7 @@ function AccountDetail(props) {
             </AddTokenForm>
             <Tooltip title="Reload">
               <Fab
-                onClick={refreshTokens}
+                onClick={reloadAccount}
                 style={{marginLeft: 10}}
                 color="primary"
                 aria-label="add"
@@ -552,7 +478,6 @@ function AccountDetail(props) {
       </div>
       {currentToken !== 0 &&
       currentToken !== 'nft' &&
-      currentToken !== 'dab' &&
       currentToken !== 'other' ? (
         <div style={{marginLeft: '15px', color: 'rgba(0, 0, 0, 0.54)'}}>
           <strong>Token ID:</strong> {account.tokens[currentToken].id}
@@ -581,13 +506,11 @@ function AccountDetail(props) {
       ) : (
         ''
       )}
-      {/* {currentToken === 'nft' ? <NFTList collections={collections} childRefresh={childRefresh} alert={alert} error={error} confirm={props.confirm} loader={props.loader} /> : ""} */}
       {currentToken === 'nft' ? (
         <NFTList
-          currentToken={currentToken}
-          nftCount={nftCount}
-          collections={collections}
-          childRefresh={childRefresh}
+          loadNfts={loadNfts} 
+          nfts={nfts} 
+          collections={collections} 
           alert={alert}
           error={error}
           confirm={props.confirm}
@@ -596,34 +519,8 @@ function AccountDetail(props) {
       ) : (
         ''
       )}
-      {currentToken === 'dab' ? (
-        <NFTList
-          currentToken={currentToken}
-          nftCount={dabCount}
-          collections={dabCollectionList}
-          childRefresh={childRefresh}
-          alert={alert}
-          error={error}
-          confirm={props.confirm}
-          loader={props.loader}
-        />
-      ) : (
-        ''
-      )}
-      {currentToken === 'other' ? (
-        <FungibleTokenList
-          setChildRefresh={setChildRefresh}
-          childRefresh={childRefresh}
-          alert={alert}
-          loader={props.loader}
-        >
-          {' '}
-        </FungibleTokenList>
-      ) : (
-        ''
-      )}
-      {currentToken !== 'nft' && currentToken !== 'dab' && currentToken !== 'other' ? (
-        <Transactions data={account.tokens[currentToken]} address={account.address} />
+      {currentToken !== 'nft' && currentToken !== 'other' ? (
+        <Transactions transactions={transactions} data={account.tokens[currentToken]} principal={principal} address={account.address} />
       ) : (
         ''
       )}
@@ -650,7 +547,7 @@ function AccountDetail(props) {
           ) : (
             ''
           )}
-          {currentToken !== 'nft' && currentToken !== 'dab' && currentToken !== 'other' ? (
+          {currentToken !== 'nft' && currentToken !== 'other' ? (
             <SendForm
               alert={alert}
               loader={props.loader}

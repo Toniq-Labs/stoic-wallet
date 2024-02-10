@@ -19,39 +19,35 @@ import LaunchIcon from '@material-ui/icons/Launch';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
 import Paper from '@material-ui/core/Paper';
 import SendIcon from '@material-ui/icons/Send';
-import StorefrontIcon from '@material-ui/icons/Storefront';
 import Typography from '@material-ui/core/Typography';
-import DeleteIcon from '@material-ui/icons/Delete';
 import SnackbarButton from '../components/SnackbarButton';
 import Pagination from '@material-ui/lab/Pagination';
 import SendNFTForm from '../components/SendNFTForm';
-import ListingForm from '../components/ListingForm';
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import extjs from '../ic/extjs.js';
-import CANISTERS from '../ic/canisters.js';
 import {StoicIdentity} from '../ic/identity.js';
-import {toHexString} from '../ic/utils.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import {compressAddress, clipboardCopy} from '../utils.js';
 import {useSelector, useDispatch} from 'react-redux';
-import {getNftsListIntersection} from '../hooks/useDab';
 import NftThumbnail from './NftThumbnail';
-import {getNftDabCollections, transformDabToStoicCollection, useDab} from '../hooks/useDab';
-import {ContactSupportOutlined} from '@material-ui/icons';
+const wrapableCanisters = [
+  'xkbqi-2qaaa-aaaah-qbpqq-cai',
+  'qcg3w-tyaaa-aaaah-qakea-cai',
+  'jzg5e-giaaa-aaaah-qaqda-cai',
+  'd3ttm-qaaaa-aaaai-qam4a-cai',
+];
+const wrapperCanisters = [
+  'q6hjz-kyaaa-aaaah-qcama-cai',
+  '3db6u-aiaaa-aaaah-qbjbq-cai',
+  'bxdf4-baaaa-aaaah-qaruq-cai',
+];
 
 const perPage = 20;
-const api = extjs.connect('https://icp0.io/');
-const _showListingPrice = n => {
+const _showPrice = n => {
   n = Number(n) / 100000000;
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
-// var allowedPrincipals = [
-// "4opr7-aaepd-uw2ok-lpt52-bi5to-nguta-7r7gr-gx57i-tnzlw-ewjid-qae",
-// "sensj-ihxp6-tyvl7-7zwvj-fr42h-7ojjp-n7kxk-z6tvo-vxykp-umhfk-wqe",
-// "gt6pl-emtcy-selas-w57zx-kyok4-5ofde-vf5nq-6773c-2t6bv-bsems-tqe",
-// "qzbdz-mtxb4-orry7-pvi45-w3e47-sclbg-xqr6z-zld6i-ertsb-xth33-eqe",
-// ];
 export default function NFTList(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount);
@@ -61,29 +57,18 @@ export default function NFTList(props) {
   const account = useSelector(state =>
     state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {},
   );
-  const [nfts, setNfts] = React.useState([]);
+  const [collection, setCollection] = React.useState(false);
   const [page, setPage] = React.useState(1);
-  const [tokenDetails, setTokenDetails] = React.useState({});
   const [openNFTForm, setOpenNFTForm] = React.useState(false);
-  const [openListingForm, setOpenListingForm] = React.useState(false);
   const [tokenNFT, setTokenNFT] = React.useState('');
   const [anchorEl, setAnchorEl] = React.useState({});
-  const [collection, setCollection] = React.useState(false);
-  const [collections, setCollections] = React.useState([]);
-  const [wearableFilter, setWearableFilter] = React.useState('all');
-  const {dabCollections, dabNfts} = useDab();
-
-  const changeWearableFilter = async event => {
-    setPage(1);
-    setWearableFilter(event.target.value);
-  };
-
   const handleClick = (id, target) => {
     setAnchorEl({id: id, target: target});
   };
   const handleClose = () => {
     setAnchorEl(null);
   };
+
   const dispatch = useDispatch();
   const changeCollection = event => {
     setPage(1);
@@ -98,6 +83,7 @@ export default function NFTList(props) {
       minWidth: 650,
     },
   };
+  //Custom Actions
   const unwrapNft = async (tokenid, canister) => {
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
@@ -109,7 +95,7 @@ export default function NFTList(props) {
       .canister(canister)
       .unwrap(tokenid, [extjs.toSubaccount(currentAccount ?? 0)]);
     if (!r) return error('There was an error!');
-    await loadNfts();
+    await props.loadNfts();
     props.loader(false);
     dispatch({type: 'account/nft/remove', payload: {id: tokenid}});
     return props.alert(
@@ -119,14 +105,11 @@ export default function NFTList(props) {
     );
   };
   const wrapNft = async (tokenid, canister) => {
-    //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error('Something wrong with your wallet, try logging in again');
     props.loader(true, 'Creating wrapper...this may take a few minutes');
-    //hot api, will sign as identity - BE CAREFUL
-
     try {
-      var wrappedCanister = props.collections.find(a => a.wrapped == canister).canister;
+      var wrappedCanister = props.collections.find(a => a.wrapped === canister).canister;
       var r = await extjs.connect('https://icp0.io/', id).canister(wrappedCanister).wrap(tokenid);
       if (!r) return error('There was an error wrapping this NFT!');
       props.loader(true, 'Sending NFT to wrapper...');
@@ -144,20 +127,16 @@ export default function NFTList(props) {
         );
       if (!r2) return error('There was an error wrapping this NFT!');
       props.loader(true, 'Wrapping NFT...');
-      var r3 = await extjs.connect('https://icp0.io/', id).canister(wrappedCanister).mint(tokenid);
+      await extjs.connect('https://icp0.io/', id).canister(wrappedCanister).mint(tokenid);
       if (!r) return error('There was an error wrapping this NFT!');
-      await loadNfts();
+      await props.loadNfts();
       props.loader(false);
-      _removeNft(tokenid);
       return props.alert('You were successful!', 'Your NFT has been wrapped!');
     } catch (e) {
       props.loader(false);
       console.log(e);
       return;
     }
-  };
-  const _removeNft = tokenid => {
-    loadNfts();
   };
   const nftAction = (tokenid, memo) => {
     //Submit to blockchain here
@@ -186,7 +165,7 @@ export default function NFTList(props) {
           el.src = el.src + '?t=' + new Date().getTime();
           //Update here
           props.loader(true, 'Updating tokens...');
-          await loadNfts();
+          await props.loadNfts();
           return props.alert('You were successful!', 'You completed an advanced NFT action!');
         } else {
           return error('Something went wrong with this transfer');
@@ -199,196 +178,34 @@ export default function NFTList(props) {
         props.loader(false);
       });
   };
+
   const sendNft = nft => {
     setTokenNFT(nft);
     setOpenNFTForm(true);
-  };
-  const listNft = nft => {
-    setTokenNFT(nft);
-    setOpenListingForm(true);
   };
   const closeNFTForm = () => {
     setOpenNFTForm(false);
     setTokenNFT('');
   };
-  const handleRefresh = () => {
-    //getTokenDetails(tokenNFT.id, true)
-    loadNfts();
-  };
-  const closeListingForm = () => {
-    setOpenListingForm(false);
-    setTimeout(() => setTokenNFT(''), 300);
-  };
-  const deleteNft = id => {
-    props
-      .confirm(
-        'Please confirm',
-        'You are about to remove this NFT from your account? This does not affect the ownership of the NFT, and you can add it back again in future',
-      )
-      .then(v => {
-        if (v) {
-          _removeNft(id);
-        }
-      });
-  };
-
+  //UTILITY
   const error = e => {
     props.loader(false);
     props.error(e);
   };
-  const icpbunnyimg = i => {
-    const icbstorage = [
-      'efqhu-yqaaa-aaaaf-qaeda-cai',
-      'ecrba-viaaa-aaaaf-qaedq-cai',
-      'fp7fo-2aaaa-aaaaf-qaeea-cai',
-      'fi6d2-xyaaa-aaaaf-qaeeq-cai',
-      'fb5ig-bqaaa-aaaaf-qaefa-cai',
-      'fg4os-miaaa-aaaaf-qaefq-cai',
-      'ft377-naaaa-aaaaf-qaega-cai',
-      'fu2zl-ayaaa-aaaaf-qaegq-cai',
-      'f5zsx-wqaaa-aaaaf-qaeha-cai',
-      'f2yud-3iaaa-aaaaf-qaehq-cai',
-    ];
-
-    return 'https://' + icbstorage[i % 10] + '.raw.icp0.io/Token/' + i;
-  };
   const getMintNumber = nft => {
-    if (nft.isDabToken) return nft.index;
-    if (nft.canister === 'qcg3w-tyaaa-aaaah-qakea-cai') return nft.index;
-    else if (nft.canister === 'jzg5e-giaaa-aaaah-qaqda-cai') return nft.index;
-    else if (nft.canister === 'bxdf4-baaaa-aaaah-qaruq-cai') return nft.index;
-    else if (nft.canister === '3db6u-aiaaa-aaaah-qbjbq-cai') return nft.index;
-    else if (nft.canister === 'd3ttm-qaaaa-aaaai-qam4a-cai') return nft.index;
-    else if (nft.canister === 'xkbqi-2qaaa-aaaah-qbpqq-cai') return nft.index;
-    else if (nft.canister === 'q6hjz-kyaaa-aaaah-qcama-cai') return nft.index;
-    else return nft.index + 1;
+    if (nft.canister === 'qcg3w-tyaaa-aaaah-qakea-cai') return nft.tokenindex;
+    else if (nft.canister === 'jzg5e-giaaa-aaaah-qaqda-cai') return nft.tokenindex;
+    else if (nft.canister === 'bxdf4-baaaa-aaaah-qaruq-cai') return nft.tokenindex;
+    else if (nft.canister === '3db6u-aiaaa-aaaah-qbjbq-cai') return nft.tokenindex;
+    else if (nft.canister === 'd3ttm-qaaaa-aaaai-qam4a-cai') return nft.tokenindex;
+    else if (nft.canister === 'xkbqi-2qaaa-aaaah-qbpqq-cai') return nft.tokenindex;
+    else if (nft.canister === 'q6hjz-kyaaa-aaaah-qcama-cai') return nft.tokenindex;
+    else return nft.tokenindex + 1;
   };
-  const getNftImg = nft => {
-    if (nft.isDabToken) return nft.icon;
-    if (nft.canister === 'qcg3w-tyaaa-aaaah-qakea-cai')
-      return 'https://' + nft.canister + '.raw.icp0.io/Token/' + nft.index;
-    else if (nft.canister === 'jzg5e-giaaa-aaaah-qaqda-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
-    else if (nft.canister === 'bxdf4-baaaa-aaaah-qaruq-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
-    else if (nft.canister === 'd3ttm-qaaaa-aaaai-qam4a-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
-    else if (nft.canister === '3db6u-aiaaa-aaaah-qbjbq-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
-    else if (nft.canister === 'xkbqi-2qaaa-aaaah-qbpqq-cai') return icpbunnyimg(nft.index);
-    else if (nft.canister === 'q6hjz-kyaaa-aaaah-qcama-cai') return icpbunnyimg(nft.index);
-    else return 'https://' + nft.canister + '.raw.icp0.io/?type=thumbnail&tokenid=' + nft.id;
-  };
-  const getNftLink = nft => {
-    if (nft.isDabToken) {
-      return nft.url;
-    }
-    if (nft.canister === 'qcg3w-tyaaa-aaaah-qakea-cai')
-      return 'https://' + nft.canister + '.raw.icp0.io/Token/' + nft.index;
-    else if (nft.canister === 'jzg5e-giaaa-aaaah-qaqda-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
-    else if (nft.canister === 'bxdf4-baaaa-aaaah-qaruq-cai')
-      return 'https://qcg3w-tyaaa-aaaah-qakea-cai.raw.icp0.io/Token/' + nft.index;
-    else if (nft.canister === 'd3ttm-qaaaa-aaaai-qam4a-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
-    else if (nft.canister === '3db6u-aiaaa-aaaah-qbjbq-cai')
-      return 'https://d3ttm-qaaaa-aaaai-qam4a-cai.raw.icp0.io/?tokenId=' + nft.index;
-    else if (nft.canister === 'xkbqi-2qaaa-aaaah-qbpqq-cai') return icpbunnyimg(nft.index);
-    else if (nft.canister === 'q6hjz-kyaaa-aaaah-qcama-cai') return icpbunnyimg(nft.index);
-    else return 'https://' + nft.canister + '.raw.icp0.io/?tokenid=' + nft.id;
-  };
-  const wearableMap = ['accessories', 'hats', 'eyewear', 'pets'];
 
-  const loadNfts = React.useCallback(async () => {
-    var decoder;
-    var _nfts = [];
-    var _collections = [];
-    try {
-      new Uint8Array([]);
-      decoder = new TextDecoder();
-    } catch (e) {
-      console.log("Browser can't decode.");
-    }
-    var scanned = [];
-
-    let selectedCollection = props.collections;
-
-    await Promise.all(
-      selectedCollection.map(c => {
-        return new Promise((resolve, reject) => {
-          if (c.isDabCollection) {
-            _collections = _collections.concat(c.canister);
-            _nfts = _nfts.concat(c.nfts);
-            // console.log(c);
-
-            setCollections([...new Set(_collections)]);
-            let nfts = getNftsListIntersection(_nfts);
-            console.log(nfts);
-            setNfts(nfts);
-            resolve();
-          }
-
-          if (scanned.indexOf(c.canister) >= 0) return resolve();
-          scanned.push(c.canister);
-          var allowedForMarket = selectedCollection.filter(a => a.market).map(a => a.canister);
-          api
-            .token(c.canister)
-            .getTokens(account.address, identity.principal)
-            .then(nfts => {
-              if (nfts.length) {
-                nfts = nfts.filter(val => val.canister !== 'qcg3w-tyaaa-aaaah-qakea-cai'); //hardcoded remove icpunks given we get it over dab
-                _nfts = _nfts.concat(
-                  nfts.map(nft => {
-                    return {
-                      ...nft,
-                      metadata: toHexString(nft.metadata),
-                      allowedToList: allowedForMarket.indexOf(nft.canister) >= 0,
-                    };
-                  }),
-                );
-                _collections = _collections.concat(c.canister);
-                setCollections([...new Set(_collections)]);
-                setNfts(getNftsListIntersection(_nfts));
-              }
-              resolve();
-            })
-            .catch(e => {
-              api
-                .token(c.canister)
-                .getTokensLegacy(account.address, identity.principal)
-                .then(nfts => {
-                  if (nfts.length) {
-                    _nfts = _nfts.concat(
-                      nfts.map(nft => {
-                        return {
-                          ...nft,
-                          metadata: toHexString(nft.metadata),
-                          allowedToList: allowedForMarket.indexOf(nft.canister) >= 0,
-                        };
-                      }),
-                    );
-                    _collections = _collections.concat(c.canister);
-                    setCollections([...new Set(_collections)]);
-                    setNfts(getNftsListIntersection(_nfts));
-                  }
-                  resolve();
-                })
-                .catch(e => {
-                  resolve();
-                });
-            });
-        });
-      }),
-    );
-  }, [account.address, identity.principal, props.collections, props.currentToken]);
-
-  React.useEffect(() => {
-    loadNfts();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [currentAccount, props.childRefresh, props.collections.length]);
   React.useEffect(() => {
     setPage(1);
-  }, [collection, props.childRefresh, props.collections.length]);
+  }, [collection, props.collections.length]);
 
   return (
     <>
@@ -396,47 +213,33 @@ export default function NFTList(props) {
         <InputLabel>Collections</InputLabel>
         <Select value={collection} onChange={changeCollection}>
           <MenuItem value={false}>All Collections</MenuItem>
-          {collections.map(col => {
+          {props.collections.map(col => {
             return (
-              <MenuItem key={col} value={col}>
-                {props.collections.find(a => a.canister == col)?.name ?? col}
+              <MenuItem key={col.canisterId} value={col.canisterId}>
+                {col.name}
               </MenuItem>
             );
           })}
         </Select>
       </FormControl>
-      {collection === 'tde7l-3qaaa-aaaah-qansa-cai' ? (
-        <FormControl style={{minWidth: 120}}>
-          <InputLabel>Wearable Type</InputLabel>
-          <Select value={wearableFilter} onChange={changeWearableFilter}>
-            <MenuItem value={'all'}>All Wearables</MenuItem>
-            <MenuItem value={'pets'}>Pets</MenuItem>
-            <MenuItem value={'accessories'}>Accessories/Flags</MenuItem>
-            <MenuItem value={'hats'}>Hats/Hair</MenuItem>
-            <MenuItem value={'eyewear'}>Eyewear</MenuItem>
-          </Select>
-        </FormControl>
-      ) : (
-        ''
-      )}
       <span style={{marginLeft: 20, lineHeight: '50px'}}>
-        Showing {nfts.filter(a => collection == false || a.canister == collection).length}
+        Showing {props.nfts === false ? 0 : (props.nfts.filter(a => collection === false || a.canister === collection).length)}
       </span>
-      {nfts.length === 0 ? (
+      {props.nfts === false || props.nfts.filter(a => collection === false || a.canister === collection).length === 0 ? (
         <div style={styles.empty}>
           <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
-            You have no NFT's right now
+            {props.nfts === false ? "Loading NFTs..." : "You have no NFT's right now"}
           </Typography>
         </div>
       ) : (
         <>
-          {nfts.slice().filter(a => collection == false || a.canister == collection).length >
+          {props.nfts.slice().filter(a => collection === false || a.canister === collection).length >
           perPage ? (
             <Pagination
               style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
               size="small"
               count={Math.ceil(
-                nfts.filter(a => collection == false || a.canister == collection).length / perPage,
+                props.nfts.filter(a => collection === false || a.canister === collection).length / perPage,
               )}
               page={page}
               onChange={(e, v) => setPage(v)}
@@ -444,7 +247,6 @@ export default function NFTList(props) {
           ) : (
             ''
           )}
-
           <TableContainer component={Paper}>
             <Table style={styles.table} aria-label="simple table">
               <TableHead>
@@ -461,9 +263,8 @@ export default function NFTList(props) {
                   <TableCell width="220" style={{fontWeight: 'bold'}}>
                     Collection/Canister
                   </TableCell>
-                  <TableCell style={{fontWeight: 'bold'}}>Metadata</TableCell>
-                  <TableCell width="200" style={{fontWeight: 'bold'}}>
-                    Marketplace
+                  <TableCell  align="right" width="300" style={{fontWeight: 'bold'}}>
+                    Floor Price
                   </TableCell>
                   <TableCell width="150" align="right" style={{fontWeight: 'bold'}}>
                     Actions
@@ -471,23 +272,23 @@ export default function NFTList(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {nfts
+                {props.nfts
                   .slice()
-                  .filter(a => collection == false || a.canister == collection)
+                  .filter(a => collection === false || a.canister === collection)
                   .filter((nft, i) => i >= (page - 1) * perPage && i < page * perPage)
                   .map((nft, i) => {
                     return (
-                      <TableRow key={nft.id}>
+                      <TableRow key={nft.tokenid}>
                         <TableCell style={{fontWeight: 'bold'}}>{getMintNumber(nft)}</TableCell>
                         <TableCell style={{fontWeight: 'bold'}}>
-                          {compressAddress(nft.id)}
+                          {compressAddress(nft.tokenid)}
                           <SnackbarButton
                             message="NFT ID Copied"
                             anchorOrigin={{
                               vertical: 'bottom',
                               horizontal: 'left',
                             }}
-                            onClick={() => clipboardCopy(nft.id)}
+                            onClick={() => clipboardCopy(nft.tokenid)}
                           >
                             <IconButton size="small" edge="end" aria-label="copy">
                               <FileCopyIcon style={{fontSize: 18}} />
@@ -495,11 +296,10 @@ export default function NFTList(props) {
                           </SnackbarButton>
                         </TableCell>
                         <TableCell>
-                          {/* <a href={getNftLink(nft)} target="_blank" rel="noreferrer"><img id={"img-"+nft.id} alt={compressAddress(nft.id)} src={getNftImg(nft)} style={{width:64}} /></a> */}
                           <NftThumbnail nft={nft} />
                         </TableCell>
                         <TableCell>
-                          {props.collections.find(a => a.canister == nft.canister)?.name ??
+                          {props.collections.find(a => a.canisterId === nft.canister)?.name ??
                             compressAddress(nft.canister)}
                           <Tooltip title="View in browser">
                             <IconButton
@@ -513,62 +313,18 @@ export default function NFTList(props) {
                             </IconButton>
                           </Tooltip>
                         </TableCell>
-                        <TableCell>
-                          {nft.metadata.substr(0, 32) + '...'}
-                          <SnackbarButton
-                            message="NFT Metadata Copied"
-                            anchorOrigin={{
-                              vertical: 'bottom',
-                              horizontal: 'left',
-                            }}
-                            onClick={() => clipboardCopy(nft.metadata)}
-                          >
-                            <IconButton size="small" edge="end" aria-label="copy">
-                              <FileCopyIcon style={{fontSize: 18}} />
-                            </IconButton>
-                          </SnackbarButton>
-                        </TableCell>
-                        <TableCell>
-                          {nft.listing == false ? (
-                            <>
-                              {nft.allowedToList ? (
-                                <>
-                                  <strong>Not Listed</strong>
-                                </>
-                              ) : (
-                                <>
-                                  <strong>Restricted</strong>
-                                </>
-                              )}
-                            </>
-                          ) : (
-                            <>
-                              {nft.listing.locked.length ? (
-                                <>
-                                  <strong>
-                                    Locked @{' '}
-                                    {(Number(nft.listing.price / 1000000n) / 100).toFixed(2)} ICP
-                                  </strong>
-                                </>
-                              ) : (
-                                <>
-                                  <strong>
-                                    Listed @{' '}
-                                    {(Number(nft.listing.price / 1000000n) / 100).toFixed(2)} ICP
-                                  </strong>
-                                </>
-                              )}
-                            </>
-                          )}
+                        <TableCell align="right">
+                          {_showPrice(nft.floor)} ICP<br />
+                          ${_showPrice(nft.floorUsd)} USD
                         </TableCell>
                         <TableCell align="right">
                           <>
                             <>
                               <IconButton
-                                id={'more-' + nft.id}
+                                id={'more-' + nft.tokenid}
                                 size="small"
                                 onClick={event => {
-                                  handleClick(nft.id, event.currentTarget);
+                                  handleClick(nft.tokenid, event.currentTarget);
                                 }}
                                 edge="end"
                               >
@@ -576,12 +332,12 @@ export default function NFTList(props) {
                               </IconButton>
                               <Menu
                                 anchorEl={
-                                  anchorEl !== null && anchorEl.id === nft.id
+                                  anchorEl !== null && anchorEl.id === nft.tokenid
                                     ? anchorEl.target
                                     : null
                                 }
                                 keepMounted
-                                open={anchorEl !== null && anchorEl.id === nft.id}
+                                open={anchorEl !== null && anchorEl.id === nft.tokenid}
                                 onClose={handleClose}
                               >
                                 <MenuItem
@@ -595,33 +351,15 @@ export default function NFTList(props) {
                                   </ListItemIcon>
                                   <Typography variant="inherit">Transfer</Typography>
                                 </MenuItem>
-                                {nft.allowedToList || nft.listing ? (
-                                  <MenuItem
-                                    onClick={() => {
-                                      handleClose();
-                                      listNft(nft);
-                                    }}
-                                  >
-                                    <ListItemIcon>
-                                      <StorefrontIcon fontSize="small" />
-                                    </ListItemIcon>
-                                    <Typography variant="inherit">Manage Listing</Typography>
-                                  </MenuItem>
-                                ) : (
-                                  ''
-                                )}
-                                {[
-                                  'q6hjz-kyaaa-aaaah-qcama-cai',
-                                  '3db6u-aiaaa-aaaah-qbjbq-cai',
-                                  'bxdf4-baaaa-aaaah-qaruq-cai',
-                                ].indexOf(nft.canister) >= 0
+                                {/*Custom actions*/}
+                                {wrapperCanisters.indexOf(nft.canister) >= 0
                                   ? [
                                       <Divider key={0} />,
                                       <MenuItem
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          unwrapNft(nft.id, nft.canister);
+                                          unwrapNft(nft.tokenid, nft.canister);
                                         }}
                                       >
                                         <ListItemIcon>
@@ -631,19 +369,14 @@ export default function NFTList(props) {
                                       </MenuItem>,
                                     ]
                                   : ''}
-                                {[
-                                  'xkbqi-2qaaa-aaaah-qbpqq-cai',
-                                  'qcg3w-tyaaa-aaaah-qakea-cai',
-                                  'jzg5e-giaaa-aaaah-qaqda-cai',
-                                  'd3ttm-qaaaa-aaaai-qam4a-cai',
-                                ].indexOf(nft.canister) >= 0
+                                {wrapableCanisters.indexOf(nft.canister) >= 0
                                   ? [
                                       <Divider key={0} />,
                                       <MenuItem
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          wrapNft(nft.id, nft.canister);
+                                          wrapNft(nft.tokenid, nft.canister);
                                         }}
                                       >
                                         <ListItemIcon>
@@ -660,7 +393,7 @@ export default function NFTList(props) {
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          nftAction(nft.id, 0);
+                                          nftAction(nft.tokenid, 0);
                                         }}
                                       >
                                         Remove Wearables
@@ -669,11 +402,6 @@ export default function NFTList(props) {
                                   : ''}
                               </Menu>
                             </>
-                            <Tooltip title="Remove from Stoic">
-                              <IconButton size="small" onClick={() => deleteNft(nft.id)}>
-                                <DeleteIcon size="small" />
-                              </IconButton>
-                            </Tooltip>
                           </>
                         </TableCell>
                       </TableRow>
@@ -682,13 +410,13 @@ export default function NFTList(props) {
               </TableBody>
             </Table>
           </TableContainer>
-          {nfts.slice().filter(a => collection == false || a.canister == collection).length >
+          {props.nfts.slice().filter(a => collection === false || a.canister === collection).length >
           perPage ? (
             <Pagination
               style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
               size="small"
               count={Math.ceil(
-                nfts.filter(a => collection == false || a.canister == collection).length / perPage,
+                props.nfts.filter(a => collection === false || a.canister === collection).length / perPage,
               )}
               page={page}
               onChange={(e, v) => setPage(v)}
@@ -698,17 +426,8 @@ export default function NFTList(props) {
           )}
         </>
       )}
-      <ListingForm
-        alert={props.alert}
-        handleRefresh={handleRefresh}
-        open={openListingForm}
-        close={closeListingForm}
-        loader={props.loader}
-        error={error}
-        nft={tokenNFT}
-      />
       <SendNFTForm
-        loadNfts={loadNfts}
+        loadNfts={props.loadNfts}
         alert={props.alert}
         open={openNFTForm}
         close={closeNFTForm}
