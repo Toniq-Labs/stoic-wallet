@@ -70,6 +70,7 @@ const decodeTokenId = tid => {
 };
 
 //Preload IDLS against a common name
+//TODO add standards here
 const _preloadedIdls = {
   governance: governanceIDL,
   ledger: ledgerIDL,
@@ -88,7 +89,6 @@ class ExtConnection {
     [GOVERNANCE_CANISTER_ID]: _preloadedIdls['governance'],
     [NNS_CANISTER_ID]: _preloadedIdls['nns'],
     'rkp4c-7iaaa-aaaaa-aaaca-cai': cyclesIDL,
-    'qz7gu-giaaa-aaaaf-qaaka-cai': _preloadedIdls['hzld'],
     'qcg3w-tyaaa-aaaah-qakea-cai': _preloadedIdls['icpunks'],
     'jzg5e-giaaa-aaaah-qaqda-cai': _preloadedIdls['icpunks'],
     'xkbqi-2qaaa-aaaah-qbpqq-cai': _preloadedIdls['icpunks'],
@@ -106,17 +106,12 @@ class ExtConnection {
       decimals: 8,
       type: 'fungible',
     },
-    'qz7gu-giaaa-aaaaf-qaaka-cai': {
-      name: 'HZLD',
-      symbol: 'HZLD',
-      decimals: 0,
-      type: 'fungible',
-    },
   };
   _identity = false; //new AnonymousIdentity();
   _host = false;
   _agent = false;
   _canisters = {};
+  _standard = '';
 
   constructor(host, identity) {
     if (identity) this._identity = identity;
@@ -158,24 +153,32 @@ class ExtConnection {
     }
     return this._canisters[cid];
   }
-  token(tid, idl) {
-    if (!tid) tid = LEDGER_CANISTER_ID; //defaults to ledger
+  token(tid, standard) {
+    if (!tid) {
+      tid = LEDGER_CANISTER_ID; 
+      standard = "ledger";
+    }//defaults to ledger
     var tokenObj = decodeTokenId(tid);
-    if (!idl) {
-      if (this._mapIdls.hasOwnProperty(tokenObj.canister)) idl = this._mapIdls[tokenObj.canister];
-      else idl = _preloadedIdls['ext']; //ext is our token default...
+    let idl = this._standard;
+    if (!standard) {
+      if (this._mapIdls.hasOwnProperty(tokenObj.canister)) {
+        idl = this._mapIdls[tokenObj.canister];
+        this._standard = "custom";
+      } else {
+        idl = _preloadedIdls['ext']; //ext is our token default...
+        this._standard = "ext";
+      }
+    } else {
+      this._standard = standard;
     }
     var api = this.canister(tokenObj.canister, idl);
     return {
       call: api,
       fee: () => {
         return new Promise((resolve, reject) => {
-          switch (tokenObj.canister) {
-            case LEDGER_CANISTER_ID:
+          switch (this._standard) {
+            case "ledger":
               resolve(10000);
-              break;
-            case 'qz7gu-giaaa-aaaaf-qaaka-cai':
-              resolve(1);
               break;
             default:
               //TODO compute fees
@@ -184,133 +187,10 @@ class ExtConnection {
           }
         });
       },
-      getTokens: (aid, principal) => {
-        // console.log("getTokens call")
-        return new Promise((resolve, reject) => {
-          // console.log("getTokens promise")
-          switch (tokenObj.canister) {
-            case 'qcg3w-tyaaa-aaaah-qakea-cai':
-            case 'jzg5e-giaaa-aaaah-qaqda-cai':
-            case 'd3ttm-qaaaa-aaaai-qam4a-cai':
-            case 'xkbqi-2qaaa-aaaah-qbpqq-cai':
-              if (aid !== principalToAccountIdentifier(principal, 0)) {
-                resolve([]);
-              } else {
-                api.user_tokens(Principal.fromText(principal)).then(r => {
-                  resolve(
-                    r.map(x => {
-                      return {
-                        id: tokenIdentifier(tokenObj.canister, Number(x)),
-                        canister: tokenObj.canister,
-                        index: Number(x),
-                        listing: false,
-                        metadata: false,
-                        wrapped: false,
-                      };
-                    }),
-                  );
-                });
-              }
-              break;
-            default:
-              if (typeof api.tokens_ext == 'undefined') reject('Not supported');
-              else {
-                try {
-                  api
-                    .tokens_ext(aid)
-                    .then(r => {
-                      if (typeof r.ok != 'undefined') {
-                        resolve(
-                          r.ok.map(d => {
-                            return {
-                              index: d[0],
-                              id: tokenIdentifier(tokenObj.canister, d[0]),
-                              canister: tokenObj.canister,
-                              listing: d[1].length ? d[1][0] : false,
-                              metadata: d[2].length ? d[2][0] : false,
-                            };
-                          }),
-                        );
-                      } else if (typeof r.err != 'undefined') {
-                        if (r.err.hasOwnProperty('Other') && r.err.Other === 'No tokens') {
-                          resolve([]);
-                        } else reject(r.err);
-                      } else reject(r);
-                    })
-                    .catch(reject);
-                } catch (e) {
-                  reject(e);
-                }
-              }
-              break;
-          }
-        });
-      },
-      getTokensLegacy: (aid, principal) => {
-        return new Promise((resolve, reject) => {
-          switch (tokenObj.canister) {
-            case 'qcg3w-tyaaa-aaaah-qakea-cai':
-            case 'jzg5e-giaaa-aaaah-qaqda-cai':
-            case 'd3ttm-qaaaa-aaaai-qam4a-cai':
-            case 'xkbqi-2qaaa-aaaah-qbpqq-cai':
-              if (aid !== principalToAccountIdentifier(principal, 0)) {
-                resolve([]);
-              } else {
-                api.user_tokens(Principal.fromText(principal)).then(r => {
-                  resolve(
-                    r.map(x => {
-                      return {
-                        id: tokenIdentifier(tokenObj.canister, Number(x)),
-                        canister: tokenObj.canister,
-                        index: Number(x),
-                        listing: false,
-                        metadata: false,
-                        wrapped: false,
-                      };
-                    }),
-                  );
-                });
-              }
-              break;
-            default:
-              if (typeof api.tokens == 'undefined') reject('Not supported');
-              else {
-                try {
-                  api
-                    .tokens(aid)
-                    .then(r => {
-                      if (typeof r.ok != 'undefined') {
-                        resolve(
-                          r.ok.map(d => {
-                            return {
-                              index: d[0],
-                              id: tokenIdentifier(tokenObj.canister, d[0]),
-                              canister: tokenObj.canister,
-                              listing: d[1].length ? d[1][0] : false,
-                              metadata: d[2].length ? d[2][0] : false,
-                            };
-                          }),
-                        );
-                      } else if (typeof r.err != 'undefined') {
-                        if (r.err.hasOwnProperty('Other') && r.err.Other === 'No tokens') {
-                          resolve([]);
-                        } // else  reject(r.err)
-                      } //else reject(r);
-                    })
-                    .catch(reject);
-                } catch (e) {
-                  //reject(e);
-                }
-              }
-              break;
-          }
-        });
-      },
       getMetadata: () => {
-        switch (tokenObj.canister) {
-          case 'qcg3w-tyaaa-aaaah-qakea-cai':
-          case 'jzg5e-giaaa-aaaah-qaqda-cai':
-          case 'xkbqi-2qaaa-aaaah-qbpqq-cai':
+        switch (this._standard) {
+          //TODO maybe inject this?
+          case 'icpunks':
             return new Promise((resolve, reject) => {
               api.data_of(tokenObj.index).then(r => {
                 resolve({
@@ -327,18 +207,7 @@ class ExtConnection {
                 });
               });
             });
-            break;
-          case 'd3ttm-qaaaa-aaaai-qam4a-cai':
-            return new Promise((resolve, reject) => {
-              api.get_token_properties(tokenObj.index).then(r => {
-                resolve({
-                  metadata: [[], r],
-                  type: 'nonfungible',
-                });
-              });
-            });
-            break;
-          default:
+          case "ext":
             return new Promise((resolve, reject) => {
               if (this._metadata.hasOwnProperty(tokenObj.canister)) {
                 resolve(this._metadata[tokenObj.canister]);
@@ -373,80 +242,17 @@ class ExtConnection {
                 }
               }
             });
-            break;
-        }
-      },
-      getBearer: () => {
-        switch (tokenObj.canister) {
-          case 'qcg3w-tyaaa-aaaah-qakea-cai':
-          case 'jzg5e-giaaa-aaaah-qaqda-cai':
-          case 'xkbqi-2qaaa-aaaah-qbpqq-cai':
-            return new Promise((resolve, reject) => {
-              api.owner_of(tokenObj.index).then(r => {
-                resolve(principalToAccountIdentifier(r.toText(), 0));
-              });
-            });
-            break;
-          case 'd3ttm-qaaaa-aaaai-qam4a-cai':
-            return new Promise((resolve, reject) => {
-              api.owner_of(tokenObj.index).then(r => {
-                if (r.length > 0) resolve(principalToAccountIdentifier(r[0].toText(), 0));
-                else reject('No such token exists');
-              });
-            });
-            break;
           default:
             return new Promise((resolve, reject) => {
-              api
-                .bearer(tokenObj.token)
-                .then(r => {
-                  if (typeof r.ok != 'undefined') resolve(r.ok);
-                  else if (typeof r.err != 'undefined') reject(r.err);
-                  else reject(r);
-                })
-                .catch(reject);
+              reject('Not supported');
             });
-            break;
-        }
-      },
-      getDetails: () => {
-        switch (tokenObj.canister) {
-          case 'qcg3w-tyaaa-aaaah-qakea-cai':
-          case 'jzg5e-giaaa-aaaah-qaqda-cai':
-          case 'xkbqi-2qaaa-aaaah-qbpqq-cai':
-            return new Promise((resolve, reject) => {
-              api.owner_of(tokenObj.index).then(r => {
-                resolve([principalToAccountIdentifier(r.toText(), 0), []]);
-              });
-            });
-            break;
-          case 'd3ttm-qaaaa-aaaai-qam4a-cai':
-            return new Promise((resolve, reject) => {
-              api.owner_of(tokenObj.index).then(r => {
-                if (r.length > 0) resolve([principalToAccountIdentifier(r[0].toText(), 0), []]);
-                else reject('No such token exists');
-              });
-            });
-            break;
-          default:
-            return new Promise((resolve, reject) => {
-              api
-                .details(tokenObj.token)
-                .then(r => {
-                  if (typeof r.ok != 'undefined') resolve(r.ok);
-                  else if (typeof r.err != 'undefined') reject(r.err);
-                  else reject(r);
-                })
-                .catch(reject);
-            });
-            break;
         }
       },
       getBalance: (address, princpal) => {
         return new Promise((resolve, reject) => {
           var args;
-          switch (tokenObj.canister) {
-            case LEDGER_CANISTER_ID:
+          switch (this._standard) {
+            case "ledger":
               // rosettaApi.getAccountBalance(address).then(b => {
               //   resolve(b)
               // });
@@ -469,19 +275,7 @@ class ExtConnection {
                 }
               };
               break;
-            case 'qz7gu-giaaa-aaaaf-qaaka-cai':
-              args = {
-                user: Principal.fromText(princpal),
-              };
-              api
-                .getBalanceInsecure(args)
-                .then(b => {
-                  var bal = b.length === 0 ? 0 : b[0];
-                  resolve(bal);
-                })
-                .catch(reject);
-              break;
-            default:
+            case "ext":
               args = {
                 user: constructUser(address),
                 token: tokenObj.token,
@@ -495,81 +289,8 @@ class ExtConnection {
                 })
                 .catch(reject);
               break;
-          }
-        });
-      },
-      getTransactions: (address, princpal) => {
-        return new Promise((resolve, reject) => {
-          switch (tokenObj.canister) {
-            case LEDGER_CANISTER_ID:
-              rosettaApi
-                .getTransactionsByAccount(address)
-                .then(ts => {
-                  if (!Array.isArray(ts)) resolve([]);
-                  var _ts = [];
-                  ts.map(_t => {
-                    if (_t.type !== 'TRANSACTION') return false;
-                    if (_t.status !== 'COMPLETED') return false;
-                    _ts.push({
-                      from: _t.account1Address,
-                      to: _t.account2Address,
-                      amount: Number(_t.amount / 100000000),
-                      fee: Number(_t.fee / 100000000),
-                      hash: _t.hash,
-                      timestamp: _t.timestamp,
-                      memo: Number(_t.memo),
-                    });
-                    return true;
-                  });
-                  _ts.reverse();
-                  resolve(_ts);
-                })
-                .catch(reject);
-              break;
-            case 'qz7gu-giaaa-aaaaf-qaaka-cai':
             default:
-              resolve([]);
-              break;
-          }
-        });
-      },
-      /*
-        from_principal = principal of account as text
-        from_sa = subaccount (to produce hex address). null/0 default as number
-        to_user = valid User (address or principal) as text
-        amount = valid amount as BigInt
-        fee = valid fee as BigInt
-        memo = data to be sent as text/hex/number
-        notify = if we need to notify TODO
-      */
-      list: (from_sa, price) => {
-        return new Promise((resolve, reject) => {
-          var args;
-          switch (tokenObj.canister) {
-            case LEDGER_CANISTER_ID:
-            case 'qz7gu-giaaa-aaaaf-qaaka-cai':
-            case 'd3ttm-qaaaa-aaaai-qam4a-cai':
-            case 'qcg3w-tyaaa-aaaah-qakea-cai':
-            case 'jzg5e-giaaa-aaaah-qaqda-cai':
-            case 'xkbqi-2qaaa-aaaah-qbpqq-cai':
               reject('Not supported');
-              break;
-            default:
-              args = {
-                token: tid,
-                from_subaccount: [getSubAccountArray(from_sa ?? 0)],
-                price: price === 0 ? [] : [price],
-              };
-              api
-                .list(args)
-                .then(b => {
-                  if (typeof b.ok != 'undefined') {
-                    resolve(true);
-                  } else {
-                    reject(JSON.stringify(b.err));
-                  }
-                })
-                .catch(reject);
               break;
           }
         });
@@ -577,8 +298,8 @@ class ExtConnection {
       transfer: (from_principal, from_sa, to_user, amount, fee, memo, notify) => {
         return new Promise((resolve, reject) => {
           var args;
-          switch (tokenObj.canister) {
-            case LEDGER_CANISTER_ID:
+          switch (this._standard) {
+            case "ledger":
               var toAddress = to_user;
               var toPrincpal;
               if (notify) {
@@ -617,9 +338,8 @@ class ExtConnection {
                 .catch(reject);
               //Notify here
               break;
-            case 'qcg3w-tyaaa-aaaah-qakea-cai':
-            case 'jzg5e-giaaa-aaaah-qaqda-cai':
-            case 'xkbqi-2qaaa-aaaah-qbpqq-cai':
+            //TODO: maybe inject this?
+            case 'icpunks':
               if (!validatePrincipal(to_user))
                 reject('ICPunks does not support traditional addresses, you must use a Principal');
               api
@@ -633,40 +353,7 @@ class ExtConnection {
                 })
                 .catch(reject);
               break;
-            case 'd3ttm-qaaaa-aaaai-qam4a-cai':
-              if (!validatePrincipal(to_user))
-                reject('IC Drip does not support traditional addresses, you must use a Principal');
-              api
-                .transfer_to(Principal.fromText(to_user), tokenObj.index)
-                .then(b => {
-                  if (b) {
-                    resolve(true);
-                  } else {
-                    reject('Something went wrong');
-                  }
-                })
-                .catch(reject);
-              break;
-              break;
-            case 'qz7gu-giaaa-aaaaf-qaaka-cai':
-              args = {
-                to: Principal.fromText(to_user),
-                metadata: [],
-                from: Principal.fromText(from_principal),
-                amount: amount,
-              };
-              api
-                .transfer(args)
-                .then(b => {
-                  if (typeof b.ok != 'undefined') {
-                    resolve(true);
-                  } else {
-                    reject(JSON.stringify(b.err));
-                  }
-                })
-                .catch(reject);
-              break;
-            default:
+            case "ext":
               args = {
                 token: tid,
                 from: {address: principalToAccountIdentifier(from_principal, from_sa ?? 0)},
@@ -688,13 +375,16 @@ class ExtConnection {
                 })
                 .catch(reject);
               break;
+            default:
+              reject('Not supported');
+              break;
           }
         });
       },
       mintCycles: (from_principal, from_sa, canister, amount, fee) => {
         return new Promise((resolve, reject) => {
-          switch (tokenObj.canister) {
-            case LEDGER_CANISTER_ID:
+          switch (this._standard) {
+            case "ledger":
               var _to_sub = getCyclesTopupSubAccount(canister);
               var _to = principalToAccountIdentifier(CYCLES_MINTING_CANISTER_ID, _to_sub);
               var args = {
@@ -718,9 +408,6 @@ class ExtConnection {
                   api.notify_dfx(args).then(resolve).catch(reject);
                 })
                 .catch(reject);
-              break;
-            case '5ymop-yyaaa-aaaah-qaa4q-cai':
-              reject('WIP');
               break;
             default:
               reject('Cycle topup is not supported by this token');
