@@ -28,7 +28,7 @@ import LockOpenIcon from '@material-ui/icons/LockOpen';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
-import {compressAddress, clipboardCopy} from '../utils.js';
+import {compressAddress, clipboardCopy, formatNumberForDisplay} from '../utils.js';
 import {useSelector, useDispatch} from 'react-redux';
 import NftThumbnail from './NftThumbnail';
 const wrapableCanisters = [
@@ -44,9 +44,10 @@ const wrapperCanisters = [
 ];
 
 const perPage = 20;
-const _showPrice = n => {
-  n = Number(n) / 100000000;
-  return n.toFixed(8).replace(/0{1,6}$/, '');
+const _showPrice = (n,e) => {
+  if (!e) e = 8;
+  n = Number(n) / (10**e);
+  return formatNumberForDisplay(n);
 };
 export default function NFTList(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
@@ -316,7 +317,7 @@ export default function NFTList(props) {
                         </TableCell>
                         <TableCell align="right">
                           {_showPrice(nft.floor)} ICP<br />
-                          ${_showPrice(nft.floorUsd)} USD
+                          ${_showPrice(nft.floorUsd, 4)} USD
                         </TableCell>
                         <TableCell align="right">
                           <>
