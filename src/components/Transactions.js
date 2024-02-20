@@ -41,7 +41,7 @@ export default function Transactions(props) {
       ) : (
         <>
           <div style={{float:"right", marginTop: '13px', marginBottom: '20px'}}>
-            <span style={{display:"inline-block", paddingTop: '3px'}}>Data powered by <a href="https://nftgeek.app/" target="_blank" rel="noreferrer">NFT Geek</a></span>
+            <span style={{display:"inline-block", paddingTop: '3px'}}>Data powered by <a href="https://nftgeek.app/" target="_blank" rel="noreferrer">nftGeek</a></span>
             {props.transactions.length > perPage ? (
               <Pagination
                 style={{float: 'right', marginLeft:"10px"}}

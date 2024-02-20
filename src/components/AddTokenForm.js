@@ -13,6 +13,7 @@ const standards = [
   ["ext", "EXT"],
   ["icrc", "ICRC"],
   ["dip20", "DIP20"],
+  ["drc20", "DRC20"],
   ["ledger", "ICP Ledger"],
 ];
 export default function AddTokenForm(props) {
@@ -23,12 +24,18 @@ export default function AddTokenForm(props) {
   const submit = async () => {
     if (typeof props.onClick != 'undefined') {
       props.loader("Loading token data...")
-      await props.onClick(canisterId, standard);
-      props.loader(false);
+      setOpen(false);
+      try{
+        await props.onClick(canisterId, standard);
+      } catch(e){
+        console.log(e);
+        props.alert("Error adding token", e.message);
+      } finally {
+        props.loader(false);
+        setCanisterId("");
+        setStandard("ext");
+      }
     };
-    setOpen(false);
-    setCanisterId("");
-    setStandard("ext");
   };
   const handleClick = () => {
     setOpen(true);

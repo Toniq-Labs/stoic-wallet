@@ -7,7 +7,6 @@ import {
   NNS_CANISTER_ID,
   CYCLES_MINTING_CANISTER_ID,
   getCyclesTopupSubAccount,
-  rosettaApi,
   principalToAccountIdentifier,
   toHexString,
   from32bits,
@@ -22,14 +21,15 @@ import ledgerIDL from './candid/ledger.did.js';
 import governanceIDL from './candid/governance.did.js';
 import nnsIDL from './candid/nns.did.js';
 import cyclesIDL from './candid/cycles.did.js';
-import hzldIDL from './candid/hzld.did.js'; //hardcode to hzld...
 import icpunksIDL from './candid/icpunks.did.js'; //hardcode to icpunks...
 import extIDL from './candid/ext.did.js';
 import advancedIDL from './candid/advanced.did.js';
 import wrapperIDL from './candid/wrapper.did.js';
 import logIDL from './candid/log.did.js';
 import icdripIDL from './candid/icdrip.did.js';
-//import cronicsIDL from './candid/cronics.did.js';
+import icrcIDL from './candid/icrc.did.js';
+import dip20IDL from './candid/dip20.did.js';
+import drc20IDL from './candid/drc20.did.js';//TODO
 
 const constructUser = u => {
   if (isHex(u) && u.length === 64) {
@@ -70,14 +70,15 @@ const decodeTokenId = tid => {
 };
 
 //Preload IDLS against a common name
-//TODO add standards here
 const _preloadedIdls = {
   governance: governanceIDL,
   ledger: ledgerIDL,
-  hzld: hzldIDL,
   icpunks: icpunksIDL,
   nns: nnsIDL,
   ext: extIDL,
+  icrc: icrcIDL,
+  dip20: dip20IDL,
+  drc20: drc20IDL,
   default: extIDL,
   wrapper: wrapperIDL,
 };
@@ -101,10 +102,13 @@ class ExtConnection {
   };
   _metadata = {
     [LEDGER_CANISTER_ID]: {
-      name: 'ICP',
+      id : LEDGER_CANISTER_ID,
+      name : "Internet Computer",
       symbol: 'ICP',
-      decimals: 8,
+      standard : 'ledger',
+      fee: 10000,
       type: 'fungible',
+      decimals: 8,
     },
   };
   _identity = false; //new AnonymousIdentity();
@@ -158,6 +162,13 @@ class ExtConnection {
       tid = LEDGER_CANISTER_ID; 
       standard = "ledger";
     }//defaults to ledger
+    switch(standard) {
+      case 'icpswap':
+      case 'yumi':
+        standard = 'ext';
+        break;
+      default:;
+    }
     var tokenObj = decodeTokenId(tid);
     let idl = this._standard;
     if (!standard) {
@@ -170,221 +181,290 @@ class ExtConnection {
       }
     } else {
       this._standard = standard;
+      if (_preloadedIdls.hasOwnProperty(standard)) {
+        idl = _preloadedIdls[standard];
+      } else {
+        throw new Error(standard + ' is not valid standard');
+      }
     }
     var api = this.canister(tokenObj.canister, idl);
     return {
       call: api,
-      fee: () => {
-        return new Promise((resolve, reject) => {
-          switch (this._standard) {
-            case "ledger":
-              resolve(10000);
-              break;
-            default:
-              //TODO compute fees
-              resolve(0);
-              break;
-          }
-        });
-      },
-      getMetadata: () => {
+      getMetadata: async () => {
+        if (this._metadata.hasOwnProperty(tokenObj.canister)) {
+          return this._metadata[tokenObj.canister];
+        }
         switch (this._standard) {
-          //TODO maybe inject this?
-          case 'icpunks':
-            return new Promise((resolve, reject) => {
-              api.data_of(tokenObj.index).then(r => {
-                resolve({
-                  metadata: [
-                    [],
-                    {
-                      name: r.name,
-                      desc: r.desc,
-                      properties: r.properties,
-                      url: r.url,
-                    },
-                  ],
-                  type: 'nonfungible',
-                });
-              });
-            });
-          case "ext":
-            return new Promise((resolve, reject) => {
-              if (this._metadata.hasOwnProperty(tokenObj.canister)) {
-                resolve(this._metadata[tokenObj.canister]);
-              } else {
-                switch (tokenObj.canister) {
-                  default:
-                    api
-                      .metadata(tokenObj.token)
-                      .then(r => {
-                        if (typeof r.ok != 'undefined') {
-                          if (typeof r.ok.fungible != 'undefined') {
-                            resolve({
-                              name: r.ok.fungible.name,
-                              symbol: r.ok.fungible.symbol,
-                              decimals: r.ok.fungible.decimals,
-                              metadata: r.ok.fungible.metadata,
-                              type: 'fungible',
-                            });
-                          } else {
-                            var md = r.ok.nonfungible.metadata[0] ?? [];
-                            if (md.length > 256) md = md.slice(0, 256);
-                            resolve({
-                              metadata: [md],
-                              type: 'nonfungible',
-                            });
-                          }
-                        } else if (typeof r.err != 'undefined') reject(r.err);
-                        else reject(r);
-                      })
-                      .catch(reject);
-                    break;
+          case "icrc":
+            try {
+              let data = await api.icrc1_metadata();
+              let ret = {};
+              data.forEach(item => {
+                const key = item[0].split(':')[1];
+                const value = item[1].Text || Number(item[1].Nat);
+                if (key === 'name' || key === 'symbol' || key === 'fee' || key === 'decimals') {
+                  ret[key] = value;
                 }
-              }
-            });
+              });
+              return {
+                id: tid,
+                standard: this._standard,
+                type: 'fungible',
+                ...ret,
+              };
+            } catch (e) {
+              throw e; // or handle error as appropriate
+            }
+          case "ext":
+            try {
+              const r = await api.metadata(tokenObj.token);
+              let fee = 0;
+              try {
+                let res = await api.getFee();
+                if (res) fee = Number(res.ok);
+              } catch(e){};
+              if (typeof r.ok != 'undefined') {
+                if (typeof r.ok.fungible != 'undefined') {
+                  return {
+                    id: tid,
+                    name: r.ok.fungible.name,
+                    symbol: r.ok.fungible.symbol,
+                    standard: this._standard,
+                    fee: fee,
+                    type: 'fungible',
+                    decimals: r.ok.fungible.decimals,
+                    metadata: r.ok.fungible.metadata,
+                  };
+                } else {
+                  var md = r.ok.nonfungible.metadata[0] ?? [];
+                  if (md.length > 256) md = md.slice(0, 256);
+                  return {
+                    metadata: [md],
+                    type: 'nonfungible',
+                  };
+                }
+              } else if (typeof r.err != 'undefined') throw r.err;
+            } catch (e) {
+              throw e; // or handle error as appropriate
+            }
+            break;
+          case "dip20":
+            try {
+              const r = await api.getMetadata(tokenObj.token);
+              return {
+                id: tid,
+                name: r.name,
+                symbol: r.symbol,
+                fee: Number(r.fee),
+                decimals: Number(r.decimals),
+                standard: this._standard,
+                type: 'fungible',
+                metadata: JSON.stringify(r)
+              };
+            } catch (e) {
+              console.error(e);
+              throw e; // or handle error as appropriate
+            }
+          case "drc20":
+            try {
+              const r = await Promise.all([
+                api.drc20_name(),
+                api.drc20_symbol(),
+                api.drc20_fee(),
+                api.drc20_decimals(),
+              ])
+              return {
+                id: tid,
+                name: r[0],
+                symbol: r[1],
+                fee: Number(r[2]),
+                decimals: Number(r[3]),
+                standard: this._standard,
+                type: 'fungible',
+                metadata: JSON.stringify(r)
+              };
+            } catch (e) {
+              console.error(e);
+              throw e; // or handle error as appropriate
+            }
           default:
-            return new Promise((resolve, reject) => {
-              reject('Not supported');
-            });
+            throw new Error('Not supported');
         }
       },
-      getBalance: (address, princpal) => {
-        return new Promise((resolve, reject) => {
-          var args;
-          switch (this._standard) {
-            case "ledger":
-              // rosettaApi.getAccountBalance(address).then(b => {
-              //   resolve(b)
-              // });
-              const Http = new XMLHttpRequest();
-              const url = 'https://ledger-api.internetcomputer.org/accounts/' + address;
-              Http.open('GET', url);
-              Http.send();
-              Http.onreadystatechange = e => {
-                if (Http.responseText.length > 0) {
-                  try {
-                    if (Http.responseText == 'An error occurred while retrieving the account.') {
-                      resolve(0);
-                    } else {
-                      let r = JSON.parse(Http.responseText);
-                      resolve(r.balance);
-                    }
-                  } catch (e) {
-                    reject(e);
-                  }
-                }
-              };
-              break;
-            case "ext":
-              args = {
+      getBalance: async (address, principal, subaccount) => {
+        switch (this._standard) {
+          case "ledger":
+            try {
+              let res = await api.account_balance_dfx({
+                account: address,
+              });
+              return res.e8s;
+            } catch (e) {
+              throw e; // or handle error as appropriate
+            }
+          case "ext":
+            try {
+              const args = {
                 user: constructUser(address),
                 token: tokenObj.token,
               };
-              api
-                .balance(args)
-                .then(r => {
-                  if (typeof r.ok != 'undefined') resolve(r.ok);
-                  else if (typeof r.err != 'undefined') reject(r.err);
-                  else reject(r);
-                })
-                .catch(reject);
-              break;
-            default:
-              reject('Not supported');
-              break;
-          }
-        });
+              const r = await api.balance(args);
+              if (typeof r.ok != 'undefined') return r.ok;
+              else if (typeof r.err != 'undefined') throw r.err;
+            } catch (e) {
+              console.error(e);
+              throw e; // or handle error as appropriate
+            }
+            break;
+          
+          case "icrc":
+            try {
+              return await api.icrc1_balance_of({
+                owner: Principal.fromText(principal),
+                subaccount: [],
+              });
+            } catch (e) {
+              throw e; // or handle error as appropriate
+            }
+          case "dip20":
+            try {
+              return await api.balanceOf({
+                who: Principal.fromText(principal),
+              });
+            } catch (e) {
+              throw e; // or handle error as appropriate
+            }
+          case "drc20":
+            try {
+              return await api.drc20_balanceOf(address);
+            } catch (e) {
+              throw e; // or handle error as appropriate
+            }
+          default:
+            throw new Error('Not supported');
+        }
       },
-      transfer: (from_principal, from_sa, to_user, amount, fee, memo, notify) => {
-        return new Promise((resolve, reject) => {
-          var args;
-          switch (this._standard) {
-            case "ledger":
+      transfer: async (from_principal, from_sa, to_user, amount, fee, memo, notify) => {
+        var args;
+        switch (this._standard) {
+          case "ledger":
+            try {
               var toAddress = to_user;
-              var toPrincpal;
               if (notify) {
                 if (!validatePrincipal(toAddress))
-                  reject('You can only use notify when specifying a Principal as the To address');
-                toPrincpal = toAddress;
-                toAddress = principalToAccountIdentifier(toPrincpal, 0);
+                  throw new Error('You can only use notify when specifying a Principal as the To address');
+                toAddress = principalToAccountIdentifier(toAddress, 0);
               } else {
                 if (validatePrincipal(toAddress))
                   toAddress = principalToAccountIdentifier(toAddress, 0);
               }
               args = {
                 from_subaccount: [getSubAccountArray(from_sa ?? 0)],
-                to: toAddress, //Should be an address
+                to: toAddress,
                 amount: {e8s: amount},
                 fee: {e8s: fee},
                 memo: memo ? Number(BigInt(memo)) : 0,
                 created_at_time: [],
               };
-              api
-                .send_dfx(args)
-                .then(bh => {
-                  if (notify) {
-                    var args = {
-                      block_height: bh,
-                      max_fee: {e8s: fee},
-                      from_subaccount: [getSubAccountArray(from_sa ?? 0)],
-                      to_subaccount: [getSubAccountArray(0)],
-                      to_canister: Principal.fromText(toPrincpal),
-                    };
-                    api.notify_dfx(args).then(resolve).catch(reject);
-                  } else {
-                    resolve(true);
-                  }
-                })
-                .catch(reject);
-              //Notify here
-              break;
-            //TODO: maybe inject this?
-            case 'icpunks':
-              if (!validatePrincipal(to_user))
-                reject('ICPunks does not support traditional addresses, you must use a Principal');
-              api
-                .transfer_to(Principal.fromText(to_user), tokenObj.index)
-                .then(b => {
-                  if (b) {
-                    resolve(true);
-                  } else {
-                    reject('Something went wrong');
-                  }
-                })
-                .catch(reject);
-              break;
-            case "ext":
-              args = {
-                token: tid,
-                from: {address: principalToAccountIdentifier(from_principal, from_sa ?? 0)},
-                subaccount: [getSubAccountArray(from_sa ?? 0)],
-                to: constructUser(to_user),
-                amount: amount,
-                fee: fee,
-                memo: fromHexString(memo),
-                notify: notify,
-              };
-              api
-                .transfer(args)
-                .then(b => {
-                  if (typeof b.ok != 'undefined') {
-                    resolve(b.ok);
-                  } else {
-                    reject(JSON.stringify(b.err));
-                  }
-                })
-                .catch(reject);
-              break;
-            default:
-              reject('Not supported');
-              break;
-          }
-        });
+              const bh = await api.send_dfx(args);
+              if (notify) {
+                args = {
+                  block_height: bh,
+                  max_fee: {e8s: fee},
+                  from_subaccount: [getSubAccountArray(from_sa ?? 0)],
+                  to_subaccount: [getSubAccountArray(0)],
+                  to_canister: Principal.fromText(to_user),
+                };
+                await api.notify_dfx(args);
+              }
+              return true; // Success
+            } catch (e) {
+              console.error(e);
+              throw e; // or handle error as appropriate
+            }
+            
+          case "ext":
+            args = {
+              token: tid,
+              from: {address: principalToAccountIdentifier(from_principal, from_sa ?? 0)},
+              subaccount: [getSubAccountArray(from_sa ?? 0)],
+              to: constructUser(to_user),
+              amount: amount,
+              fee: fee,
+              memo: fromHexString(memo),
+              notify: notify,
+            };
+            try {
+              const b = await api.transfer(args);
+              if (typeof b.ok != 'undefined') {
+                return b.ok;
+              } else {
+                throw new Error(JSON.stringify(b.err));
+              }
+            } catch (e) {
+              console.error(e);
+              throw e;
+            }
+          case "icrc":
+            if (!validatePrincipal(to_user))  throw new Error('Current you can only send to principals');
+            args = {
+              to : {
+                owner : Principal.fromText(to_user),
+                subaccount : [],
+              },
+              fee: [fee],
+              memo: [],
+              from_subaccount : [getSubAccountArray(from_sa ?? 0)],
+              created_at_time : [],
+              amount: amount,
+            };
+            try {
+              const b = await api.icrc1_transfer(args);
+              if (typeof b.Ok != 'undefined') {
+                return b.Ok;
+              } else if (typeof b.ok != 'undefined') {
+                return b.ok;
+              } else if (typeof b.Err != 'undefined') {
+                throw new Error(JSON.stringify(b.Err));
+              } else {
+                throw new Error(JSON.stringify(b.err));
+              }
+            } catch (e) {
+              console.error(e);
+              throw e;
+            }
+          case "dip20":
+            if (!validatePrincipal(to_user))  throw new Error('Current you can only send to principals');
+            try {
+              const b = await api.transfer(Principal.fromText(to_user), amount);
+              if (typeof b.ok != 'undefined') {
+                return b.ok;
+              } else {
+                throw new Error(JSON.stringify(b.err));
+              }
+            } catch (e) {
+              throw e;
+            }
+          case "drc20":
+            try {
+              const b = await api.drc20_transfer(to_user, amount, [], [getSubAccountArray(from_sa ?? 0)], []);
+              if (typeof b.ok != 'undefined') {
+                return b.ok;
+              } else {
+                throw new Error(JSON.stringify(b.err));
+              }
+            } catch (e) {
+              console.error(e);
+              throw e;
+            }
+          default:
+            throw new Error('Not supported');
+        }
       },
-      mintCycles: (from_principal, from_sa, canister, amount, fee) => {
-        return new Promise((resolve, reject) => {
-          switch (this._standard) {
-            case "ledger":
+      mintCycles: async (from_principal, from_sa, canister, amount, fee) => {
+        switch (this._standard) {
+          case "ledger":
+            try {
               var _to_sub = getCyclesTopupSubAccount(canister);
               var _to = principalToAccountIdentifier(CYCLES_MINTING_CANISTER_ID, _to_sub);
               var args = {
@@ -395,25 +475,22 @@ class ExtConnection {
                 created_at_time: [],
                 amount: {e8s: amount},
               };
-              api
-                .send_dfx(args)
-                .then(block => {
-                  var args = {
-                    block_height: block,
-                    max_fee: {e8s: fee},
-                    from_subaccount: [getSubAccountArray(from_sa ?? 0)],
-                    to_subaccount: [getSubAccountArray(_to_sub)],
-                    to_canister: Principal.fromText(CYCLES_MINTING_CANISTER_ID),
-                  };
-                  api.notify_dfx(args).then(resolve).catch(reject);
-                })
-                .catch(reject);
-              break;
-            default:
-              reject('Cycle topup is not supported by this token');
-              break;
-          }
-        });
+              const block = await api.send_dfx(args);
+              args = {
+                block_height: block,
+                max_fee: {e8s: fee},
+                from_subaccount: [getSubAccountArray(from_sa ?? 0)],
+                to_subaccount: [getSubAccountArray(_to_sub)],
+                to_canister: Principal.fromText(CYCLES_MINTING_CANISTER_ID),
+              };
+              await api.notify_dfx(args);
+              return true; // Success
+            } catch (e) {
+              throw e; // or handle error as appropriate
+            }
+          default:
+            throw new Error('Cycle topup is not supported by this token');
+        }
       },
     };
   }

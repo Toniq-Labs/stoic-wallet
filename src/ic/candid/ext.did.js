@@ -6,6 +6,14 @@ export default ({ IDL }) => {
   const TokenIndex = TokenIndex_2;
   const AccountIdentifier_2 = IDL.Text;
   const AccountIdentifier = AccountIdentifier_2;
+  const TokenIdentifier = IDL.Text;
+  const CommonError__1 = IDL.Variant({
+    'InsufficientBalance' : IDL.Null,
+    'InvalidToken' : TokenIdentifier,
+    'Unauthorized' : AccountIdentifier,
+    'Other' : IDL.Text,
+  });
+  const Result_1 = IDL.Variant({ 'ok' : IDL.Nat, 'err' : CommonError__1 });
   const AccountIdentifier_3 = AccountIdentifier;
   const Settlement = IDL.Record({
     'subaccount' : SubAccount_3,
@@ -23,7 +31,6 @@ export default ({ IDL }) => {
     'nonfungible' : IDL.Record({ 'metadata' : IDL.Opt(IDL.Vec(IDL.Nat8)) }),
   });
   const Metadata = Metadata_2;
-  const TokenIdentifier = IDL.Text;
   const User = IDL.Variant({
     'principal' : IDL.Principal,
     'address' : AccountIdentifier,
@@ -163,6 +170,7 @@ export default ({ IDL }) => {
         ],
         ['query'],
       ),
+    'getFee' : IDL.Func([], [Result_1], ['query']),
     'balance' : IDL.Func([BalanceRequest], [BalanceResponse], ['query']),
     'bearer' : IDL.Func([TokenIdentifier_2], [Result_7], ['query']),
     'details' : IDL.Func([TokenIdentifier_2], [Result_9], ['query']),

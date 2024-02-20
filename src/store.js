@@ -1,6 +1,6 @@
 import { createStore } from "redux";
 import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
-const DBVERSION = 1;
+const DBVERSION = 2;
 var appData = {
   principals : [],
   addresses : [],
@@ -30,14 +30,14 @@ function initDb(_db){
       savenow = true;
     }
     let dbCurrentVersion = db[3];
-    if (true || dbCurrentVersion < 2) {
+    if (dbCurrentVersion < 2) {
       //This DB upgrade adds nftgeek NFT support
       db[3] = 2;
       db[0] = db[0].map(({accounts, ...principalRest}) => ({
         ...principalRest,
         accounts: accounts.map(([accountName, tokens]) => ([
           accountName, // Preserve the accountName
-          tokens.map(token => ({...token, standard: "ext"})) // Update tokens
+          [] // Update tokens
           // The nfts element is omitted, effectively removing it from the structure
         ]))
       }));
@@ -72,9 +72,16 @@ function initDb(_db){
               name : "Internet Computer",
               symbol : "ICP",
               standard : 'ledger',
+              fee: 10000,
+              type: "fungible",
               decimals : 8,
             }, 
-            ...account[1]
+            ...account[1].reduce((acc, current) => {
+              if (!acc.some(token => token.id === current.id)) {
+                  acc.push(current);
+              }
+              return acc;
+            }, [])
           ]
         });    
         return true;
@@ -95,10 +102,16 @@ function initDb(_db){
       appData.principals.push(_principal);
       return true;
     });
+    let cp = db[2][0] ?? 0;
+    if (cp >= appData.principals.length) cp = 0;
+    appData.currentPrincipal = cp;
+    let ca = db[2][1] ?? 0;
+    if (ca >= appData.principals[cp].accounts.length) ca = 0;
+    appData.currentAccount = ca;
+    let ct = db[2][2] ?? 0;
+    if (ct >= appData.principals[cp].accounts[ca].tokens.length) ct = 0;
+    appData.currentToken = ct;
     appData.addresses = db[1];
-    appData.currentPrincipal = db[2][0] ?? 0;
-    appData.currentAccount = db[2][1] ?? 0;
-    appData.currentToken = db[2][2] ?? 0;
     
     if (savenow) saveDb(appData);
     return appData;
@@ -303,6 +316,7 @@ function rootReducer(state = initDb(), action) {
         currentToken : state.currentToken-1
       });
     case "addwallet": //TODO
+      if (state.principals.some(e => e.identity.principal === action.payload.identity.principal)) return state;
       var cp = state.principals.length;
       return saveDb({
         ...state,
@@ -320,6 +334,7 @@ function rootReducer(state = initDb(), action) {
                     symbol : "ICP",
                     standard : 'ledger',
                     decimals : 8,
+                    fee: 10000,
                     type : 'fungible',
                   }
                 ],
@@ -388,6 +403,8 @@ function rootReducer(state = initDb(), action) {
                   standard : "ledger",
                   name : "Internet Computer",
                   symbol : "ICP",
+                  fee: 10000,
+                  type: "fungible",
                   decimals : 8,
                 }],
               }]
@@ -398,6 +415,7 @@ function rootReducer(state = initDb(), action) {
         }),
       });
     case "account/token/add":
+      if (state.principals[state.currentPrincipal].accounts[state.currentAccount].tokens.some(e => e.id === action.payload.metadata.id)) return state;
       return saveDb({
         ...state,
         principals : state.principals.map((principal,i) => {

@@ -36,8 +36,7 @@ export default function SendNFTForm(props) {
   const review = () => {
     setStep(1);
   };
-  const submit = () => {
-    //Submit to blockchain here
+  const submit = async () => {
     var _from_principal = identity.principal;
     var _from_sa = currentAccount;
     var _to_user = to;
@@ -45,37 +44,25 @@ export default function SendNFTForm(props) {
     var _fee = BigInt(0);
     var _memo = '';
     var _notify = false;
-
-    //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error('Something wrong with your wallet, try logging in again');
-
     props.loader(true);
     handleClose();
-
-    //hot api, will sign as identity - BE CAREFUL
-    extjs
+    try {
+      let r = await extjs
       .connect('https://icp0.io/', id)
-      .token(props.nft.id)
-      .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify)
-      .then(r => {
-        if (r !== false) {
-          if (r > 0n) {
-            props.loadNfts();
-            return props.alert('Transaction complete', 'Your transfer was sent successfully');
-          } else {
-            return props.alert('You were successful!', 'You completed an advanced NFT action!');
-          }
-        } else {
-          return error('Something went wrong with this transfer');
-        }
-      })
-      .catch(e => {
-        return error('There was an error: ' + e);
-      })
-      .finally(() => {
-        props.loader(false);
-      });
+      .token(props.nft.tokenid, props.nft.standard.toLowerCase())
+      .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify);
+      if (r !== false) {
+        props.loadNfts();
+        props.alert('Transaction complete', 'Your transfer was sent successfully');
+      } else {
+        error('Something went wrong with this transfer');
+      }
+    } catch (e){
+      error('There was an error: ' + (e.message || e));
+    }
+    props.loader(false);
   };
 
   const handleClose = () => {
@@ -85,7 +72,7 @@ export default function SendNFTForm(props) {
     props.close();
   };
   React.useEffect(() => {
-    if (props.nft ) setCanister(extjs.decodeTokenId(props.nft.id).canister);
+    if (props.nft ) setCanister(extjs.decodeTokenId(props.nft.tokenid).canister);
     else setCanister('');
     var contacts = [];
     addresses.forEach(el => {
@@ -162,7 +149,7 @@ export default function SendNFTForm(props) {
           <DialogContent>
             <DialogContentText style={{textAlign: 'center'}}>
               Please confirm that you are about to send NFT <br />
-              <strong style={{color: 'red'}}>{props.nft.id}</strong>
+              <strong style={{color: 'red'}}>{props.nft.tokenid}</strong>
               <br />
               to <strong style={{color: 'red'}}>{compressAddress(to)}</strong>
             </DialogContentText>

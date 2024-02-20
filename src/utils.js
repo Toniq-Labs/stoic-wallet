@@ -68,6 +68,18 @@ numf = (n, d) => {
   d = (d ?? 2);
   return n.toFixed(d).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 };
+
+const formatNumberForDisplay = (n) => {
+  // Convert to string to check for scientific notation
+  const nStr = n.toString();
+  // Check if the number is in scientific notation
+  if (nStr.includes('e-')) {
+      const exponent = parseInt(nStr.split('e-')[1], 10); // Extract exponent
+      return n.toFixed(exponent);
+  }
+  // Return the number as is if not in scientific notation
+  return n;
+}
 export {
-  clipboardCopy, compressAddress, displayDate, numf, identityTypes
+  clipboardCopy, compressAddress, displayDate, numf, identityTypes, formatNumberForDisplay
 };

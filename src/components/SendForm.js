@@ -13,7 +13,7 @@ import Switch from '@material-ui/core/Switch';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, validateAddress} from '../ic/utils.js';
-import {compressAddress} from '../utils.js';
+import {compressAddress, formatNumberForDisplay} from '../utils.js';
 import {useSelector} from 'react-redux';
 
 export default function SendForm(props) {
@@ -79,14 +79,14 @@ export default function SendForm(props) {
 
     props.loader(true);
     handleClose();
-
     //hot api, will sign as identity - BE CAREFUL
     extjs
       .connect('https://icp0.io/', id)
-      .token(props.data.id)
+      .token(props.data.id, props.data.standard)
       .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify)
       .then(r => {
         if (r) {
+          props.refresh(true);
           return props.alert('Transaction complete', 'Your transfer was sent successfully');
         } else {
           return error('Something went wrong with this transfer');
@@ -98,6 +98,9 @@ export default function SendForm(props) {
       .finally(() => {
         props.loader(false);
       });
+  };
+  const sendMax = () => {
+    setAmount(balance - Number(fee))
   };
   const handleClick = () => {
     setOpen(true);
@@ -116,15 +119,10 @@ export default function SendForm(props) {
     setNotify(false);
   };
   React.useEffect(() => {
+    setMinFee(props.data.fee / 10 ** props.data.decimals);
+    setFee(props.data.fee / 10 ** props.data.decimals);
     api
-      .token(props.data.id)
-      .fee()
-      .then(f => {
-        setMinFee(f / 10 ** props.data.decimals);
-        setFee(f / 10 ** props.data.decimals);
-      });
-    api
-      .token(props.data.id)
+      .token(props.data.id, props.data.standard)
       .getBalance(props.address, identity.principal)
       .then(b => {
         setBalance(Number(b) / 10 ** props.data.decimals);
@@ -209,7 +207,7 @@ export default function SendForm(props) {
                   style={{width: '49%'}}
                   margin="dense"
                   label="Fee"
-                  value={fee}
+                  value={formatNumberForDisplay(fee)}
                   onChange={e => setFee(e.target.value)}
                   type="text"
                   InputLabelProps={{
@@ -219,11 +217,12 @@ export default function SendForm(props) {
               ) : (
                 ''
               )}
+              <Button size="small" variant="outlined" onClick={sendMax} color="primary">Max</Button>
               <DialogContentText
                 style={{fontSize: 'small', textAlign: 'center', marginTop: '20px'}}
               >
                 {balance !== false ? 'Balance: ' + balance + ' ' + props.data.symbol + ' ' : ''}
-                {minFee > 0 ? 'Min Fee: ' + minFee + ' ' + props.data.symbol : ''}
+                {minFee > 0 ? 'Min Fee: ' + formatNumberForDisplay(minFee) + ' ' + props.data.symbol : ''}
               </DialogContentText>
               {advanced ? (
                 <p
@@ -286,7 +285,7 @@ export default function SendForm(props) {
               <br />
               to <strong style={{color: 'red'}}>{compressAddress(to)}</strong>
               <br />
-              {fee > 0 ? ' using a fee of ' + fee : ''}
+              {fee > 0 ? ' using a fee of ' + formatNumberForDisplay(fee) : ''}
             </DialogContentText>
             <DialogContentText style={{textAlign: 'center'}}>
               <strong>

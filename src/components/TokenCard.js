@@ -39,7 +39,7 @@ export default function TokenCard(props) {
   };
   const updateBalance = () => {
     api
-      .token(props.data.id)
+      .token(props.data.id, props.data.standard)
       .getBalance(props.address, identity.principal)
       .then(b => {
         setBalance(Number(b) / 10 ** props.data.decimals);

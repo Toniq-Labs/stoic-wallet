@@ -104,7 +104,7 @@ export default function NFTList(props) {
         (currentAccount !== 0 ? ' Unwrapped NFTs will appear in your Main account' : ''),
     );
   };
-  const wrapNft = async (tokenid, canister) => {
+  const wrapNft = async (tokenid, canister, standard) => {
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error('Something wrong with your wallet, try logging in again');
     props.loader(true, 'Creating wrapper...this may take a few minutes');
@@ -115,7 +115,7 @@ export default function NFTList(props) {
       props.loader(true, 'Sending NFT to wrapper...');
       var r2 = await extjs
         .connect('https://icp0.io/', id)
-        .token(tokenid)
+        .token(tokenid, standard.toLowerCase())
         .transfer(
           identity.principal,
           currentAccount,
@@ -138,7 +138,7 @@ export default function NFTList(props) {
       return;
     }
   };
-  const nftAction = (tokenid, memo) => {
+  const nftAction = (tokenid, memo, standard) => {
     //Submit to blockchain here
     var _from_principal = identity.principal;
     var _from_sa = currentAccount;
@@ -156,7 +156,7 @@ export default function NFTList(props) {
     //hot api, will sign as identity - BE CAREFUL
     extjs
       .connect('https://icp0.io/', id)
-      .token(tokenid)
+      .token(tokenid, standard.toLowerCase())
       .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify)
       .then(async r => {
         if (r !== false) {
@@ -300,11 +300,12 @@ export default function NFTList(props) {
                         </TableCell>
                         <TableCell>
                           {props.collections.find(a => a.canisterId === nft.canister)?.name ??
-                            compressAddress(nft.canister)}
+                            compressAddress(nft.canister)}<br />
+                            {nft.standard}
                           <Tooltip title="View in browser">
                             <IconButton
                               size="small"
-                              href={'https://' + nft.canister + '.raw.icp0.io'}
+                              href={'https://icscan.io/canister/' + nft.canister}
                               target="_blank"
                               edge="end"
                               aria-label="search"
@@ -376,7 +377,7 @@ export default function NFTList(props) {
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          wrapNft(nft.tokenid, nft.canister);
+                                          wrapNft(nft.tokenid, nft.canister, "icpunks");
                                         }}
                                       >
                                         <ListItemIcon>
@@ -393,7 +394,7 @@ export default function NFTList(props) {
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          nftAction(nft.tokenid, 0);
+                                          nftAction(nft.tokenid, nft.standard, 0);
                                         }}
                                       >
                                         Remove Wearables

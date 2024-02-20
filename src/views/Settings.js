@@ -69,6 +69,7 @@ function Settings(props) {
   const submit = (type, optdata) => {
     props.loader(true);
     StoicIdentity.change(identity, type, optdata).then(identity => {
+      if (principals.some(p => p.identity.principal === identity.principal)) return error("This Principal is already added to your wallet");
       dispatch({ type: 'addwallet', payload : {identity : identity}});
     }).catch(e => {
     }).finally(() => {      
