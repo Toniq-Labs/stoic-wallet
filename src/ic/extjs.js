@@ -294,14 +294,19 @@ class ExtConnection {
       getBalance: async (address, principal, subaccount) => {
         switch (this._standard) {
           case "ledger":
-            try {
-              let res = await api.account_balance_dfx({
-                account: address,
-              });
-              return res.e8s;
-            } catch (e) {
-              throw e; // or handle error as appropriate
+            let res;
+            while(true){
+              try {
+                res = await api.account_balance_dfx({
+                  account: address,
+                });
+                break;
+              } catch(e) {
+                console.error(e, "trying again in 1000ms");
+                await new Promise(r => setTimeout(r, 2000));
+              }
             }
+            return res.e8s;
           case "ext":
             try {
               const args = {

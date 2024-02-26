@@ -277,7 +277,7 @@ function AccountDetail(props) {
       const newTokens = balances[0].filter(item1 => !tokens.some(item2 => item1.canisterId === item2.id));
       newTokens.forEach(token => {
         if (knownTokens.hasOwnProperty(token.canisterId)) {
-          addToken(token.canisterId, knownTokens[token.canisterId], true);
+          //addToken(token.canisterId, knownTokens[token.canisterId], true);
         };
       })
     });
