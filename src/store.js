@@ -1,6 +1,8 @@
 import { createStore } from "redux";
 import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
 const DBVERSION = 2;
+const DB_NAME = 'stoicWalletDB';
+const DB_STORE_NAME = 'walletStore';
 var appData = {
   principals : [],
   addresses : [],
@@ -8,11 +10,78 @@ var appData = {
   currentAccount : 0,
   currentToken : 0,
 };
-function initDb(_db){
-  var db = _db ?? localStorage.getItem('_db');
-  if (db){
-    db = JSON.parse(db);
-    //db versioning
+// Open or create the IndexedDB database
+function openIndexedDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, DBVERSION);
+
+    request.onupgradeneeded = (event) => {
+      const db = event.target.result;
+      db.createObjectStore(DB_STORE_NAME, { keyPath: 'id' });
+    };
+
+    request.onsuccess = (event) => {
+      resolve(event.target.result);
+    };
+
+    request.onerror = (event) => {
+      reject("IndexedDB error: " + event.target.errorCode);
+    };
+  });
+}
+// Retrieve data from IndexedDB
+function getFromIndexedDB(db, key) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DB_STORE_NAME], 'readonly');
+    const store = transaction.objectStore(DB_STORE_NAME);
+    const request = store.get(key);
+
+    request.onsuccess = () => {
+      resolve(request.result ? request.result.value : null);
+    };
+
+    request.onerror = (event) => {
+      reject("IndexedDB read error: " + event.target.errorCode);
+    };
+  });
+}
+// Store data in IndexedDB
+function saveToIndexedDB(db, key, value) {
+  return new Promise((resolve, reject) => {
+    const transaction = db.transaction([DB_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(DB_STORE_NAME);
+    store.put({ id: key, value: value });
+
+    transaction.oncomplete = () => {
+      resolve(true);
+    };
+
+    transaction.onerror = (event) => {
+      reject("IndexedDB write error: " + event.target.errorCode);
+    };
+  });
+}
+
+// Migrate data from localStorage to IndexedDB
+async function migrateLocalStorageToIndexedDB(db) {
+  const localStorageData = localStorage.getItem('_dbOLD');
+  if (localStorageData) {
+    await saveToIndexedDB(db, '_db', JSON.parse(localStorageData));
+    //localStorage.removeItem('_db'); // Clean up localStorage after migration
+    console.log("Migrated data from localStorage to IndexedDB");
+  }
+}
+
+async function initDb(){
+  const db = await openIndexedDB();
+  let storedData = await getFromIndexedDB(db, '_db');
+
+  if (!storedData) {
+    await migrateLocalStorageToIndexedDB(db);
+    storedData = await getFromIndexedDB(db, '_db');
+  }
+  if (storedData){
+    let db = storedData;
     var savenow = false;
     if (!Array.isArray(db)) {
       db = [[db],[]];
@@ -33,13 +102,9 @@ function initDb(_db){
     if (dbCurrentVersion < 2) {
       //This DB upgrade adds nftgeek NFT support
       db[3] = 2;
-      db[0] = db[0].map(({accounts, ...principalRest}) => ({
+      db[0] = db[0].map(({ accounts, ...principalRest }) => ({
         ...principalRest,
-        accounts: accounts.map(([accountName, tokens]) => ([
-          accountName, // Preserve the accountName
-          [] // Update tokens
-          // The nfts element is omitted, effectively removing it from the structure
-        ]))
+        accounts: accounts.map(([accountName, tokens]) => ([accountName, []])),
       }));
       savenow = true;
     }
@@ -139,20 +204,23 @@ function newDb(identity){
       apps : []
     }
   ],[],[0,0,0], DBVERSION];
-  localStorage.setItem('_db', JSON.stringify(tc));
-  return initDb();
+  openIndexedDB().then(db => saveToIndexedDB(db, '_db', tc));
+  return tc();
 }
 function clearDb(){
-  localStorage.removeItem('_db');
-  var clearState = {
-    principals : [],
-    addresses : [],
-    currentPrincipal : 0,
-    currentAccount : 0,
-    currentToken : 0,
+  openIndexedDB().then(db => {
+    const transaction = db.transaction([DB_STORE_NAME], 'readwrite');
+    const store = transaction.objectStore(DB_STORE_NAME);
+    store.delete('_db');
+  });
+  appData = {
+    principals: [],
+    addresses: [],
+    currentPrincipal: 0,
+    currentAccount: 0,
+    currentToken: 0,
   };
-  appData = clearState;
-  return clearState;
+  return appData;
 }
 function saveDb(newState){
   var updatedDb = [[], newState.addresses, [newState.currentPrincipal, newState.currentAccount, newState.currentToken], DBVERSION];
@@ -187,11 +255,11 @@ function saveDb(newState){
     updatedDb[0].push(_p);
     return true;
   });
-  localStorage.setItem('_db', JSON.stringify(updatedDb));
+  openIndexedDB().then(db => saveToIndexedDB(db, '_db', updatedDb));
   appData = newState;
   return newState;
 }
-function rootReducer(state = initDb(), action) {
+function rootReducer(state = { loading: true }, action) {
   switch(action.type){
     case "refresh":
       console.log("Detected storage update");
@@ -467,13 +535,7 @@ function rootReducer(state = initDb(), action) {
   }
   return state;
 };
-const store = createStore(rootReducer);
-window.addEventListener('storage', (e) => {
-  if (e.key === "_db" && e.url !== "https://www.stoicwallet.com/?stoicTunnel") {
-    store.dispatch({
-      type: "refresh",
-      payload : e.newValue
-    });
-  }
-});
-export default store;
+const configureStore = (preloadedState) => {
+  return createStore(rootReducer, preloadedState);
+};
+export { initDb, configureStore};

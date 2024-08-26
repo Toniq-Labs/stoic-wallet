@@ -1,13 +1,8 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import CssBaseline from '@material-ui/core/CssBaseline';
-import { ThemeProvider } from '@material-ui/core/styles';
-import App from './App';
-import { Provider } from 'react-redux'
-import store from './store'
+import AppInitializer from './AppInitializer';
 import {StoicIdentity} from './ic/identity.js';
 import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
-import theme from './theme';
 import '@fontsource/roboto';
 
 const params = new URLSearchParams(window.location.search);
@@ -172,12 +167,7 @@ if (params.get('stoicTunnel') !== null) {
   }, false);
 } else {
   ReactDOM.render(
-    <Provider store={store}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <App />
-      </ThemeProvider>
-    </Provider>,
-    document.querySelector('#root'),
-  );      
+    <AppInitializer />,
+    document.getElementById('root')
+  );  
 }
