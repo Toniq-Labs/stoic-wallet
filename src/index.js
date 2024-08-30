@@ -11,109 +11,117 @@ import theme from './theme';
 import '@fontsource/roboto';
 
 const params = new URLSearchParams(window.location.search);
-if (params.get('stoicTunnel') !== null) {
-  const hex2buf = (hex) => {
-    const view = new Uint8Array(hex.length / 2)
-    for (let i = 0; i < hex.length; i += 2) {
-      view[i / 2] = parseInt(hex.substring(i, i + 2), 16)
+const hex2buf = (hex) => {
+  const view = new Uint8Array(hex.length / 2)
+  for (let i = 0; i < hex.length; i += 2) {
+    view[i / 2] = parseInt(hex.substring(i, i + 2), 16)
+  }
+  return view;
+};
+function buf2hex(buffer) {
+  return [...new Uint8Array(buffer)]
+    .map(x => x.toString(16).padStart(2, '0'))
+    .join('');
+}
+const sendMessageToExtension = (e, success, data) => {
+  window.parent.postMessage({
+    action : e.data.action,
+    listener : e.data.listener,
+    target : "STOIC-EXT",
+    success : success,
+    data : data
+  }, '*')
+}
+const verify = async (data, apikey, sig) => {
+  var enc = new TextEncoder();
+  var encdata = enc.encode(data);
+  var pubk = await window.crypto.subtle.importKey(
+    "spki",
+    hex2buf(apikey),
+    {
+      name: "ECDSA",
+      namedCurve: "P-384"
+    },
+    true,
+    ["verify"]
+  );
+  return await window.crypto.subtle.verify(
+    {
+      name: "ECDSA",
+      hash: {name: "SHA-384"},
+    },
+    pubk,
+    hex2buf(sig),
+    encdata
+  );
+};
+const loadDbFast = () => {
+  var db = localStorage.getItem('_db');
+  if (db){
+    var appData = {
+      principals : [],
+      addresses : [],
+      currentPrincipal : 0,
+      currentAccount : 0,
+      currentToken : 0,
+    };
+    db = JSON.parse(db);
+    //db versioning
+    if (!Array.isArray(db)) {
+      db = [[db],[],[0,0,0]];
+      console.log("Converting old DB to new");
     }
-    return view;
-  };
-  function buf2hex(buffer) {
-    return [...new Uint8Array(buffer)]
-      .map(x => x.toString(16).padStart(2, '0'))
-      .join('');
-  }
-  const sendMessageToExtension = (e, success, data) => {
-    window.parent.postMessage({
-      action : e.data.action,
-      listener : e.data.listener,
-      target : "STOIC-EXT",
-      success : success,
-      data : data
-    }, '*')
-  }
-  const verify = async (data, apikey, sig) => {
-    var enc = new TextEncoder();
-    var encdata = enc.encode(data);
-    var pubk = await window.crypto.subtle.importKey(
-      "spki",
-      hex2buf(apikey),
-      {
-        name: "ECDSA",
-        namedCurve: "P-384"
-      },
-      true,
-      ["verify"]
-    );
-    return await window.crypto.subtle.verify(
-      {
-        name: "ECDSA",
-        hash: {name: "SHA-384"},
-      },
-      pubk,
-      hex2buf(sig),
-      encdata
-    );
-  };
-  const loadDbFast = () => {
-    var db = localStorage.getItem('_db');
-    if (db){
-      var appData = {
-        principals : [],
-        addresses : [],
-        currentPrincipal : 0,
-        currentAccount : 0,
-        currentToken : 0,
+    if (db.length === 2) {
+      db[2] = [0,0,0];
+    }
+    db[0].map(principal => {
+      var _principal = {
+        accounts : [],
+        neurons : [],
+        apps : [],
+        identity : principal.identity
       };
-      db = JSON.parse(db);
-      //db versioning
-      if (!Array.isArray(db)) {
-        db = [[db],[],[0,0,0]];
-        console.log("Converting old DB to new");
-      }
-      if (db.length === 2) {
-        db[2] = [0,0,0];
-      }
-      db[0].map(principal => {
-        var _principal = {
-          accounts : [],
-          neurons : [],
-          apps : [],
-          identity : principal.identity
-        };
-        principal.accounts.map((account, subaccount) => {
-          if (account.length === 2) account[2] = [];
-          _principal.accounts.push({
-            name : account[0],
-            address : principalToAccountIdentifier(principal.identity.principal, subaccount),
-            tokens : [
-              {
-                id : LEDGER_CANISTER_ID,
-                name : "Internet Computer",
-                symbol : "ICP",
-                decimals : 8,
-              }, 
-              ...account[1]
-            ],
-          });    
-          return true;
-        });
-        if (!principal.hasOwnProperty('apps')) principal.apps = [];
-        principal.apps.map(app => {
-          _principal.apps.push(app);
-          return true;
-        });
-        appData.principals.push(_principal);
+      principal.accounts.map((account, subaccount) => {
+        if (account.length === 2) account[2] = [];
+        _principal.accounts.push({
+          name : account[0],
+          address : principalToAccountIdentifier(principal.identity.principal, subaccount),
+          tokens : [
+            {
+              id : LEDGER_CANISTER_ID,
+              name : "Internet Computer",
+              symbol : "ICP",
+              decimals : 8,
+            }, 
+            ...account[1]
+          ],
+        });    
         return true;
       });
-      appData.addresses = db[1];
-      appData.currentPrincipal = db[2][0];
-      appData.currentAccount = db[2][1];
-      appData.currentToken = db[2][2];
-      return appData;
-    } else return false;
+      if (!principal.hasOwnProperty('apps')) principal.apps = [];
+      principal.apps.map(app => {
+        _principal.apps.push(app);
+        return true;
+      });
+      appData.principals.push(_principal);
+      return true;
+    });
+    appData.addresses = db[1];
+    appData.currentPrincipal = db[2][0];
+    appData.currentAccount = db[2][1];
+    appData.currentToken = db[2][2];
+    return appData;
+  } else return false;
+}
+if (params.get('stoicPopup') !== null && params.get('lid') !== null) {
+  window.onload= () => {
+    window.opener.postMessage({
+      action : "stoicPopupLoad",
+      listener : params.get('lid'),
+    }, '*');
   }
+}
+if (params.get('stoicTunnel') !== null) {
   window.addEventListener("message", async function(e){
     if (e && e.data && e.data.target === 'STOIC-IFRAME') {
       const state = loadDbFast();
