@@ -64,7 +64,7 @@ function saveToIndexedDB(db, key, value) {
 
 // Migrate data from localStorage to IndexedDB
 async function migrateLocalStorageToIndexedDB(db) {
-  const localStorageData = localStorage.getItem('_db');
+  const localStorageData = localStorage.getItem('_dbOLD');
   if (localStorageData) {
     await saveToIndexedDB(db, '_db', JSON.parse(localStorageData));
     //localStorage.removeItem('_db'); // Clean up localStorage after migration
