@@ -24,14 +24,24 @@ function buf2hex(buffer) {
     .join('');
 }
 const sendMessageToExtension = (e, success, data) => {
-  console.log(e);
-  window.parent.postMessage({
-    action : e.data.action,
-    listener : e.data.listener,
-    target : "STOIC-EXT",
-    success : success,
-    data : data
-  }, '*')
+  if (e.data.target == "STOIC-POPUP") {
+    window.opener.postMessage({
+      action : e.data.action,
+      listener : e.data.listener,
+      target : "STOIC-EXT",
+      success : success,
+      data : data
+    }, '*')
+
+  } else {
+    window.parent.postMessage({
+      action : e.data.action,
+      listener : e.data.listener,
+      target : "STOIC-EXT",
+      success : success,
+      data : data
+    }, '*')
+  };
 }
 const verify = async (data, apikey, sig) => {
   var enc = new TextEncoder();
