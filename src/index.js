@@ -113,17 +113,18 @@ const loadDbFast = () => {
     return appData;
   } else return false;
 }
-if (params.get('stoicPopup') !== null && params.get('lid') !== null) {
-  window.onload= () => {
-    window.opener.postMessage({
-      action : "stoicPopupLoad",
-      listener : params.get('lid'),
-    }, '*');
-  }
-}
 if (params.get('stoicTunnel') !== null) {
+  if (params.get('transport') !== null && params.get('transport') == "popup" && params.get('lid') !== null) {
+    window.onload= () => {
+      window.opener.postMessage({
+        action : "stoicPopupLoad",
+        listener : params.get('lid'),
+      }, '*');
+    }
+  }
+  
   window.addEventListener("message", async function(e){
-    if (e && e.data && e.data.target === 'STOIC-IFRAME') {
+    if (e && e.data && e.data.target === 'STOIC-TUNNEL') {
       const state = loadDbFast();
       if (!state) {
         sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
