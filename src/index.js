@@ -114,17 +114,10 @@ const loadDbFast = () => {
   } else return false;
 }
 if (params.get('stoicTunnel') !== null) {
-  if (params.get('transport') !== null && params.get('transport') == "popup" && params.get('lid') !== null) {
-    window.onload= () => {
-      window.opener.postMessage({
-        action : "stoicPopupLoad",
-        listener : params.get('lid'),
-      }, '*');
-    }
-  }
   
   window.addEventListener("message", async function(e){
-    if (e && e.data && e.data.target === 'STOIC-TUNNEL') {
+    console.log(e);
+    if (e && e.data && e.data.target === 'STOIC-TUNNEL') {      
       const state = loadDbFast();
       if (!state) {
         sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
@@ -179,6 +172,17 @@ if (params.get('stoicTunnel') !== null) {
       }
     }
   }, false);
+
+  
+  if (params.get('transport') !== null && params.get('transport') == "popup" && params.get('lid') !== null) {
+    console.log("TESTING");
+    window.onload= () => {
+      window.opener.postMessage({
+        action : "stoicPopupLoad",
+        listener : params.get('lid'),
+      }, '*');
+    }
+  }
 } else {
   ReactDOM.render(
     <Provider store={store}>
