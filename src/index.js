@@ -24,6 +24,7 @@ function buf2hex(buffer) {
     .join('');
 }
 const sendMessageToExtension = (e, success, data) => {
+  console.log(data);
   window.parent.postMessage({
     action : e.data.action,
     listener : e.data.listener,
@@ -116,8 +117,8 @@ const loadDbFast = () => {
 if (params.get('stoicTunnel') !== null) {
   
   window.addEventListener("message", async function(e){
-    console.log(e);
     if (e && e.data && e.data.target === 'STOIC-TUNNEL') {      
+      console.log(e);
       const state = loadDbFast();
       if (!state) {
         sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
@@ -170,6 +171,7 @@ if (params.get('stoicTunnel') !== null) {
           sendMessageToExtension(e, false, "Incorrect Principal is logged in, please go to StoicWallet and ensure the correct Principal is active");
         }
       }
+      window.close();
     }
   }, false);
 
