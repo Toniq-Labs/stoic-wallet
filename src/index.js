@@ -32,7 +32,7 @@ const sendMessageToExtension = (e, success, data) => {
       success : success,
       data : data
     }, '*')
-
+    //window.close();
   } else {
     window.parent.postMessage({
       action : e.data.action,
@@ -125,7 +125,6 @@ const loadDbFast = () => {
   } else return false;
 }
 if (params.get('stoicTunnel') !== null) {
-  
   window.addEventListener("message", async function(e){
     if (e && e.data && (e.data.target === 'STOIC-IFRAME' || e.data.target === 'STOIC-POPUP')) {
       console.log(e);
@@ -180,9 +179,6 @@ if (params.get('stoicTunnel') !== null) {
         } else {
           sendMessageToExtension(e, false, "Incorrect Principal is logged in, please go to StoicWallet and ensure the correct Principal is active");
         }
-      }
-      if (e.data.target === 'STOIC-POPUP'){
-        window.close();
       }
     }
   }, false);
