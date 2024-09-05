@@ -150,6 +150,7 @@ const sendMessageToExtension = (e, success, data) => {
     listener : e.data.listener,
     target : "STOIC-EXT",
     success : success,
+    message: e.data,
     data : data,
     complete: true,
   };
@@ -262,7 +263,7 @@ if (params.get('stoicTunnel') !== null) {
                   switch (e.data.action) {
                     case 'sign':
                       let requiresConfirmation = false;
-                      if (e.data.target == "STOIC-POPUP" && e.data.endpoint != 'update') {
+                      if (e.data.target == "STOIC-POPUP" && e.data.endpoint == 'call') {
                         requiresConfirmation = true;
                       }
                       if (requiresConfirmation) {
