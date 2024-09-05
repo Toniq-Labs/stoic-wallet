@@ -259,7 +259,12 @@ if (params.get('stoicTunnel') !== null) {
                 if (verified) {
                   switch (e.data.action) {
                     case 'sign':
-                      if (e.data.target == "STOIC-POPUP") {
+                      let requiresConfirmation = false;
+                      if (e.data.target == "STOIC-POPUP" && e.data.endpoint != 'update') {
+                        requiresConfirmation = true;
+                      }
+                      if (requiresConfirmation) {
+                        console.log(e);
                         jspopup("Are you sure you want to sign this message from "+app.host+"?", "Sign", "Reject")
                           .then(async (result) => {
                             if (result) {
