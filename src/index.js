@@ -9,7 +9,128 @@ import {StoicIdentity} from './ic/identity.js';
 import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
 import theme from './theme';
 import '@fontsource/roboto';
+function injectPopupStyles() {
+  if (!document.getElementById("popup-styles")) {
+    const style = document.createElement("style");
+    style.id = "popup-styles";
+    style.textContent = `
+      .popup-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        background-color: rgba(0, 0, 0, 0.3); /* Slightly darker background */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+      }
 
+      .popup-content {
+        background: white;
+        padding: 20px;
+        border-radius: 4px;
+        box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2); /* Light shadow */
+        width: 400px;
+        font-family: 'Roboto', sans-serif; /* Material Design look */
+      }
+
+      .popup-title {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 20px;
+        text-align: left;
+      }
+
+      .popup-message {
+        font-size: 14px;
+        color: #333;
+        margin-bottom: 30px;
+      }
+
+      .popup-buttons {
+        display: flex;
+        justify-content: flex-end;
+      }
+
+      .popup-buttons button {
+        padding: 10px 20px;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+        margin-left: 10px;
+      }
+
+      .popup-approve {
+        background-color: #1a73e8; /* Material blue */
+        color: white;
+      }
+
+      .popup-reject {
+        background-color: transparent;
+        color: #1a73e8;
+        border: 1px solid #1a73e8; /* Outline style for reject */
+      }
+
+      .popup-reject:hover,
+      .popup-approve:hover {
+        opacity: 0.8;
+      }
+    `;
+    document.head.appendChild(style);
+  }
+}
+function jspopup(message, approveText = "Authorize", rejectText = "Reject") {
+  return new Promise((resolve) => {
+    injectPopupStyles();
+
+    const overlay = document.createElement("div");
+    overlay.classList.add("popup-overlay");
+
+    const popup = document.createElement("div");
+    popup.classList.add("popup-content");
+
+    const title = document.createElement("div");
+    title.classList.add("popup-title");
+    title.textContent = "Authorize Application";
+    popup.appendChild(title);
+
+    const msg = document.createElement("div");
+    msg.classList.add("popup-message");
+    msg.textContent = message;
+    popup.appendChild(msg);
+
+    const buttons = document.createElement("div");
+    buttons.classList.add("popup-buttons");
+    const approveButton = document.createElement("button");
+    approveButton.classList.add("popup-approve");
+    approveButton.textContent = approveText;
+    approveButton.addEventListener("click", () => {
+      resolve(true);
+      closePopup();
+    });
+
+    const rejectButton = document.createElement("button");
+    rejectButton.classList.add("popup-reject");
+    rejectButton.textContent = rejectText;
+    rejectButton.addEventListener("click", () => {
+      resolve(false);
+      closePopup();
+    });
+
+    buttons.appendChild(rejectButton);
+    buttons.appendChild(approveButton);
+    popup.appendChild(buttons);
+
+    overlay.appendChild(popup);
+    document.body.appendChild(overlay);
+    function closePopup() {
+      document.body.removeChild(overlay);
+    }
+  });
+}
 const params = new URLSearchParams(window.location.search);
 const hex2buf = (hex) => {
   const view = new Uint8Array(hex.length / 2)
@@ -127,7 +248,6 @@ const loadDbFast = () => {
 if (params.get('stoicTunnel') !== null) {
   window.addEventListener("message", async function(e){
     if (e && e.data && (e.data.target === 'STOIC-IFRAME' || e.data.target === 'STOIC-POPUP')) {
-      console.log(e);
       const state = loadDbFast();
       if (!state) {
         sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
@@ -135,6 +255,7 @@ if (params.get('stoicTunnel') !== null) {
         const principal = state.principals[state.currentPrincipal];
         if (principal.identity.principal === e.data.principal) {
           if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
+            let app = principal.apps.filter(a => a.apikey === e.data.apikey)[0];
             StoicIdentity.load(principal.identity).then(async () => {
               var id = StoicIdentity.getIdentity(e.data.principal);
               if (id) {
@@ -142,13 +263,30 @@ if (params.get('stoicTunnel') !== null) {
                 if (verified) {
                   switch (e.data.action) {
                     case 'sign':
-                      var response = {
-                        signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
-                      };
-                      if (id.hasOwnProperty('_delegation') ) {
-                        response.chain = id.getDelegation().toJSON();
+                      if (e.data.target == "STOIC-POPUP") {
+                        jspopup("Are you sure you want to sign this message from "+app.host+"?", "Sign", "Reject")
+                          .then((result) => {
+                            if (result) {
+                              var response = {
+                                signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
+                              };
+                              if (id.hasOwnProperty('_delegation') ) {
+                                response.chain = id.getDelegation().toJSON();
+                              }
+                              sendMessageToExtension(e, true, JSON.stringify(response));
+                            } else {
+                              sendMessageToExtension(e, false, "User rejected");
+                            }
+                          });
+                      } else {
+                        var response = {
+                          signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
+                        };
+                        if (id.hasOwnProperty('_delegation') ) {
+                          response.chain = id.getDelegation().toJSON();
+                        }
+                        sendMessageToExtension(e, true, JSON.stringify(response));
                       }
-                      sendMessageToExtension(e, true, JSON.stringify(response));
                     break;
                     case 'accounts':
                       var accs = [];
@@ -158,7 +296,18 @@ if (params.get('stoicTunnel') !== null) {
                           address : principal.accounts[i].address,
                         });
                       }
-                      sendMessageToExtension(e, true, JSON.stringify(accs));
+                      if (e.data.target == "STOIC-POPUP") {
+                        jspopup("Are you sure you want to share your account details with "+app.host+"?", "Continue", "Reject")
+                          .then((result) => {
+                            if (result) {
+                              sendMessageToExtension(e, true, JSON.stringify(accs));
+                            } else {
+                              sendMessageToExtension(e, false, "User rejected");
+                            }
+                          });
+                      } else {
+                        sendMessageToExtension(e, true, JSON.stringify(accs));
+                      }
                     break;
                     default:
                       sendMessageToExtension(e, false, "Error - nothing to do");
