@@ -155,7 +155,7 @@ const sendMessageToExtension = (e, success, data) => {
     complete: true,
   };
   if (e.data.target == "STOIC-POPUP") {
-    if (e.data.endpoint === 'read_state') {
+    if (e.data.endpoint === 'call') {
       response.complete = false;
     }
     window.opener.postMessage(response, '*');
