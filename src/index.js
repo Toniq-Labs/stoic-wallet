@@ -265,7 +265,7 @@ if (params.get('stoicTunnel') !== null) {
                     case 'sign':
                       if (e.data.target == "STOIC-POPUP") {
                         jspopup("Are you sure you want to sign this message from "+app.host+"?", "Sign", "Reject")
-                          .then((result) => {
+                          .then(async (result) => {
                             if (result) {
                               var response = {
                                 signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
