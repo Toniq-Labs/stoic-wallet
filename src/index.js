@@ -145,24 +145,20 @@ function buf2hex(buffer) {
     .join('');
 }
 const sendMessageToExtension = (e, success, data) => {
-  if (e.data.target == "STOIC-POPUP") {
-    window.opener.postMessage({
-      action : e.data.action,
-      listener : e.data.listener,
-      target : "STOIC-EXT",
-      success : success,
-      data : data
-    }, '*')
-    //window.close();
-  } else {
-    window.parent.postMessage({
-      action : e.data.action,
-      listener : e.data.listener,
-      target : "STOIC-EXT",
-      success : success,
-      data : data
-    }, '*')
+  let response = {
+    action : e.data.action,
+    listener : e.data.listener,
+    target : "STOIC-EXT",
+    success : success,
+    data : data,
+    complete: true,
   };
+  if (e.data.target == "STOIC-POPUP") {
+    if (e.data.endpoint === 'read_state') {
+      response.complete = false;
+    }
+  }
+  window.parent.postMessage(response, '*');
 }
 const verify = async (data, apikey, sig) => {
   var enc = new TextEncoder();
