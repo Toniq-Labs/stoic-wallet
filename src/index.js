@@ -157,8 +157,10 @@ const sendMessageToExtension = (e, success, data) => {
     if (e.data.endpoint === 'read_state') {
       response.complete = false;
     }
+    window.opener.postMessage(response, '*');
+  } else {
+    window.parent.postMessage(response, '*');
   }
-  window.parent.postMessage(response, '*');
 }
 const verify = async (data, apikey, sig) => {
   var enc = new TextEncoder();
