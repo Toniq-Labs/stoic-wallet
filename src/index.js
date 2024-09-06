@@ -14,7 +14,7 @@ function injectPopupStyles() {
     const style = document.createElement("style");
     style.id = "popup-styles";
     style.textContent = `
-      .popup-overlay {
+      .popup-overlay, .loading-overlay {
         position: fixed;
         top: 0;
         left: 0;
@@ -78,13 +78,43 @@ function injectPopupStyles() {
       .popup-approve:hover {
         opacity: 0.8;
       }
+
+      .loading-message {
+        font-size: 18px;
+        color: white;
+        font-family: 'Roboto', sans-serif;
+        text-align: center;
+      }
     `;
     document.head.appendChild(style);
   }
 }
+
+function showLoadingMessage() {
+  removeLoadingMessage(); // Ensure any existing message is removed first
+
+  const loadingOverlay = document.createElement("div");
+  loadingOverlay.classList.add("loading-overlay");
+
+  const loadingMessage = document.createElement("div");
+  loadingMessage.classList.add("loading-message");
+  loadingMessage.textContent = "Loading...please don't close this window.";
+
+  loadingOverlay.appendChild(loadingMessage);
+  document.body.appendChild(loadingOverlay);
+}
+
+function removeLoadingMessage() {
+  const existingOverlay = document.querySelector(".loading-overlay");
+  if (existingOverlay) {
+    document.body.removeChild(existingOverlay);
+  }
+}
+
 function jspopup(message, approveText = "Authorize", rejectText = "Reject") {
   return new Promise((resolve) => {
     injectPopupStyles();
+    removeLoadingMessage(); // Remove loading message if it's showing
 
     const overlay = document.createElement("div");
     overlay.classList.add("popup-overlay");
@@ -108,6 +138,7 @@ function jspopup(message, approveText = "Authorize", rejectText = "Reject") {
     approveButton.classList.add("popup-approve");
     approveButton.textContent = approveText;
     approveButton.addEventListener("click", () => {
+      showLoadingMessage(); // Show the loading message when approve is clicked
       resolve(true);
       closePopup();
     });
@@ -126,6 +157,7 @@ function jspopup(message, approveText = "Authorize", rejectText = "Reject") {
 
     overlay.appendChild(popup);
     document.body.appendChild(overlay);
+
     function closePopup() {
       document.body.removeChild(overlay);
     }
