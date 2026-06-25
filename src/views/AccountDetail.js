@@ -361,7 +361,7 @@ function AccountDetail(props) {
                   <Tooltip title="View in explorer (ICScan)">
                     <IconButton
                       href={'https://icscan.io/account/' + account.address}
-                      target="_blank"
+                      target="_blank" rel="noopener noreferrer"
                       edge="end"
                       aria-label="search"
                     >

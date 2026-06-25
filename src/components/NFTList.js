@@ -307,7 +307,7 @@ export default function NFTList(props) {
                             <IconButton
                               size="small"
                               href={'https://icscan.io/canister/' + nft.canister}
-                              target="_blank"
+                              target="_blank" rel="noopener noreferrer"
                               edge="end"
                               aria-label="search"
                             >
