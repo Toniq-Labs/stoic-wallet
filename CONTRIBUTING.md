@@ -4,10 +4,10 @@ Thanks for helping improve Stoic Wallet!
 
 ## Development setup
 
-This is a Create React App project that currently requires **Node 16** (see `.nvmrc`).
+This is a Create React App project (built with CRACO / react-scripts 5) that requires **Node 20** (see `.nvmrc`).
 
 ```bash
-nvm use            # Node 16
+nvm use            # Node 20
 npm install
 npm start          # http://localhost:3000
 npm test           # run unit tests
