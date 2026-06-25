@@ -7,3 +7,16 @@ updates:
     open-pull-requests-limit: 5
     labels:
       - "dependencies"
+    groups:
+      # Batch low-risk updates into one PR to cut review noise
+      minor-and-patch:
+        update-types:
+          - "minor"
+          - "patch"
+    ignore:
+      # @dfinity/* must be upgraded together (coordinated + tested) — see #55, not piecemeal majors
+      - dependency-name: "@dfinity/*"
+        update-types: ["version-update:semver-major"]
+      # react-scripts / CRA toolchain majors are handled by the Node 20 migration (#107 / #55)
+      - dependency-name: "react-scripts"
+        update-types: ["version-update:semver-major"]
