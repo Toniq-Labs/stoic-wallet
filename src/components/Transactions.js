@@ -85,7 +85,7 @@ export default function Transactions(props) {
                             Fee
                             <br />(
                             <a
-                              href={'https://ic.house/ICP/tx/' + tx.hash}
+                              href={'https://dashboard.internetcomputer.org/transaction/' + tx.hash}
                               target="_blank"
                               rel="noreferrer"
                             >
@@ -102,7 +102,7 @@ export default function Transactions(props) {
                             from {tx.from}
                             <br />(
                             <a
-                              href={'https://ic.house/ICP/tx/' + tx.hash}
+                              href={'https://dashboard.internetcomputer.org/transaction/' + tx.hash}
                               target="_blank"
                               rel="noreferrer"
                             >
