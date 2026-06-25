@@ -14,9 +14,20 @@ updates:
           - "minor"
           - "patch"
     ignore:
-      # @dfinity/* must be upgraded together (coordinated + tested) — see #55, not piecemeal majors
+      # The @dfinity/* agent stack is tightly coupled and pinned at 0.9.x.
+      # These are 0.x packages, so a 0.9 -> 0.14 bump is a *minor* in semver terms
+      # but still breaking — it must be upgraded as a coordinated, tested whole
+      # (see #55/#128). Allow only patch updates here; do majors/minors by hand.
       - dependency-name: "@dfinity/*"
+        update-types:
+          - "version-update:semver-major"
+          - "version-update:semver-minor"
+      # react + react-dom must move together as a deliberate framework upgrade,
+      # never as a lone dependabot bump (see #126, react-dom 17 -> 19 mismatch).
+      - dependency-name: "react"
         update-types: ["version-update:semver-major"]
-      # react-scripts / CRA toolchain majors are handled by the Node 20 migration (#107 / #55)
+      - dependency-name: "react-dom"
+        update-types: ["version-update:semver-major"]
+      # react-scripts / CRA toolchain majors are handled by the migration (#107).
       - dependency-name: "react-scripts"
         update-types: ["version-update:semver-major"]
