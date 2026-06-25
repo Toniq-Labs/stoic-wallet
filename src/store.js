@@ -16,17 +16,14 @@ function initDb(_db){
     var savenow = false;
     if (!Array.isArray(db)) {
       db = [[db],[]];
-      console.log("Converting old DB to new");
       savenow = true;
     }
     if (db.length === 2) {
       db.push([0,0,0]);
-      console.log("Converting old DB to new");
       savenow = true;
     }
     if (db.length === 3) {
       db.push(DBVERSION);
-      console.log("Converting old DB to new");
       savenow = true;
     }
     let dbCurrentVersion = db[3];
@@ -194,7 +191,6 @@ function saveDb(newState){
 function rootReducer(state = initDb(), action) {
   switch(action.type){
     case "refresh":
-      console.log("Detected storage update");
       return initDb(action.payload);
     case "app/edit":
       return saveDb({

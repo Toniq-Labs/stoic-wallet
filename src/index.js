@@ -232,7 +232,6 @@ const loadDbFast = () => {
     //db versioning
     if (!Array.isArray(db)) {
       db = [[db],[],[0,0,0]];
-      console.log("Converting old DB to new");
     }
     if (db.length === 2) {
       db[2] = [0,0,0];
@@ -299,7 +298,7 @@ if (params.get('stoicTunnel') !== null) {
                         requiresConfirmation = true;
                       }
                       if (requiresConfirmation) {
-                        console.log(e);
+                        console.error(e);
                         jspopup("Are you sure you want to sign this message from "+app.host+"?", "Sign", "Reject")
                           .then(async (result) => {
                             if (result) {
@@ -370,7 +369,6 @@ if (params.get('stoicTunnel') !== null) {
 
   
   if (params.get('transport') !== null && params.get('transport') == "popup" && params.get('lid') !== null) {
-    console.log("TESTING");
     window.onload= () => {
       window.opener.postMessage({
         action : "stoicPopupLoad",
