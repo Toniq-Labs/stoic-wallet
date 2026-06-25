@@ -38,7 +38,7 @@ export default function ConnectList(props) {
           <AllInclusiveIcon />
         </ListItemIcon>
         <ListItemText 
-          primary={props.add ? "Link your Internet Identitiy" : "Link your Internet Identitiy" }
+          primary={props.add ? "Link your Internet Identity" : "Link your Internet Identity" }
           secondary={props.add ? "I want to link another Wallet using an Internet Identity" : "I want to link a Wallet using an Internet Identity" }
         />
       </ListItem>
