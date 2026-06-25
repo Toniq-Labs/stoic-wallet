@@ -6,12 +6,12 @@ Note: the redirect does not require any approvals or whitelisting from Stoic. It
 
 ## Local development
 
-Stoic Wallet is a [Create React App](https://create-react-app.dev/) project.
+Stoic Wallet is a [Create React App](https://create-react-app.dev/) project built with [CRACO](https://craco.js.org/) (react-scripts 5 / webpack 5).
 
 ### Prerequisites
 
-- **Node.js 16** — the `react-scripts@4` toolchain doesn't build on Node ≥ 17.
-  Use [nvm](https://github.com/nvm-sh/nvm): `nvm install 16 && nvm use 16` (see `.nvmrc`).
+- **Node.js 20** (see `.nvmrc` and the `engines` field in `package.json`).
+  Use [nvm](https://github.com/nvm-sh/nvm): `nvm install 20 && nvm use 20`.
 
 ### Install & run
 
@@ -25,9 +25,6 @@ npm start          # dev server at http://localhost:3000
 ```bash
 npm run build      # outputs to ./build
 ```
-
-> If a build fails with an OpenSSL error on a newer Node, prefix with
-> `NODE_OPTIONS=--openssl-legacy-provider`.
 
 ### Notes
 
