@@ -359,7 +359,7 @@ if (params.get('stoicTunnel') !== null) {
                   sendMessageToExtension(e, false, "Invalid signature for payload");
                 }
               } else {        
-                sendMessageToExtension(e, false, "The principal is not unlocked, please go to StoicWallet and unlocl your wallet");
+                sendMessageToExtension(e, false, "The principal is not unlocked, please go to StoicWallet and unlock your wallet");
               }
             }).catch(err => {            
               sendMessageToExtension(e, false, err);

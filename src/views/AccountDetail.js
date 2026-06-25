@@ -138,7 +138,7 @@ function AccountDetail(props) {
                     'Authorize Application',
                     'Do you want to authorize "' +
                       e.origin +
-                      '" to access your princpal "' +
+                      '" to access your principal "' +
                       principal +
                       '"?',
                     'Reject',
