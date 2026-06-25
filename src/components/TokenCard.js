@@ -28,7 +28,7 @@ const styles = {
 };
 var intervalId = 0;
 const api = extjs.connect('https://icp0.io/');
-export default function TokenCard(props) {
+function TokenCard(props) {
   const [balance, setBalance] = React.useState(false);
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const identity = useSelector(state =>
@@ -82,3 +82,5 @@ export default function TokenCard(props) {
     </Grid>
   );
 }
+
+export default React.memo(TokenCard);
