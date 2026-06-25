@@ -58,7 +58,7 @@ function Applications(props) {
                 <TableCell>
                   <a href={app.host} target="_blank" rel="noreferrer">{app.host}</a>
                 </TableCell>
-                <TableCell>{app.apikey.substr(48, 80)}...</TableCell>
+                <TableCell>{app.apikey.substr(0, 8)}...</TableCell>
                 <TableCell align="right">
                   <Tooltip title="Remove from Stoic">
                     <IconButton aria-label="Remove application" onClick={() => deleteApp(app.host)}>
