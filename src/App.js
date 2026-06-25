@@ -1,7 +1,7 @@
-import React from 'react';
-import Wallet from './containers/Wallet';
-import Connect from './containers/Connect';
-import Unlock from './containers/Unlock';
+import React, {Suspense} from 'react';
+const Wallet = React.lazy(() => import('./containers/Wallet'));
+const Connect = React.lazy(() => import('./containers/Connect'));
+const Unlock = React.lazy(() => import('./containers/Unlock'));
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {useSelector, useDispatch} from 'react-redux';
@@ -127,6 +127,13 @@ export default function App() {
 
   return (
     <>
+      <Suspense
+        fallback={
+          <Backdrop className={classes.backdrop} open={true}>
+            <CircularProgress color="inherit" />
+          </Backdrop>
+        }
+      >
       {appState === 0 ? (
         <Connect alert={alert} confirm={confirm} login={login} loader={loader} />
       ) : (
@@ -144,6 +151,7 @@ export default function App() {
       ) : (
         ''
       )}
+      </Suspense>
       <Backdrop className={classes.backdrop} open={loaderOpen}>
         <CircularProgress color="inherit" />
         <h2 style={{position: 'absolute', marginTop: '120px'}}>{loaderText ?? 'Loading...'}</h2>
