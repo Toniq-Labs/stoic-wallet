@@ -31,7 +31,7 @@
     "react-redux": "^7.2.4",
     "react-router-dom": "^5.2.0",
     "react-scripts": "^5.0.1",
-    "react-timestamp": "^5.1.0",
+    "react-timestamp": "^6.0.0",
     "sjcl": "^1.0.9",
     "starkbank-ecdsa": "^1.1.2",
     "use-file-picker": "^1.3.0",
