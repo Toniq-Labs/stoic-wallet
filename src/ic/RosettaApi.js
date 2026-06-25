@@ -125,7 +125,6 @@ export default class RosettaApi {
       return new BigNumber(response.balances[0].value);
     }
     catch (error) {
-      //console.log(error);
       return new RosettaError(
         error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
     }
@@ -141,7 +140,6 @@ export default class RosettaApi {
       return response.current_block_identifier.index;
     }
     catch (error) {
-      //console.log(error);
       return new RosettaError(
         error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
     }
@@ -164,7 +162,6 @@ export default class RosettaApi {
         responseTransactions.transactions[0].block_identifier.index);
     }
     catch (error) {
-      //console.log(error);
       return new RosettaError(
         error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
     }
@@ -201,7 +198,6 @@ export default class RosettaApi {
       return transactions;
     }
     catch (error) {
-      //console.log(error);
       return new RosettaError(
         error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
     }
@@ -226,7 +222,6 @@ export default class RosettaApi {
       return transactions.reverse();
     }
     catch (error) {
-      //console.log(error);
       return new RosettaError(
         error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
     }

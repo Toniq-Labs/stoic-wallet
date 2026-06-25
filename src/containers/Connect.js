@@ -17,7 +17,7 @@ function Connect(props) {
       dispatch({ type: 'createwallet', payload : {identity : identity}});
       props.login();
     }).catch(e => {
-      console.log(e);
+      console.error(e);
     }).finally(() => {
       setTimeout(() => {
         setOpen(true);
@@ -52,7 +52,7 @@ function Connect(props) {
           props.loader(false);
           setOpen(true)
         }).catch(e => {
-          console.log(e);
+          console.error(e);
         }).finally(() => {
           setOpen(true)
           props.loader(false)
