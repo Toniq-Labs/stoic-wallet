@@ -70,5 +70,12 @@
   },
   "engines": {
     "node": ">=16 <17"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Toniq-Labs/stoic-wallet.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Toniq-Labs/stoic-wallet/issues"
   }
 }
