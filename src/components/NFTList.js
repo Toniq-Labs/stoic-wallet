@@ -128,8 +128,8 @@ export default function NFTList(props) {
         );
       if (!r2) return error('There was an error wrapping this NFT!');
       props.loader(true, 'Wrapping NFT...');
-      await extjs.connect('https://icp0.io/', id).canister(wrappedCanister).mint(tokenid);
-      if (!r) return error('There was an error wrapping this NFT!');
+      var r3 = await extjs.connect('https://icp0.io/', id).canister(wrappedCanister).mint(tokenid);
+      if (!r3) return error('There was an error wrapping this NFT!');
       await props.loadNfts();
       props.loader(false);
       return props.alert('You were successful!', 'Your NFT has been wrapped!');
@@ -395,7 +395,7 @@ export default function NFTList(props) {
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          nftAction(nft.tokenid, nft.standard, 0);
+                                          nftAction(nft.tokenid, '00', nft.standard);
                                         }}
                                       >
                                         Remove Wearables
