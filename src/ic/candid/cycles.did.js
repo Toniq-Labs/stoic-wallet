@@ -28,7 +28,27 @@ export default ({ IDL }) => {
     'ToppedUp' : IDL.Null,
   });
   const Result = IDL.Variant({ 'Ok' : CyclesResponse, 'Err' : IDL.Text });
+  // New cmc_notify flow (replaces the deprecated ledger_notify / transaction_notification).
+  const NotifyTopUpArg = IDL.Record({
+    'block_index' : IDL.Nat64,
+    'canister_id' : IDL.Principal,
+  });
+  const NotifyError = IDL.Variant({
+    'Refunded' : IDL.Record({
+      'block_index' : IDL.Opt(IDL.Nat64),
+      'reason' : IDL.Text,
+    }),
+    'InvalidTransaction' : IDL.Text,
+    'Other' : IDL.Record({
+      'error_message' : IDL.Text,
+      'error_code' : IDL.Nat64,
+    }),
+    'Processing' : IDL.Null,
+    'TransactionTooOld' : IDL.Nat64,
+  });
+  const NotifyTopUpResult = IDL.Variant({ 'Ok' : IDL.Nat, 'Err' : NotifyError });
   return IDL.Service({
+    'notify_top_up' : IDL.Func([NotifyTopUpArg], [NotifyTopUpResult], []),
     'get_average_icp_xdr_conversion_rate' : IDL.Func(
         [],
         [IcpXdrConversionRateCertifiedResponse],
