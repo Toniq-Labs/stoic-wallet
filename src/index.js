@@ -190,9 +190,9 @@ const sendMessageToExtension = (e, success, data) => {
     if (e.data.endpoint === 'call') {
       response.complete = false;
     }
-    window.opener.postMessage(response, '*');
+    window.opener.postMessage(response, e.origin || '*');
   } else {
-    window.parent.postMessage(response, '*');
+    window.parent.postMessage(response, e.origin || '*');
   }
 }
 const verify = async (data, apikey, sig) => {
