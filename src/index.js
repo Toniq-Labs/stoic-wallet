@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import App from './App';
+import ErrorBoundary from './components/ErrorBoundary';
 import { Provider } from 'react-redux'
 import store from './store'
 import {StoicIdentity} from './ic/identity.js';
@@ -383,7 +384,9 @@ if (params.get('stoicTunnel') !== null) {
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
-        <App />
+        <ErrorBoundary>
+          <App />
+        </ErrorBoundary>
       </ThemeProvider>
     </Provider>,
     document.querySelector('#root'),
