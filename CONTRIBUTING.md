@@ -24,3 +24,15 @@ npm run build      # production build -> ./build
 ## Reporting issues
 
 Use the issue templates. For **security** reports, see [SECURITY.md](SECURITY.md) — please don't open a public issue.
+
+## Smoke test
+
+A headless smoke test boots the built app in a browser and fails on runtime errors
+(e.g. a missing webpack polyfill) — the kind a plain `npm run build` can't catch:
+
+```bash
+npm install --no-save puppeteer   # one-time, pulls Chromium
+npm run build && npm run smoke
+```
+
+Network errors (no IC mainnet in CI) are ignored; it only fails on fatal JS errors or a blank app.

@@ -56,7 +56,8 @@
     "start": "craco start",
     "build": "craco build",
     "test": "craco test",
-    "eject": "react-scripts eject"
+    "eject": "react-scripts eject",
+    "smoke": "node scripts/smoke-test.cjs"
   },
   "eslintConfig": {
     "extends": [

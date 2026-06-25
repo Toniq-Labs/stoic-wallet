@@ -1,0 +1,21 @@
+# Headless smoke check — move this to .github/workflows/smoke.yml to enable.
+# (Adding it under .github/workflows/ requires a token/permission that can write workflow files.)
+name: smoke
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: '.nvmrc'
+      - run: npm install
+      - run: npm install --no-save puppeteer
+      - run: npm run build
+        env:
+          CI: 'false'
+      - run: npm run smoke
