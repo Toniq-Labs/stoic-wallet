@@ -17,7 +17,7 @@ class ErrorBoundary extends React.Component {
         <div style={{padding: 40, textAlign: 'center', fontFamily: 'Roboto, sans-serif'}}>
           <h2>Something went wrong</h2>
           <p>Please reload the page. If the problem persists, contact support@toniqlabs.com.</p>
-          <button onClick={() => window.location.reload()}>Reload</button>
+          <button type="button" onClick={() => window.location.reload()}>Reload</button>
         </div>
       );
     }
