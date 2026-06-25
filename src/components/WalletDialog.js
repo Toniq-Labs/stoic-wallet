@@ -343,7 +343,7 @@ export default function WalletDialog(props) {
               label="Enter Password"
               fullWidth
               required
-              type="password"
+              type="password" autoComplete="off"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               style={{marginBottom: 20}}
@@ -353,7 +353,7 @@ export default function WalletDialog(props) {
               label="Confirm Password"
               fullWidth
               required
-              type="password"
+              type="password" autoComplete="off"
               value={password2}
               onChange={(e) => setPassword2(e.target.value)}
             />

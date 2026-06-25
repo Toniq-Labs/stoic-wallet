@@ -191,7 +191,7 @@ function Unlock(props) {
                 label="Enter Password"
                 fullWidth
                 required
-                type="password"
+                type="password" autoComplete="off"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
