@@ -121,7 +121,6 @@ function Wallet(props) {
         <Toolbar>
           <IconButton
             color="inherit"
-            aria-label="open drawer"
             edge="start"
             aria-label="Toggle navigation menu" onClick={handleDrawerToggle}
             className={classes.menuButton}
@@ -135,7 +134,6 @@ function Wallet(props) {
           <div className={classes.toolbarButtons}>
             <IconButton
               color="inherit"
-              aria-label="settings"   
               edge="end"
               aria-label="Settings" onClick={() => changeRoute('settings')}
             >
