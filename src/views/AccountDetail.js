@@ -360,10 +360,10 @@ function AccountDetail(props) {
                   </InputForm>
                   <Tooltip title="View in explorer (ICScan)">
                     <IconButton
+                      aria-label="View in explorer"
                       href={'https://icscan.io/account/' + account.address}
                       target="_blank" rel="noopener noreferrer"
                       edge="end"
-                      aria-label="search"
                     >
                       <LaunchIcon />
                     </IconButton>

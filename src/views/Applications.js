@@ -61,7 +61,7 @@ function Applications(props) {
                 <TableCell>{app.apikey.substr(48, 80)}...</TableCell>
                 <TableCell align="right">
                   <Tooltip title="Remove from Stoic">
-                    <IconButton onClick={() => deleteApp(app.host)}>
+                    <IconButton aria-label="Remove application" onClick={() => deleteApp(app.host)}>
                       <DeleteIcon />
                     </IconButton>
                   </Tooltip>
