@@ -48,6 +48,7 @@ export default function SendForm(props) {
   };
   const review = () => {
     if (isNaN(amount)) return error('Please enter a valid amount to send');
+    if (Number(amount) <= 0) return error('Please enter an amount greater than 0');
     if (isNaN(fee)) return error('Please enter a valid fee to use');
     if (fee !== minFee) return error('The fee must be ' + minFee);
     switch (props.data.symbol) {
@@ -234,7 +235,6 @@ export default function SendForm(props) {
                 </p>
               ) : (
                 <p
-                  href="#"
                   style={{cursor: 'pointer', fontWeight: 'bold'}}
                   onClick={() => setAdvanced(true)}
                 >
