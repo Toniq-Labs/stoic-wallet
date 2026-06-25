@@ -131,14 +131,14 @@ function AccountDetail(props) {
                   : 'Standard',
               };
               if (app && app.apikey === e.data.apikey) {
-                window.opener.postMessage(authResponse, '*');
+                window.opener.postMessage(authResponse, e.origin || '*');
               } else {
                 props
                   .confirm(
                     'Authorize Application',
                     'Do you want to authorize "' +
                       e.origin +
-                      '" to access your princpal "' +
+                      '" to access your principal "' +
                       principal +
                       '"?',
                     'Reject',
@@ -156,9 +156,9 @@ function AccountDetail(props) {
                         app.apikey = e.data.apikey;
                         dispatch({type: 'app/edit', payload: {app: app}});
                       }
-                      window.opener.postMessage(authResponse, '*');
+                      window.opener.postMessage(authResponse, e.origin || '*');
                     } else {
-                      window.opener.postMessage({action: 'rejectAuthorization'}, '*');
+                      window.opener.postMessage({action: 'rejectAuthorization'}, e.origin || '*');
                     }
                   });
               }
@@ -360,10 +360,10 @@ function AccountDetail(props) {
                   </InputForm>
                   <Tooltip title="View in explorer (ICScan)">
                     <IconButton
+                      aria-label="View in explorer"
                       href={'https://icscan.io/account/' + account.address}
                       target="_blank" rel="noopener noreferrer"
                       edge="end"
-                      aria-label="search"
                     >
                       <LaunchIcon />
                     </IconButton>

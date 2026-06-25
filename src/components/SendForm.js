@@ -179,6 +179,7 @@ export default function SendForm(props) {
                 renderInput={params => (
                   <TextField
                     {...params}
+                    inputProps={{...params.inputProps, spellCheck: false, autoCapitalize: 'none', autoCorrect: 'off'}}
                     autoFocus
                     margin="dense"
                     label="Address of the Recipient"

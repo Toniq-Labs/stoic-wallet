@@ -152,7 +152,7 @@ export default function App() {
         ''
       )}
       </Suspense>
-      <Backdrop className={classes.backdrop} open={loaderOpen}>
+      <Backdrop className={classes.backdrop} open={loaderOpen} role="status" aria-live="polite">
         <CircularProgress color="inherit" />
         <h2 style={{position: 'absolute', marginTop: '120px'}}>{loaderText ?? 'Loading...'}</h2>
       </Backdrop>

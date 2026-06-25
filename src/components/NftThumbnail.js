@@ -2,17 +2,17 @@ import React from "react";
 
 import { compressAddress } from "../utils.js";
 
-export default function NftThumbnail({ nft }) {
+function NftThumbnail({ nft }) {
   let link = getNftLink(nft);
   let img = getNftImg(nft);
   if (link) {
     return (<a href={link} target="_blank" rel="noreferrer" style={{ display: "block" }} >
-        {img ? (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} style={{width:64}} />) : (<p>No preview available</p>)}
+        {img ? (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{width:64}} />) : (<p>No preview available</p>)}
       </a>
     );
   } else {
     if (img) {
-      return (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} style={{width:64}} />);
+      return (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{width:64}} />);
     } else {
       return (<p>No preview available</p>);
     }
@@ -89,3 +89,5 @@ const getNftImg = (nft) => {
     );
   else return false;
 };
+
+export default React.memo(NftThumbnail);
