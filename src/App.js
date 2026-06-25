@@ -1,7 +1,4 @@
 import React, {Suspense} from 'react';
-const Wallet = React.lazy(() => import('./containers/Wallet'));
-const Connect = React.lazy(() => import('./containers/Connect'));
-const Unlock = React.lazy(() => import('./containers/Unlock'));
 import Backdrop from '@material-ui/core/Backdrop';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import {useSelector, useDispatch} from 'react-redux';
@@ -10,6 +7,9 @@ import {StoicIdentity} from './ic/identity.js';
 import extjs from './ic/extjs.js';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
+const Wallet = React.lazy(() => import('./containers/Wallet'));
+const Connect = React.lazy(() => import('./containers/Connect'));
+const Unlock = React.lazy(() => import('./containers/Unlock'));
 
 const useStyles = makeStyles(theme => ({
   backdrop: {
