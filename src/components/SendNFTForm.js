@@ -1,5 +1,6 @@
 /* global BigInt */
 import React from 'react';
+import {validateAddress, validatePrincipal} from '../ic/utils.js';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -34,6 +35,8 @@ export default function SendNFTForm(props) {
     props.error(e);
   };
   const review = () => {
+    if (!validateAddress(to) && !validatePrincipal(to))
+      return error('Please enter a valid address to send to');
     setStep(1);
   };
   const submit = async () => {
