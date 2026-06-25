@@ -123,7 +123,7 @@ function Wallet(props) {
             color="inherit"
             aria-label="open drawer"
             edge="start"
-            onClick={handleDrawerToggle}
+            aria-label="Toggle navigation menu" onClick={handleDrawerToggle}
             className={classes.menuButton}
           >
             <MenuIcon />
@@ -137,7 +137,7 @@ function Wallet(props) {
               color="inherit"
               aria-label="settings"   
               edge="end"
-              onClick={() => changeRoute('settings')}
+              aria-label="Settings" onClick={() => changeRoute('settings')}
             >
               <AccountCircleIcon />
             </IconButton>

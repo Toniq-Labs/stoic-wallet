@@ -306,7 +306,7 @@ export default function NFTList(props) {
                           <Tooltip title="View in browser">
                             <IconButton
                               size="small"
-                              href={'https://icscan.io/canister/' + nft.canister}
+                              aria-label="View in browser" href={'https://icscan.io/canister/' + nft.canister}
                               target="_blank"
                               edge="end"
                               aria-label="search"
@@ -323,7 +323,7 @@ export default function NFTList(props) {
                           <>
                             <>
                               <IconButton
-                                id={'more-' + nft.tokenid}
+                                aria-label="More actions" id={'more-' + nft.tokenid}
                                 size="small"
                                 onClick={event => {
                                   handleClick(nft.tokenid, event.currentTarget);

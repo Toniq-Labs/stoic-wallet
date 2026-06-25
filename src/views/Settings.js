@@ -202,7 +202,7 @@ function Settings(props) {
                 } 
               />
               <ListItemSecondaryAction>
-                <IconButton onClick={() => clipboardCopy(principal.identity.principal)} edge="end">
+                <IconButton aria-label="Copy principal" onClick={() => clipboardCopy(principal.identity.principal)} edge="end">
                   <FileCopyIcon />
                 </IconButton>
                 <IconButton href={"https://icscan.io/principal/"+principal.identity.principal} target="_blank" edge="end" aria-label="search">
