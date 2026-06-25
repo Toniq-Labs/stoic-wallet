@@ -45,6 +45,7 @@ function Settings(props) {
           props.loader(false);
         }).catch(e => {
           props.loader(false);
+          error(e.message || String(e));
         })
       break;
       case "3party":
@@ -72,6 +73,7 @@ function Settings(props) {
       if (principals.some(p => p.identity.principal === identity.principal)) return error("This Principal is already added to your wallet");
       dispatch({ type: 'addwallet', payload : {identity : identity}});
     }).catch(e => {
+      error(e.message || String(e));
     }).finally(() => {      
       props.loader(false);
       setInitialRoute('');
