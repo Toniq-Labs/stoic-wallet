@@ -7,12 +7,12 @@ function NftThumbnail({ nft }) {
   let img = getNftImg(nft);
   if (link) {
     return (<a href={link} target="_blank" rel="noreferrer" style={{ display: "block" }} >
-        {img ? (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} style={{width:64}} />) : (<p>No preview available</p>)}
+        {img ? (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{width:64}} />) : (<p>No preview available</p>)}
       </a>
     );
   } else {
     if (img) {
-      return (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} style={{width:64}} />);
+      return (<img id={"img-"+nft.tokenid} alt={compressAddress(nft.tokenid)} src={img} loading="lazy" decoding="async" referrerPolicy="no-referrer" style={{width:64}} />);
     } else {
       return (<p>No preview available</p>);
     }
