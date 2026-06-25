@@ -188,7 +188,7 @@ const sendMessageToExtension = (e, success, data) => {
     data : data,
     complete: true,
   };
-  if (e.data.target == "STOIC-POPUP") {
+  if (e.data.target === "STOIC-POPUP") {
     if (e.data.endpoint === 'call') {
       response.complete = false;
     }
@@ -302,11 +302,10 @@ if (params.get('stoicTunnel') !== null) {
                   switch (e.data.action) {
                     case 'sign':
                       let requiresConfirmation = false;
-                      if (e.data.target == "STOIC-POPUP" && e.data.endpoint == 'call') {
+                      if (e.data.target === "STOIC-POPUP" && e.data.endpoint === 'call') {
                         requiresConfirmation = true;
                       }
                       if (requiresConfirmation) {
-                        console.error(e);
                         jspopup("Are you sure you want to sign this message from "+app.host+"?", "Sign", "Reject")
                           .then(async (result) => {
                             if (result) {
@@ -339,7 +338,7 @@ if (params.get('stoicTunnel') !== null) {
                           address : principal.accounts[i].address,
                         });
                       }
-                      if (e.data.target == "STOIC-POPUP") {
+                      if (e.data.target === "STOIC-POPUP") {
                         jspopup("Are you sure you want to share your account details with "+app.host+"?", "Continue", "Reject")
                           .then((result) => {
                             if (result) {
@@ -376,7 +375,7 @@ if (params.get('stoicTunnel') !== null) {
   }, false);
 
   
-  if (params.get('transport') !== null && params.get('transport') == "popup" && params.get('lid') !== null) {
+  if (params.get('transport') !== null && params.get('transport') === "popup" && params.get('lid') !== null) {
     window.onload= () => {
       window.opener.postMessage({
         action : "stoicPopupLoad",
