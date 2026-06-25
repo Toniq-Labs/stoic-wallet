@@ -297,6 +297,7 @@ export default function WalletDialog(props) {
               value={mnemonic}
               rows={2}
               onChange={(e) => setMnemonic(e.target.value)}
+              inputProps={{spellCheck: false, autoCapitalize: 'none', autoCorrect: 'off'}}
             />
           </DialogContent>
           <DialogActions>
