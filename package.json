@@ -65,8 +65,10 @@
     ]
   },
   "devDependencies": {
-
     "redux": "^4.1.0",
     "webpack": "4.44.2"
+  },
+  "engines": {
+    "node": ">=16 <17"
   }
 }
