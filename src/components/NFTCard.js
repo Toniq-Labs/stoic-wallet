@@ -24,7 +24,7 @@ const styles = {
     marginBottom: 12,
   },
 };
-export default function NFTCard(props) {
+function NFTCard(props) {
   const handleClick = () => {
     props.onClick();
   };
@@ -48,3 +48,5 @@ export default function NFTCard(props) {
     </Grid>
   );
 }
+
+export default React.memo(NFTCard);

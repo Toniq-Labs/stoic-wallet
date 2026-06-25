@@ -2,7 +2,7 @@ import React from "react";
 
 import { compressAddress } from "../utils.js";
 
-export default function NftThumbnail({ nft }) {
+function NftThumbnail({ nft }) {
   let link = getNftLink(nft);
   let img = getNftImg(nft);
   if (link) {
@@ -89,3 +89,5 @@ const getNftImg = (nft) => {
     );
   else return false;
 };
+
+export default React.memo(NftThumbnail);
