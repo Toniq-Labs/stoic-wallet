@@ -33,7 +33,7 @@ const sha256 = data => {
   return Buffer.from(new Uint8Array(shaObj.array()));
 };
 const getStakingAddress = (principal, nonce) => {
-  if (typeof nonce == 'string') nonce = Buffer(nonce);
+  if (typeof nonce == 'string') nonce = Buffer.from(nonce);
   if (nonce.length > 8) return false;
   const array = new Uint8Array([
     [0x0c],

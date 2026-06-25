@@ -43,7 +43,7 @@ const constructUser = u => {
   }
 };
 const tokenIdentifier = (principal, index) => {
-  const padding = Buffer('\x0Atid');
+  const padding = Buffer.from('\x0Atid');
   const array = new Uint8Array([
     ...padding,
     ...Principal.fromText(principal).toUint8Array(),
@@ -54,7 +54,7 @@ const tokenIdentifier = (principal, index) => {
 const decodeTokenId = tid => {
   var p = [...Principal.fromText(tid).toUint8Array()];
   var padding = p.splice(0, 4);
-  if (toHexString(padding) !== toHexString(Buffer('\x0Atid'))) {
+  if (toHexString(padding) !== toHexString(Buffer.from('\x0Atid'))) {
     return {
       index: 0,
       canister: tid,
