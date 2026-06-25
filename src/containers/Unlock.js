@@ -44,7 +44,7 @@ function Unlock(props) {
       StoicIdentity.unlock(identity, od).then(r => {
         props.login();
       }).catch(e => {
-        console.log(e);
+        console.error(e);
       }).finally(() => {
         setOpen(true)
       });

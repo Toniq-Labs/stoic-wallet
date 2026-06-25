@@ -28,7 +28,7 @@ export default function AddTokenForm(props) {
       try{
         await props.onClick(canisterId, standard);
       } catch(e){
-        console.log(e);
+        console.error(e);
         props.alert("Error adding token", e.message);
       } finally {
         props.loader(false);

@@ -321,7 +321,7 @@ function AccountDetail(props) {
       if (!ignoreChange) dispatch({type: 'currentToken', payload: {index: account.tokens.length}});
       return true;
     } catch(e){
-      console.log(e);
+      console.error(e);
       throw new Error('There was a problem adding that token');
     }
   };

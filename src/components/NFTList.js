@@ -135,7 +135,7 @@ export default function NFTList(props) {
       return props.alert('You were successful!', 'Your NFT has been wrapped!');
     } catch (e) {
       props.loader(false);
-      console.log(e);
+      console.error(e);
       return;
     }
   };

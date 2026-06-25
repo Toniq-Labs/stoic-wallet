@@ -35,7 +35,6 @@ export default function TopupForm(props) {
     props.error(e);
   };
   const review = () => {
-    console.log(amount, fee, amount + fee, Number(amount) + Number(fee));
     if (isNaN(amount)) return error('Please enter a valid amount to send');
     if (!validatePrincipal(to)) return error('Please enter a valid canister ID');
     if (Number(amount) + Number(fee) > balance) return error('You have insufficient ICP');

@@ -261,7 +261,7 @@ const StoicIdentity = {
           const openlogin = await loadOpenLogin();
           await openlogin.logout();
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
       }
       delete identities[_id.principal];
@@ -289,7 +289,7 @@ const StoicIdentity = {
           const openlogin = await loadOpenLogin();
           await openlogin.logout();
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
       }
       delete identities[_id.principal];
@@ -316,7 +316,7 @@ const StoicIdentity = {
           const openlogin = await loadOpenLogin();
           await openlogin.logout();
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
       }
       //setup new
