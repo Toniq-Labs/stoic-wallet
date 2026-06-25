@@ -481,15 +481,22 @@ class ExtConnection {
                 amount: {e8s: amount},
               };
               const block = await api.send_dfx(args);
-              args = {
-                block_height: block,
-                max_fee: {e8s: fee},
-                from_subaccount: [getSubAccountArray(from_sa ?? 0)],
-                to_subaccount: [getSubAccountArray(_to_sub)],
-                to_canister: Principal.fromText(CYCLES_MINTING_CANISTER_ID),
-              };
-              await api.notify_dfx(args);
-              return true; // Success
+              // New cmc_notify flow: notify the Cycles Minting Canister directly via
+              // notify_top_up, replacing the deprecated ledger notify_dfx ->
+              // transaction_notification push. See:
+              // https://forum.dfinity.org/t/deprecating-the-ledger-notify-flow-for-minting-cycles-in-favor-of-cmc-notify/42502
+              const cmc = this.canister(CYCLES_MINTING_CANISTER_ID, cyclesIDL);
+              const notifyRes = await cmc.notify_top_up({
+                block_index: BigInt(block),
+                canister_id: Principal.fromText(canister),
+              });
+              if (notifyRes.Err !== undefined) {
+                throw new Error(
+                  'Cycles top-up notification failed: ' +
+                    JSON.stringify(notifyRes.Err, (k, v) => (typeof v === 'bigint' ? v.toString() : v)),
+                );
+              }
+              return true; // notifyRes.Ok holds the cycles minted
             } catch (e) {
               throw e; // or handle error as appropriate
             }
