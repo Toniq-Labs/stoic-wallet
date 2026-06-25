@@ -131,7 +131,7 @@ function AccountDetail(props) {
                   : 'Standard',
               };
               if (app && app.apikey === e.data.apikey) {
-                window.opener.postMessage(authResponse, '*');
+                window.opener.postMessage(authResponse, e.origin || '*');
               } else {
                 props
                   .confirm(
@@ -156,9 +156,9 @@ function AccountDetail(props) {
                         app.apikey = e.data.apikey;
                         dispatch({type: 'app/edit', payload: {app: app}});
                       }
-                      window.opener.postMessage(authResponse, '*');
+                      window.opener.postMessage(authResponse, e.origin || '*');
                     } else {
-                      window.opener.postMessage({action: 'rejectAuthorization'}, '*');
+                      window.opener.postMessage({action: 'rejectAuthorization'}, e.origin || '*');
                     }
                   });
               }
