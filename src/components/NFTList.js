@@ -135,7 +135,7 @@ export default function NFTList(props) {
       return props.alert('You were successful!', 'Your NFT has been wrapped!');
     } catch (e) {
       props.loader(false);
-      console.log(e);
+      console.error(e);
       return;
     }
   };
@@ -306,10 +306,10 @@ export default function NFTList(props) {
                           <Tooltip title="View in browser">
                             <IconButton
                               size="small"
-                              aria-label="View in browser" href={'https://icscan.io/canister/' + nft.canister}
-                              target="_blank"
+                              aria-label="View in browser"
+                              href={'https://icscan.io/canister/' + nft.canister}
+                              target="_blank" rel="noopener noreferrer"
                               edge="end"
-                              aria-label="search"
                             >
                               <LaunchIcon style={{fontSize: 18}} />
                             </IconButton>
