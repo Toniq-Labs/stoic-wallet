@@ -282,7 +282,13 @@ if (params.get('stoicTunnel') !== null) {
       if (!state) {
         sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
       } else {
-        const principal = state.principals[state.currentPrincipal];
+        // #12: resolve the requested principal across ALL of the user's
+        // principals, not just the active one, so authorizing/using an app no
+        // longer requires manually switching to the right account first. The
+        // signature verification below is unchanged, so this doesn't weaken auth.
+        const principal =
+          state.principals.find(p => p.identity.principal === e.data.principal) ||
+          state.principals[state.currentPrincipal];
         if (principal.identity.principal === e.data.principal) {
           if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
             let app = principal.apps.filter(a => a.apikey === e.data.apikey)[0];
