@@ -7,6 +7,7 @@ import {StoicIdentity} from './ic/identity.js';
 import extjs from './ic/extjs.js';
 import AlertDialog from './components/AlertDialog';
 import ConfirmDialog from './components/ConfirmDialog';
+import OfflineBanner from './components/OfflineBanner';
 const Wallet = React.lazy(() => import('./containers/Wallet'));
 const Connect = React.lazy(() => import('./containers/Connect'));
 const Unlock = React.lazy(() => import('./containers/Unlock'));
@@ -171,6 +172,7 @@ export default function App() {
         buttonConfirm={confirmData.buttonConfirm}
         handler={confirmData.handler}
       />
+      <OfflineBanner />
     </>
   );
 }
