@@ -109,7 +109,7 @@ export default function SendForm(props) {
       });
   };
   const sendMax = () => {
-    setAmount(balance - Number(fee))
+    setAmount(balance - Number(fee));
   };
   const pasteAddress = async () => {
     try {
@@ -117,9 +117,9 @@ export default function SendForm(props) {
       if (t) setTo(t.trim());
     } catch (e) {}
   };
-  const setPct = (p) => {
+  const setPct = p => {
     const max = balance - Number(fee);
-    setAmount(max > 0 ? Math.round((max * p / 100) * 1e8) / 1e8 : 0);
+    setAmount(max > 0 ? Math.round(((max * p) / 100) * 1e8) / 1e8 : 0);
   };
   const handleClick = () => {
     setOpen(true);
@@ -198,14 +198,23 @@ export default function SendForm(props) {
                 renderInput={params => (
                   <TextField
                     {...params}
-                    inputProps={{...params.inputProps, spellCheck: false, autoCapitalize: 'none', autoCorrect: 'off'}}
+                    inputProps={{
+                      ...params.inputProps,
+                      spellCheck: false,
+                      autoCapitalize: 'none',
+                      autoCorrect: 'off',
+                    }}
                     autoFocus
                     margin="dense"
                     label="Address of the Recipient"
                     type="text"
                     fullWidth
                     error={!!to && !validateAddress(to) && !validatePrincipal(to)}
-                    helperText={!!to && !validateAddress(to) && !validatePrincipal(to) ? 'Not a valid address or principal' : ''}
+                    helperText={
+                      !!to && !validateAddress(to) && !validatePrincipal(to)
+                        ? 'Not a valid address or principal'
+                        : ''
+                    }
                     InputLabelProps={{
                       shrink: true,
                     }}
@@ -213,7 +222,9 @@ export default function SendForm(props) {
                 )}
               />
               <div style={{textAlign: 'right'}}>
-                <Button size="small" onClick={pasteAddress} color="primary">Paste address</Button>
+                <Button size="small" onClick={pasteAddress} color="primary">
+                  Paste address
+                </Button>
               </div>
               <div style={{display: 'flex', gap: '8px', alignItems: 'flex-start'}}>
                 <TextField
@@ -238,16 +249,26 @@ export default function SendForm(props) {
                 ) : null}
               </div>
               <div style={{marginTop: 4}}>
-                <Button size="small" onClick={() => setPct(25)} color="primary">25%</Button>
-                <Button size="small" onClick={() => setPct(50)} color="primary">50%</Button>
-                <Button size="small" onClick={() => setPct(75)} color="primary">75%</Button>
-                <Button size="small" variant="outlined" onClick={sendMax} color="primary">Max</Button>
+                <Button size="small" onClick={() => setPct(25)} color="primary">
+                  25%
+                </Button>
+                <Button size="small" onClick={() => setPct(50)} color="primary">
+                  50%
+                </Button>
+                <Button size="small" onClick={() => setPct(75)} color="primary">
+                  75%
+                </Button>
+                <Button size="small" variant="outlined" onClick={sendMax} color="primary">
+                  Max
+                </Button>
               </div>
               <DialogContentText
                 style={{fontSize: 'small', textAlign: 'center', marginTop: '20px'}}
               >
                 {balance !== false ? 'Balance: ' + balance + ' ' + props.data.symbol + ' ' : ''}
-                {minFee > 0 ? 'Min Fee: ' + formatNumberForDisplay(minFee) + ' ' + props.data.symbol : ''}
+                {minFee > 0
+                  ? 'Min Fee: ' + formatNumberForDisplay(minFee) + ' ' + props.data.symbol
+                  : ''}
               </DialogContentText>
               {advanced ? (
                 <p

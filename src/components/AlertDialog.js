@@ -21,9 +21,9 @@ export default function AlertDialog(props) {
         <DialogContentText id="alert-dialog-description">{props.message}</DialogContentText>
       </DialogContent>
       <DialogActions>
-      <Button onClick={handleClick} color="primary">
-        {props.buttonLabel ?? "OK" }
-      </Button>
+        <Button onClick={handleClick} color="primary">
+          {props.buttonLabel ?? 'OK'}
+        </Button>
       </DialogActions>
     </Dialog>
   );

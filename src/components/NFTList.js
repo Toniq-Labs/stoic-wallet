@@ -46,9 +46,9 @@ const wrapperCanisters = [
 ];
 
 const perPage = 20;
-const _showPrice = (n,e) => {
+const _showPrice = (n, e) => {
   if (!e) e = 8;
-  n = Number(n) / (10**e);
+  n = Number(n) / 10 ** e;
   return formatNumberForDisplay(n);
 };
 export default function NFTList(props) {
@@ -226,9 +226,13 @@ export default function NFTList(props) {
         </Select>
       </FormControl>
       <span style={{marginLeft: 20, lineHeight: '50px'}}>
-        Showing {props.nfts === false ? 0 : (props.nfts.filter(a => collection === false || a.canister === collection).length)}
+        Showing{' '}
+        {props.nfts === false
+          ? 0
+          : props.nfts.filter(a => collection === false || a.canister === collection).length}
       </span>
-      {props.nfts === false || props.nfts.filter(a => collection === false || a.canister === collection).length === 0 ? (
+      {props.nfts === false ||
+      props.nfts.filter(a => collection === false || a.canister === collection).length === 0 ? (
         <div style={styles.empty}>
           {props.nfts === false ? (
             <div style={{paddingTop: 20}}>
@@ -238,7 +242,9 @@ export default function NFTList(props) {
             </div>
           ) : (
             <>
-              <CollectionsIcon style={{fontSize: 48, color: '#ccc', display: 'block', margin: '20px auto 0'}} />
+              <CollectionsIcon
+                style={{fontSize: 48, color: '#ccc', display: 'block', margin: '20px auto 0'}}
+              />
               <Typography paragraph style={{paddingTop: 10, fontWeight: 'bold'}} align="center">
                 You have no NFT's right now
               </Typography>
@@ -247,13 +253,14 @@ export default function NFTList(props) {
         </div>
       ) : (
         <>
-          {props.nfts.slice().filter(a => collection === false || a.canister === collection).length >
-          perPage ? (
+          {props.nfts.slice().filter(a => collection === false || a.canister === collection)
+            .length > perPage ? (
             <Pagination
               style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
               size="small"
               count={Math.ceil(
-                props.nfts.filter(a => collection === false || a.canister === collection).length / perPage,
+                props.nfts.filter(a => collection === false || a.canister === collection).length /
+                  perPage,
               )}
               page={page}
               onChange={(e, v) => setPage(v)}
@@ -277,7 +284,7 @@ export default function NFTList(props) {
                   <TableCell width="220" style={{fontWeight: 'bold'}}>
                     Collection/Canister
                   </TableCell>
-                  <TableCell  align="right" width="300" style={{fontWeight: 'bold'}}>
+                  <TableCell align="right" width="300" style={{fontWeight: 'bold'}}>
                     Floor Price
                   </TableCell>
                   <TableCell width="150" align="right" style={{fontWeight: 'bold'}}>
@@ -314,14 +321,16 @@ export default function NFTList(props) {
                         </TableCell>
                         <TableCell>
                           {props.collections.find(a => a.canisterId === nft.canister)?.name ??
-                            compressAddress(nft.canister)}<br />
-                            {nft.standard}
+                            compressAddress(nft.canister)}
+                          <br />
+                          {nft.standard}
                           <Tooltip title="View in browser">
                             <IconButton
                               size="small"
                               aria-label="View in browser"
                               href={'https://icscan.io/canister/' + nft.canister}
-                              target="_blank" rel="noopener noreferrer"
+                              target="_blank"
+                              rel="noopener noreferrer"
                               edge="end"
                             >
                               <LaunchIcon style={{fontSize: 18}} />
@@ -329,23 +338,24 @@ export default function NFTList(props) {
                           </Tooltip>
                         </TableCell>
                         <TableCell align="right">
-                          {_showPrice(nft.floor)} ICP<br />
-                          ${_showPrice(nft.floorUsd, 4)} USD
+                          {_showPrice(nft.floor)} ICP
+                          <br />${_showPrice(nft.floorUsd, 4)} USD
                         </TableCell>
                         <TableCell align="right">
                           <>
                             <>
                               <Tooltip title="More actions">
-                              <IconButton
-                                aria-label="More actions" id={'more-' + nft.tokenid}
-                                size="small"
-                                onClick={event => {
-                                  handleClick(nft.tokenid, event.currentTarget);
-                                }}
-                                edge="end"
-                              >
-                                <MoreVertIcon />
-                              </IconButton>
+                                <IconButton
+                                  aria-label="More actions"
+                                  id={'more-' + nft.tokenid}
+                                  size="small"
+                                  onClick={event => {
+                                    handleClick(nft.tokenid, event.currentTarget);
+                                  }}
+                                  edge="end"
+                                >
+                                  <MoreVertIcon />
+                                </IconButton>
                               </Tooltip>
                               <Menu
                                 anchorEl={
@@ -393,7 +403,7 @@ export default function NFTList(props) {
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          wrapNft(nft.tokenid, nft.canister, "icpunks");
+                                          wrapNft(nft.tokenid, nft.canister, 'icpunks');
                                         }}
                                       >
                                         <ListItemIcon>
@@ -427,13 +437,14 @@ export default function NFTList(props) {
               </TableBody>
             </Table>
           </TableContainer>
-          {props.nfts.slice().filter(a => collection === false || a.canister === collection).length >
-          perPage ? (
+          {props.nfts.slice().filter(a => collection === false || a.canister === collection)
+            .length > perPage ? (
             <Pagination
               style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
               size="small"
               count={Math.ceil(
-                props.nfts.filter(a => collection === false || a.canister === collection).length / perPage,
+                props.nfts.filter(a => collection === false || a.canister === collection).length /
+                  perPage,
               )}
               page={page}
               onChange={(e, v) => setPage(v)}

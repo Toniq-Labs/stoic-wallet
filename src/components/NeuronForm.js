@@ -50,7 +50,9 @@ export default function NeuronForm(props) {
         })
         .catch(() => {});
     }
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subaccount]);
 

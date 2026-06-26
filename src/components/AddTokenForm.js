@@ -10,32 +10,32 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 const standards = [
-  ["ext", "EXT"],
-  ["icrc", "ICRC"],
-  ["dip20", "DIP20"],
-  ["drc20", "DRC20"],
-  ["ledger", "ICP Ledger"],
+  ['ext', 'EXT'],
+  ['icrc', 'ICRC'],
+  ['dip20', 'DIP20'],
+  ['drc20', 'DRC20'],
+  ['ledger', 'ICP Ledger'],
 ];
 export default function AddTokenForm(props) {
   const [open, setOpen] = React.useState(false);
-  const [canisterId, setCanisterId] = React.useState("");
-  const [standard, setStandard] = React.useState("ext");
+  const [canisterId, setCanisterId] = React.useState('');
+  const [standard, setStandard] = React.useState('ext');
 
   const submit = async () => {
     if (typeof props.onClick != 'undefined') {
-      props.loader("Loading token data...")
+      props.loader('Loading token data...');
       setOpen(false);
-      try{
+      try {
         await props.onClick(canisterId, standard);
-      } catch(e){
+      } catch (e) {
         console.error(e);
-        props.alert("Error adding token", e.message);
+        props.alert('Error adding token', e.message);
       } finally {
         props.loader(false);
-        setCanisterId("");
-        setStandard("ext");
+        setCanisterId('');
+        setStandard('ext');
       }
-    };
+    }
   };
   const handleClick = () => {
     setOpen(true);
@@ -48,32 +48,41 @@ export default function AddTokenForm(props) {
   return (
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
-      <Dialog maxWidth={'sm'} fullWidth open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog
+        maxWidth={'sm'}
+        fullWidth
+        open={open}
+        onClose={handleClose}
+        aria-labelledby="form-dialog-title"
+      >
         <DialogContent>
           <h3>Add Token</h3>
           <div>
-            <DialogContentText>Add the Canister ID and the Token Standard for the token you wish to add</DialogContentText>
-            <FormControl style={{width:'49%',top:0, marginRight:5}}>
+            <DialogContentText>
+              Add the Canister ID and the Token Standard for the token you wish to add
+            </DialogContentText>
+            <FormControl style={{width: '49%', top: 0, marginRight: 5}}>
               <TextField
                 autoFocus
                 margin="dense"
                 label="Canister ID"
                 value={canisterId}
-                onChange={(e) => setCanisterId(e.target.value)}
+                onChange={e => setCanisterId(e.target.value)}
                 type="text"
                 InputLabelProps={{
                   shrink: true,
                 }}
               />
             </FormControl>
-            <FormControl style={{width:'49%',top:5}}>
-              <InputLabel shrink id="">Standard</InputLabel>
-              <Select
-                value={standard}
-                onChange={(e) => setStandard(e.target.value)}
-              >
+            <FormControl style={{width: '49%', top: 5}}>
+              <InputLabel shrink id="">
+                Standard
+              </InputLabel>
+              <Select value={standard} onChange={e => setStandard(e.target.value)}>
                 {standards.map((s, i) => (
-                  <MenuItem key={i} value={s[0]}>{s[1]}</MenuItem>
+                  <MenuItem key={i} value={s[0]}>
+                    {s[1]}
+                  </MenuItem>
                 ))}
               </Select>
             </FormControl>
@@ -83,7 +92,9 @@ export default function AddTokenForm(props) {
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={submit} color="primary">Add</Button>
+          <Button onClick={submit} color="primary">
+            Add
+          </Button>
         </DialogActions>
       </Dialog>
     </>

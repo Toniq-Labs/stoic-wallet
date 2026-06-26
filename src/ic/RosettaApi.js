@@ -9,7 +9,7 @@ import BigNumber from 'bignumber.js';
 import jsonBigint from 'json-bigint';
 
 // Set useNativeBigInt to true and use BigInt once BigInt is widely supported.
-const JSONbig = jsonBigint({ strict: true });
+const JSONbig = jsonBigint({strict: true});
 
 /**
  * Types of Rosetta API errors.
@@ -17,7 +17,7 @@ const JSONbig = jsonBigint({ strict: true });
 export const RosettaErrorType = Object.freeze({
   NotFound: 0,
   Timeout: 1,
-  NetworkError: 2
+  NetworkError: 2,
 });
 
 /**
@@ -32,15 +32,15 @@ export class RosettaError extends Error {
   constructor(message, status) {
     super(message);
     switch (status) {
-    case 408:
-      this.errorType = RosettaErrorType.Timeout;
-      break;
-    case 500:
-      this.errorType = RosettaErrorType.NotFound;
-      break;
-    default:
-      this.errorType = RosettaErrorType.NetworkError;
-      break;
+      case 408:
+        this.errorType = RosettaErrorType.Timeout;
+        break;
+      case 500:
+        this.errorType = RosettaErrorType.NotFound;
+        break;
+      default:
+        this.errorType = RosettaErrorType.NetworkError;
+        break;
     }
   }
 }
@@ -48,7 +48,7 @@ export class RosettaError extends Error {
 /**
  * Contains information about a transaction.
  */
-export class Transaction  {
+export class Transaction {
   /**
    * Create a Transaction.
    * @param {Any} rosettaTransaction The Rosetta Transaction object of the transaction.
@@ -61,18 +61,19 @@ export class Transaction  {
     const timestampMs = rosettaTransaction.metadata.timestamp.div(1000000).toNumber();
     this.timestamp = new Date(timestampMs);
     const operations = rosettaTransaction.operations;
-    if (operations.length >= 1) { 
+    if (operations.length >= 1) {
       this.type = operations[0].type;
       this.status = operations[0].status;
       this.account1Address = operations[0].account.address;
       this.amount = new BigNumber(operations[0].amount.value);
       // Negate amount for TRANSACTION and BURN, so that they appear in the UI as positive values.
-      if ((operations[0].type === 'TRANSACTION' || operations[0].type === 'BURN') &&
-        !this.amount.isZero()) {
+      if (
+        (operations[0].type === 'TRANSACTION' || operations[0].type === 'BURN') &&
+        !this.amount.isZero()
+      ) {
         this.amount = this.amount.negated();
       }
-    }
-    else {
+    } else {
       this.type = '';
       this.status = '';
       this.account1Address = '';
@@ -80,15 +81,13 @@ export class Transaction  {
     }
     if (operations.length >= 2 && operations[1].type === 'TRANSACTION')
       this.account2Address = operations[1].account.address;
-    else
-      this.account2Address = '';
+    else this.account2Address = '';
     if (operations.length >= 3 && operations[2].type === 'FEE')
       this.fee = new BigNumber(-operations[2].amount.value);
-    else
-      this.fee = new BigNumber(0);
+    else this.fee = new BigNumber(0);
     this.memo = new BigNumber(rosettaTransaction.metadata.memo);
   }
-};
+}
 
 /**
  * Manages Rosetta API calls.
@@ -101,15 +100,15 @@ export default class RosettaApi {
     this.axios = axios.create({
       baseURL: 'https://rosetta-api.internetcomputer.org/',
       method: 'post',
-      transformRequest: (data) => JSONbig.stringify(data),
-      transformResponse: (data) => JSONbig.parse(data),
-      headers: { 'Content-Type': 'application/json;charset=utf-8' }
+      transformRequest: data => JSONbig.stringify(data),
+      transformResponse: data => JSONbig.parse(data),
+      headers: {'Content-Type': 'application/json;charset=utf-8'},
     });
 
     this.networkIdentifier = this.networksList().then(res =>
       res.network_identifiers.find(
-        networkIdentifier => networkIdentifier.blockchain === 'Internet Computer'
-      )
+        networkIdentifier => networkIdentifier.blockchain === 'Internet Computer',
+      ),
     );
   }
 
@@ -123,10 +122,11 @@ export default class RosettaApi {
     try {
       const response = await this.accountBalanceByAddress(accountAddress);
       return new BigNumber(response.balances[0].value);
-    }
-    catch (error) {
+    } catch (error) {
       return new RosettaError(
-        error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
+        error.message,
+        axios.isAxiosError(error) ? error?.response?.status : undefined,
+      );
     }
   }
 
@@ -138,10 +138,11 @@ export default class RosettaApi {
     try {
       const response = await this.networkStatus();
       return response.current_block_identifier.index;
-    }
-    catch (error) {
+    } catch (error) {
       return new RosettaError(
-        error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
+        error.message,
+        axios.isAxiosError(error) ? error?.response?.status : undefined,
+      );
     }
   }
 
@@ -159,11 +160,13 @@ export default class RosettaApi {
 
       return new Transaction(
         responseTransactions.transactions[0].transaction,
-        responseTransactions.transactions[0].block_identifier.index);
-    }
-    catch (error) {
+        responseTransactions.transactions[0].block_identifier.index,
+      );
+    } catch (error) {
       return new RosettaError(
-        error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
+        error.message,
+        axios.isAxiosError(error) ? error?.response?.status : undefined,
+      );
     }
   }
 
@@ -182,24 +185,23 @@ export default class RosettaApi {
       // This function can be simplified once /search/transactions supports using the properties
       // max_block, offset, and limit.
       let blockIndex;
-      if (maxBlockIndex)
-        blockIndex = maxBlockIndex;
+      if (maxBlockIndex) blockIndex = maxBlockIndex;
       else {
         // Get the latest block index.
         const response = await this.networkStatus();
         blockIndex = response.current_block_identifier.index;
       }
-      if (offset)
-        blockIndex = Math.max(blockIndex - offset, -1);
+      if (offset) blockIndex = Math.max(blockIndex - offset, -1);
       const transactionCount = Math.min(limit, blockIndex + 1);
       const transactions = [];
       for (let i = 0; i < transactionCount; i++)
         transactions.push(await this.getTransactionByBlock(blockIndex - i));
       return transactions;
-    }
-    catch (error) {
+    } catch (error) {
       return new RosettaError(
-        error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
+        error.message,
+        axios.isAxiosError(error) ? error?.response?.status : undefined,
+      );
     }
   }
 
@@ -214,16 +216,19 @@ export default class RosettaApi {
     try {
       const response = await this.transactionsByAccount(accountAddress);
       const transactions = await Promise.all(
-        response.transactions.map((blockTransaction) => {
+        response.transactions.map(blockTransaction => {
           return new Transaction(
-            blockTransaction.transaction, blockTransaction.block_identifier.index);
-        })
+            blockTransaction.transaction,
+            blockTransaction.block_identifier.index,
+          );
+        }),
       );
       return transactions.reverse();
-    }
-    catch (error) {
+    } catch (error) {
       return new RosettaError(
-        error.message, axios.isAxiosError(error) ? error?.response?.status : undefined);
+        error.message,
+        axios.isAxiosError(error) ? error?.response?.status : undefined,
+      );
     }
   }
 
@@ -246,7 +251,7 @@ export default class RosettaApi {
    * @private
    */
   async request(url, data) {
-    return (await this.axios.request({ url: url, data: data })).data;
+    return (await this.axios.request({url: url, data: data})).data;
   }
 
   /**
@@ -266,11 +271,9 @@ export default class RosettaApi {
    */
   async networkStatus() {
     const networkIdentifier = await this.networkIdentifier;
-    return this.request(
-      '/network/status', {
-        network_identifier: networkIdentifier
-      }
-    );
+    return this.request('/network/status', {
+      network_identifier: networkIdentifier,
+    });
   }
 
   /**
@@ -281,12 +284,10 @@ export default class RosettaApi {
    */
   async accountBalanceByAddress(accountAddress) {
     const networkIdentifier = await this.networkIdentifier;
-    return this.request(
-      '/account/balance', {
-        network_identifier: networkIdentifier,
-        account_identifier: {address: accountAddress}
-      }
-    );
+    return this.request('/account/balance', {
+      network_identifier: networkIdentifier,
+      account_identifier: {address: accountAddress},
+    });
   }
 
   /**
@@ -298,12 +299,10 @@ export default class RosettaApi {
    */
   async blockByIndex(blockIndex) {
     const networkIdentifier = await this.networkIdentifier;
-    return this.request(
-      '/block', {
-        network_identifier: networkIdentifier,
-        block_identifier: {index: blockIndex}
-      }
-    );
+    return this.request('/block', {
+      network_identifier: networkIdentifier,
+      block_identifier: {index: blockIndex},
+    });
   }
 
   /**
@@ -315,12 +314,10 @@ export default class RosettaApi {
    */
   async transactionsByAccount(accountAddress) {
     const networkIdentifier = await this.networkIdentifier;
-    return this.request(
-      '/search/transactions', {
-        network_identifier: networkIdentifier,
-        account_identifier: {address: accountAddress}
-      }
-    );
+    return this.request('/search/transactions', {
+      network_identifier: networkIdentifier,
+      account_identifier: {address: accountAddress},
+    });
   }
 
   /**
@@ -331,11 +328,9 @@ export default class RosettaApi {
    */
   async transactionsByHash(transactionHash) {
     const networkIdentifier = await this.networkIdentifier;
-    return this.request(
-      '/search/transactions', {
-        network_identifier: networkIdentifier,
-        transaction_identifier: {hash: transactionHash}
-      }
-    );
+    return this.request('/search/transactions', {
+      network_identifier: networkIdentifier,
+      transaction_identifier: {hash: transactionHash},
+    });
   }
 }

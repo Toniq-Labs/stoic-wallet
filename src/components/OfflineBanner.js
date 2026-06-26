@@ -4,7 +4,9 @@ import Alert from '@material-ui/lab/Alert';
 
 // Shows a persistent warning while the browser is offline.
 export default function OfflineBanner() {
-  const [offline, setOffline] = React.useState(typeof navigator !== 'undefined' && !navigator.onLine);
+  const [offline, setOffline] = React.useState(
+    typeof navigator !== 'undefined' && !navigator.onLine,
+  );
   React.useEffect(() => {
     const goOnline = () => setOffline(false);
     const goOffline = () => setOffline(true);

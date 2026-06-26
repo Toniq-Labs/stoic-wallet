@@ -9,14 +9,14 @@ import DialogTitle from '@material-ui/core/DialogTitle';
 
 export default function InputForm(props) {
   const [open, setOpen] = React.useState(false);
-  const [value, setValue] = React.useState(props.defaultValue ?? "");
-  const [secondaryValue, setSecondaryValue] = React.useState(props.defaultSecondaryValue ?? "");
+  const [value, setValue] = React.useState(props.defaultValue ?? '');
+  const [secondaryValue, setSecondaryValue] = React.useState(props.defaultSecondaryValue ?? '');
 
   const submit = () => {
     if (typeof props.onClick != 'undefined') props.onClick(value, secondaryValue);
     setOpen(false);
-    setValue(props.defaultValue ?? "");
-    setSecondaryValue(props.defaultSecondaryValue ?? "");
+    setValue(props.defaultValue ?? '');
+    setSecondaryValue(props.defaultSecondaryValue ?? '');
   };
   const handleClick = () => {
     setOpen(true);
@@ -38,31 +38,36 @@ export default function InputForm(props) {
             margin="dense"
             label={props.inputLabel}
             value={value}
-            onChange={(e) => setValue(e.target.value)}
+            onChange={e => setValue(e.target.value)}
             type="text"
             InputLabelProps={{
               shrink: true,
             }}
             fullWidth
           />
-          { props.secondaryInput ? 
+          {props.secondaryInput ? (
             <TextField
               margin="dense"
               label={props.secondaryInput}
               value={secondaryValue}
-              onChange={(e) => setSecondaryValue(e.target.value)}
+              onChange={e => setSecondaryValue(e.target.value)}
               type="text"
               InputLabelProps={{
                 shrink: true,
               }}
               fullWidth
-            /> : "" }
+            />
+          ) : (
+            ''
+          )}
         </DialogContent>
         <DialogActions>
           <Button onClick={handleClose} color="primary">
             Cancel
           </Button>
-          <Button onClick={submit} color="primary">{props.buttonLabel}</Button>
+          <Button onClick={submit} color="primary">
+            {props.buttonLabel}
+          </Button>
         </DialogActions>
       </Dialog>
     </>

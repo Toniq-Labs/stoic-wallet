@@ -1,5 +1,5 @@
 import React from 'react';
-import { useDispatch } from 'react-redux'
+import {useDispatch} from 'react-redux';
 import AppBar from '@material-ui/core/AppBar';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import IconButton from '@material-ui/core/IconButton';
@@ -23,10 +23,10 @@ import Neurons from '../views/Neurons';
 import Applications from '../views/Applications';
 import Settings from '../views/Settings';
 
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 
 const drawerWidth = 300;
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     display: 'flex',
   },
@@ -49,34 +49,31 @@ const useStyles = makeStyles((theme) => ({
   content: {
     flexGrow: 1,
   },
-
 }));
 
-
-  const routes = {
-    'accountDetail' : {
-      title : "Account Details",
-      view : AccountDetail
-    },
-    'neurons' : {
-      title : "Neuron Management",
-      view : Neurons
-    },
-    'applications' : {
-      title : "Applications",
-      view : Applications
-    },
-    'addressBook' : {
-      title : "Address Book",
-      view : AddressBook
-    },
-    'settings' : {
-      title : "Settings",
-      view : Settings
-    },
-  };
+const routes = {
+  accountDetail: {
+    title: 'Account Details',
+    view: AccountDetail,
+  },
+  neurons: {
+    title: 'Neuron Management',
+    view: Neurons,
+  },
+  applications: {
+    title: 'Applications',
+    view: Applications,
+  },
+  addressBook: {
+    title: 'Address Book',
+    view: AddressBook,
+  },
+  settings: {
+    title: 'Settings',
+    view: Settings,
+  },
+};
 //Helpers
-
 
 function Wallet(props) {
   const classes = useStyles();
@@ -85,36 +82,50 @@ function Wallet(props) {
     try {
       const saved = localStorage.getItem('stoic-route');
       return saved && routes[saved] ? saved : 'accountDetail';
-    } catch (e) { return 'accountDetail'; }
+    } catch (e) {
+      return 'accountDetail';
+    }
   });
   const [toolbarTitle, setToolbarTitle] = React.useState(routes[route].title);
-  const dispatch = useDispatch()
-  
+  const dispatch = useDispatch();
+
   const handleDrawerClose = () => {
     setMobileOpen(false);
   };
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
-  const renderView = (r) => {
-    switch(r){
-      case "settings":
-        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader, clearWallet : clearWallet, lockWallet : lockWallet})
-      case "accountDetail":
-      case "neurons":
-      case "applications":
-        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
+  const renderView = r => {
+    switch (r) {
+      case 'settings':
+        return React.createElement(routes[r].view, {
+          alert: props.alert,
+          confirm: props.confirm,
+          loader: props.loader,
+          clearWallet: clearWallet,
+          lockWallet: lockWallet,
+        });
+      case 'accountDetail':
+      case 'neurons':
+      case 'applications':
+        return React.createElement(routes[r].view, {
+          alert: props.alert,
+          confirm: props.confirm,
+          loader: props.loader,
+        });
       default:
-        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm})
+        return React.createElement(routes[r].view, {alert: props.alert, confirm: props.confirm});
     }
-  }
+  };
   const changeRoute = (r, i) => {
     setToolbarTitle(routes[r].title);
     setRoute(r);
-    try { localStorage.setItem('stoic-route', r); } catch (e) {}
-    if (typeof i !== 'undefined') dispatch({ type: 'currentAccount', payload: {index:i}});
+    try {
+      localStorage.setItem('stoic-route', r);
+    } catch (e) {}
+    if (typeof i !== 'undefined') dispatch({type: 'currentAccount', payload: {index: i}});
   };
-  
+
   const lockWallet = () => {
     props.logout();
   };
@@ -126,17 +137,22 @@ function Wallet(props) {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar position="fixed" className={classes.appBar} style={mode === 'dark' ? {backgroundColor: '#13242b', color: '#fff'} : undefined}>
+      <AppBar
+        position="fixed"
+        className={classes.appBar}
+        style={mode === 'dark' ? {backgroundColor: '#13242b', color: '#fff'} : undefined}
+      >
         <Toolbar>
           <IconButton
             color="inherit"
             edge="start"
-            aria-label="Toggle navigation menu" onClick={handleDrawerToggle}
+            aria-label="Toggle navigation menu"
+            onClick={handleDrawerToggle}
             className={classes.menuButton}
           >
             <MenuIcon />
           </IconButton>
-          
+
           <Typography variant="h6" noWrap>
             {toolbarTitle}
           </Typography>
@@ -154,19 +170,26 @@ function Wallet(props) {
             <IconButton
               color="inherit"
               edge="end"
-              aria-label="Settings" onClick={() => changeRoute('settings')}
+              aria-label="Settings"
+              onClick={() => changeRoute('settings')}
             >
               <AccountCircleIcon />
             </IconButton>
           </div>
         </Toolbar>
       </AppBar>
-      <AccountDrawer route={route} lockWallet={lockWallet} changeRoute={changeRoute} onClose={handleDrawerClose} open={mobileOpen} />
+      <AccountDrawer
+        route={route}
+        lockWallet={lockWallet}
+        changeRoute={changeRoute}
+        onClose={handleDrawerClose}
+        open={mobileOpen}
+      />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-          <BalanceVisibilityContext.Provider value={hideBalances}>
-            {renderView(route)}
-          </BalanceVisibilityContext.Provider>
+        <BalanceVisibilityContext.Provider value={hideBalances}>
+          {renderView(route)}
+        </BalanceVisibilityContext.Provider>
       </main>
       <ScrollTop />
     </div>
