@@ -7,8 +7,12 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Pagination from '@material-ui/lab/Pagination';
+import ReceiptIcon from '@material-ui/icons/Receipt';
 import Typography from '@material-ui/core/Typography';
+import Skeleton from '@material-ui/lab/Skeleton';
 import Timestamp from 'react-timestamp';
+import CallMadeIcon from '@material-ui/icons/CallMade';
+import CallReceivedIcon from '@material-ui/icons/CallReceived';
 const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
@@ -27,14 +31,15 @@ export default function Transactions(props) {
   return (
     <>
       {props.transactions === false ? (
-        <div style={styles.empty}>
-          <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
-            Loading transactions...
-          </Typography>
+        <div style={{padding: '20px 0'}}>
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} variant="text" height={40} />
+          ))}
         </div>
       ) : props.transactions.length === 0 ? (
         <div style={styles.empty}>
-          <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
+          <ReceiptIcon style={{fontSize: 48, color: '#ccc', display: 'block', margin: '20px auto 0'}} />
+          <Typography paragraph style={{paddingTop: 10, fontWeight: 'bold'}} align="center">
             No transactions available
           </Typography>
         </div>
@@ -74,6 +79,7 @@ export default function Transactions(props) {
                       <TableCell>
                         {tx.from === props.address ? (
                           <>
+                            <CallMadeIcon style={{fontSize: 14, verticalAlign: 'middle', color: 'red', marginRight: 4}} />
                             Sent{' '}
                             <strong>
                               {tx.amount} {props.data.symbol}
@@ -95,6 +101,7 @@ export default function Transactions(props) {
                           </>
                         ) : (
                           <>
+                            <CallReceivedIcon style={{fontSize: 14, verticalAlign: 'middle', color: '#00b894', marginRight: 4}} />
                             Received{' '}
                             <strong>
                               {tx.amount} {props.data.symbol}

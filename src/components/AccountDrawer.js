@@ -40,6 +40,7 @@ export default function AccountDrawer(props) {
   const theme = useTheme();
   const container = window !== undefined ? () => window().document.body : undefined;
   const currentPrincipal = useSelector(state => state.currentPrincipal)
+  const currentAccount = useSelector(state => state.currentAccount)
   const accounts = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts : []))
   const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
   const principal = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.principal : ""));
@@ -62,7 +63,7 @@ export default function AccountDrawer(props) {
         {accounts.map((account, index) => {
           return (
             <div key={index}>
-              <ListItem button onClick={() => {props.onClose(); props.changeRoute('accountDetail', index)}}>
+              <ListItem button selected={props.route === 'accountDetail' && currentAccount === index} onClick={() => {props.onClose(); props.changeRoute('accountDetail', index)}}>
                 <ListItemAvatar>
                   <Avatar>
                     <Blockie address={account.address} />
@@ -88,15 +89,15 @@ export default function AccountDrawer(props) {
       </List>
       <Divider />
       <List>
-        <ListItem button onClick={() => {props.onClose(); props.changeRoute('addressBook')}}>
+        <ListItem button selected={props.route === 'addressBook'} onClick={() => {props.onClose(); props.changeRoute('addressBook')}}>
           <ListItemIcon><PeopleIcon /></ListItemIcon>
           <ListItemText primary="Address Book" />
         </ListItem>
-        <ListItem button onClick={() => {props.onClose(); props.changeRoute('neurons')}}>
+        <ListItem button selected={props.route === 'neurons'} onClick={() => {props.onClose(); props.changeRoute('neurons')}}>
           <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
           <ListItemText primary="Neurons" />
         </ListItem>
-        <ListItem button onClick={() => {props.onClose(); props.changeRoute('applications')}}>
+        <ListItem button selected={props.route === 'applications'} onClick={() => {props.onClose(); props.changeRoute('applications')}}>
           <ListItemIcon><AppsIcon /></ListItemIcon>
           <ListItemText primary="Applications" />
         </ListItem>

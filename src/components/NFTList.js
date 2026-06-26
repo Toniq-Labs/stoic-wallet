@@ -1,5 +1,7 @@
 /* global BigInt */
 import React from 'react';
+import CollectionsIcon from '@material-ui/icons/Collections';
+import Skeleton from '@material-ui/lab/Skeleton';
 import Divider from '@material-ui/core/Divider';
 import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
@@ -228,9 +230,20 @@ export default function NFTList(props) {
       </span>
       {props.nfts === false || props.nfts.filter(a => collection === false || a.canister === collection).length === 0 ? (
         <div style={styles.empty}>
-          <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
-            {props.nfts === false ? "Loading NFTs..." : "You have no NFT's right now"}
-          </Typography>
+          {props.nfts === false ? (
+            <div style={{paddingTop: 20}}>
+              {[...Array(4)].map((_, i) => (
+                <Skeleton key={i} variant="text" height={40} />
+              ))}
+            </div>
+          ) : (
+            <>
+              <CollectionsIcon style={{fontSize: 48, color: '#ccc', display: 'block', margin: '20px auto 0'}} />
+              <Typography paragraph style={{paddingTop: 10, fontWeight: 'bold'}} align="center">
+                You have no NFT's right now
+              </Typography>
+            </>
+          )}
         </div>
       ) : (
         <>
@@ -322,6 +335,7 @@ export default function NFTList(props) {
                         <TableCell align="right">
                           <>
                             <>
+                              <Tooltip title="More actions">
                               <IconButton
                                 aria-label="More actions" id={'more-' + nft.tokenid}
                                 size="small"
@@ -332,6 +346,7 @@ export default function NFTList(props) {
                               >
                                 <MoreVertIcon />
                               </IconButton>
+                              </Tooltip>
                               <Menu
                                 anchorEl={
                                   anchorEl !== null && anchorEl.id === nft.tokenid

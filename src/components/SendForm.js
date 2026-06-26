@@ -39,6 +39,7 @@ export default function SendForm(props) {
   const [notify, setNotify] = React.useState(false);
 
   const [contacts, setContacts] = React.useState([]);
+  const submitting = React.useRef(false);
 
   //cold API
   const api = extjs.connect('https://icp0.io/');
@@ -78,6 +79,8 @@ export default function SendForm(props) {
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error('Something wrong with your wallet, try logging in again');
 
+    if (submitting.current) return;
+    submitting.current = true;
     props.loader(true);
     handleClose();
     //hot api, will sign as identity - BE CAREFUL
@@ -98,6 +101,7 @@ export default function SendForm(props) {
       })
       .finally(() => {
         props.loader(false);
+        submitting.current = false;
       });
   };
   const sendMax = () => {
