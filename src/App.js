@@ -6,6 +6,7 @@ import {makeStyles} from '@material-ui/core/styles';
 import {StoicIdentity} from './ic/identity.js';
 import extjs from './ic/extjs.js';
 import AlertDialog from './components/AlertDialog';
+import InstallPrompt from './components/InstallPrompt';
 import ConfirmDialog from './components/ConfirmDialog';
 import OfflineBanner from './components/OfflineBanner';
 const Wallet = React.lazy(() => import('./containers/Wallet'));
@@ -173,6 +174,7 @@ export default function App() {
         ''
       )}
       </Suspense>
+      <InstallPrompt />
       <Backdrop className={classes.backdrop} open={loaderOpen} role="status" aria-live="polite">
         <CircularProgress color="inherit" />
         <h2 style={{position: 'absolute', marginTop: '120px'}}>{loaderText ?? 'Loading...'}</h2>
