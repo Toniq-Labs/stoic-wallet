@@ -9,6 +9,8 @@ import Paper from '@material-ui/core/Paper';
 import Pagination from '@material-ui/lab/Pagination';
 import Typography from '@material-ui/core/Typography';
 import Timestamp from 'react-timestamp';
+import CallMadeIcon from '@material-ui/icons/CallMade';
+import CallReceivedIcon from '@material-ui/icons/CallReceived';
 const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
@@ -74,6 +76,7 @@ export default function Transactions(props) {
                       <TableCell>
                         {tx.from === props.address ? (
                           <>
+                            <CallMadeIcon style={{fontSize: 14, verticalAlign: 'middle', color: 'red', marginRight: 4}} />
                             Sent{' '}
                             <strong>
                               {tx.amount} {props.data.symbol}
@@ -95,6 +98,7 @@ export default function Transactions(props) {
                           </>
                         ) : (
                           <>
+                            <CallReceivedIcon style={{fontSize: 14, verticalAlign: 'middle', color: '#00b894', marginRight: 4}} />
                             Received{' '}
                             <strong>
                               {tx.amount} {props.data.symbol}
