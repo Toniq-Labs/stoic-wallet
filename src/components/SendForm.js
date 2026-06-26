@@ -190,6 +190,8 @@ export default function SendForm(props) {
                     label="Address of the Recipient"
                     type="text"
                     fullWidth
+                    error={!!to && !validateAddress(to) && !validatePrincipal(to)}
+                    helperText={!!to && !validateAddress(to) && !validatePrincipal(to) ? 'Not a valid address or principal' : ''}
                     InputLabelProps={{
                       shrink: true,
                     }}
