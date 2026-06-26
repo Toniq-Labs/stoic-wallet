@@ -24,7 +24,7 @@
     "dotenv": "^17.4.2",
     "ethereum-blockies-base64": "^1.0.2",
     "json-bigint": "^1.0.0",
-    "patch-package": "^6.4.7",
+    "patch-package": "^8.0.1",
     "postinstall-postinstall": "^2.1.0",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
