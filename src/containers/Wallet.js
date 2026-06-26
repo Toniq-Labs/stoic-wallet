@@ -13,6 +13,7 @@ import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
 import AccountDrawer from '../components/AccountDrawer';
+import ScrollTop from '../components/ScrollTop';
 import {BalanceVisibilityContext} from '../balanceVisibility';
 import {ThemeModeContext} from '../ThemeModeProvider';
 
@@ -161,6 +162,7 @@ function Wallet(props) {
             {renderView(route)}
           </BalanceVisibilityContext.Provider>
       </main>
+      <ScrollTop />
     </div>
   );
 }
