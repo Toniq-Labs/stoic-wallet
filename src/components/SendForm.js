@@ -212,38 +212,37 @@ export default function SendForm(props) {
                   />
                 )}
               />
-              <Button size="small" onClick={pasteAddress} color="primary" style={{marginTop: 2}}>Paste address</Button>
-
-              <TextField
-                style={{width: '49%', marginRight: '2%'}}
-                margin="dense"
-                label={'Amount of ' + props.data.symbol + ' to Send'}
-                value={amount}
-                onChange={e => setAmount(e.target.value)}
-                type="text"
-                InputLabelProps={{
-                  shrink: true,
-                }}
-              />
-              {minFee > 0 ? (
+              <div style={{textAlign: 'right'}}>
+                <Button size="small" onClick={pasteAddress} color="primary">Paste address</Button>
+              </div>
+              <div style={{display: 'flex', gap: '8px', alignItems: 'flex-start'}}>
                 <TextField
-                  style={{width: '49%'}}
+                  style={{flex: 1}}
                   margin="dense"
-                  label="Fee"
-                  value={formatNumberForDisplay(fee)}
-                  onChange={e => setFee(e.target.value)}
+                  label={'Amount of ' + props.data.symbol + ' to Send'}
+                  value={amount}
+                  onChange={e => setAmount(e.target.value)}
                   type="text"
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
+                  InputLabelProps={{shrink: true}}
                 />
-              ) : (
-                ''
-              )}
-              <Button size="small" onClick={() => setPct(25)} color="primary">25%</Button>
-              <Button size="small" onClick={() => setPct(50)} color="primary">50%</Button>
-              <Button size="small" onClick={() => setPct(75)} color="primary">75%</Button>
-              <Button size="small" variant="outlined" onClick={sendMax} color="primary">Max</Button>
+                {minFee > 0 ? (
+                  <TextField
+                    style={{flex: 1}}
+                    margin="dense"
+                    label="Fee"
+                    value={formatNumberForDisplay(fee)}
+                    onChange={e => setFee(e.target.value)}
+                    type="text"
+                    InputLabelProps={{shrink: true}}
+                  />
+                ) : null}
+              </div>
+              <div style={{marginTop: 4}}>
+                <Button size="small" onClick={() => setPct(25)} color="primary">25%</Button>
+                <Button size="small" onClick={() => setPct(50)} color="primary">50%</Button>
+                <Button size="small" onClick={() => setPct(75)} color="primary">75%</Button>
+                <Button size="small" variant="outlined" onClick={sendMax} color="primary">Max</Button>
+              </div>
               <DialogContentText
                 style={{fontSize: 'small', textAlign: 'center', marginTop: '20px'}}
               >
