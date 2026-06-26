@@ -47,3 +47,30 @@ export const amountToBigInt = (amount, decimals) => {
   }
   return BigInt(amount) * BigInt(10 ** decimals);
 };
+
+// Escape a single CSV field per RFC 4180: always quote and double embedded quotes
+// so commas, quotes and newlines inside values can't break the column layout.
+export const csvEscape = value => '"' + String(value ?? '').replace(/"/g, '""') + '"';
+
+// Serialize a matrix (array of rows, each an array of cells) into CSV text.
+export const toCsv = rows => rows.map(row => row.map(csvEscape).join(',')).join('\n');
+
+// Build CSV text for the transactions loaded into the Transactions component. The
+// shape (timestamp/from/to/amount/fee/hash) is identical for ICP and custom tokens,
+// so this serializes both. `address` is the viewed account, used to derive direction.
+export const transactionsToCsv = (transactions, address) => {
+  const head = ['Date', 'Direction', 'From', 'To', 'Amount', 'Fee', 'Hash'];
+  const rows = (Array.isArray(transactions) ? transactions : []).map(tx => {
+    const ms = tx.timestamp < 1e12 ? tx.timestamp * 1000 : tx.timestamp;
+    return [
+      new Date(ms).toISOString(),
+      tx.from === address ? 'Sent' : 'Received',
+      tx.from,
+      tx.to,
+      tx.amount,
+      tx.fee,
+      tx.hash,
+    ];
+  });
+  return toCsv([head, ...rows]);
+};
