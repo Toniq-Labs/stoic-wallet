@@ -116,6 +116,26 @@ export default function App() {
     login();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPrincipal, principals]);
+  // Auto-lock the wallet after a period of inactivity (security).
+  // Configurable via localStorage 'stoic-autolock' (minutes; 0 disables). Default 15.
+  React.useEffect(() => {
+    if (appState !== 2) return;
+    const minutes = parseInt(localStorage.getItem('stoic-autolock') || '15', 10);
+    if (!minutes || minutes <= 0) return;
+    let timer;
+    const reset = () => {
+      clearTimeout(timer);
+      timer = setTimeout(() => { logout(); }, minutes * 60 * 1000);
+    };
+    const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
+    events.forEach((e) => window.addEventListener(e, reset, {passive: true}));
+    reset();
+    return () => {
+      clearTimeout(timer);
+      events.forEach((e) => window.removeEventListener(e, reset));
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [appState]);
 
   const loader = (l, t) => {
     setLoaderText(t);
