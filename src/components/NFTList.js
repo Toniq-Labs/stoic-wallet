@@ -322,6 +322,7 @@ export default function NFTList(props) {
                         <TableCell align="right">
                           <>
                             <>
+                              <Tooltip title="More actions">
                               <IconButton
                                 aria-label="More actions" id={'more-' + nft.tokenid}
                                 size="small"
@@ -332,6 +333,7 @@ export default function NFTList(props) {
                               >
                                 <MoreVertIcon />
                               </IconButton>
+                              </Tooltip>
                               <Menu
                                 anchorEl={
                                   anchorEl !== null && anchorEl.id === nft.tokenid
