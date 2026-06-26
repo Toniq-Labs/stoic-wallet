@@ -13,12 +13,16 @@ import Skeleton from '@material-ui/lab/Skeleton';
 import Timestamp from 'react-timestamp';
 import CallMadeIcon from '@material-ui/icons/CallMade';
 import CallReceivedIcon from '@material-ui/icons/CallReceived';
+import TextField from '@material-ui/core/TextField';
+import Button from '@material-ui/core/Button';
+import GetAppIcon from '@material-ui/icons/GetApp';
 const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
 const perPage = 20;
 export default function Transactions(props) {
   const [page, setPage] = React.useState(1);
+  const [query, setQuery] = React.useState('');
   const styles = {
     empty: {
       maxWidth: 400,
@@ -27,6 +31,37 @@ export default function Transactions(props) {
     table: {
       minWidth: 650,
     },
+  };
+  const q = query.trim().toLowerCase();
+  const list = Array.isArray(props.transactions)
+    ? (q
+        ? props.transactions.filter((tx) =>
+            (tx.from || '').toLowerCase().includes(q) ||
+            (tx.to || '').toLowerCase().includes(q) ||
+            (tx.hash || '').toLowerCase().includes(q) ||
+            String(tx.amount).includes(q) ||
+            (tx.from === props.address ? 'sent' : 'received').includes(q))
+        : props.transactions)
+    : [];
+  const exportCsv = () => {
+    const head = ['Date', 'Direction', 'From', 'To', 'Amount', 'Fee', 'Hash'];
+    const rows = (Array.isArray(props.transactions) ? props.transactions : []).map((tx) => {
+      const ms = tx.timestamp < 1e12 ? tx.timestamp * 1000 : tx.timestamp;
+      return [
+        new Date(ms).toISOString(),
+        tx.from === props.address ? 'Sent' : 'Received',
+        tx.from, tx.to, tx.amount, tx.fee, tx.hash,
+      ];
+    });
+    const csv = [head, ...rows]
+      .map((r) => r.map((c) => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(','))
+      .join('\n');
+    const url = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = (props.data.symbol || 'token') + '-transactions.csv';
+    a.click();
+    URL.revokeObjectURL(url);
   };
   return (
     <>
@@ -45,13 +80,26 @@ export default function Transactions(props) {
         </div>
       ) : (
         <>
+          <div style={{display: 'flex', gap: '8px', alignItems: 'center', marginTop: '13px', marginBottom: '10px', flexWrap: 'wrap'}}>
+            <TextField
+              size="small"
+              variant="outlined"
+              placeholder="Search address, amount, sent/received…"
+              value={query}
+              onChange={(e) => { setQuery(e.target.value); setPage(1); }}
+              style={{flex: 1, minWidth: 200, maxWidth: 360}}
+            />
+            <Button size="small" variant="outlined" startIcon={<GetAppIcon />} onClick={exportCsv}>
+              Export CSV
+            </Button>
+          </div>
           <div style={{float:"right", marginTop: '13px', marginBottom: '20px'}}>
             <span style={{display:"inline-block", paddingTop: '3px'}}>Data powered by <a href="https://nftgeek.app/" target="_blank" rel="noreferrer">nftGeek</a></span>
-            {props.transactions.length > perPage ? (
+            {list.length > perPage ? (
               <Pagination
                 style={{float: 'right', marginLeft:"10px"}}
                 size="small"
-                count={Math.ceil(props.transactions.length / perPage)}
+                count={Math.ceil(list.length / perPage)}
                 page={page}
                 onChange={(e, v) => setPage(v)}
               />
@@ -69,7 +117,7 @@ export default function Transactions(props) {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {props.transactions
+                {list
                   .filter((tx, i) => i >= (page - 1) * perPage && i < page * perPage)
                   .map((tx, i) => (
                     <TableRow key={props.data.id + props.address + tx.hash + i}>
