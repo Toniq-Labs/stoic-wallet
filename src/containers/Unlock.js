@@ -115,19 +115,23 @@ function Unlock(props) {
             aria-labelledby="settings-list"
           >
             {principals.map((principal, i) => {
+              const firstAccount = principal.accounts[0];
+              const accountCount = principal.accounts.length;
               return (
-              <ListItem key={principal.identity.principal} button onClick={() => changePrincipal(i)}>
+              <ListItem key={principal.identity.principal} button selected={i === currentPrincipal} onClick={() => changePrincipal(i)}>
                 <ListItemAvatar>
                   <Avatar>
-                    <Blockie address={principal.identity.principal ?? ''} />
+                    <Blockie address={firstAccount ? firstAccount.address : (principal.identity.principal ?? '')} />
                   </Avatar>
                 </ListItemAvatar>
                 <ListItemText 
                   primaryTypographyProps={{noWrap:true}} 
+                  secondaryTypographyProps={{noWrap:true, component:'span'}}
                   primary={principal.identity.principal}
                   secondary={
                     <>
-                      <>{identityTypes[principal.identity.type]}</>
+                      {identityTypes[principal.identity.type]} · {accountCount} account{accountCount === 1 ? '' : 's'}
+                      {firstAccount ? <><br />{firstAccount.address.substr(0, 24) + '…'}</> : ''}
                     </>
                   } />
               </ListItem>) 
