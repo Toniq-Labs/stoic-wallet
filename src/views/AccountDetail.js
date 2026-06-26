@@ -20,7 +20,6 @@ import EvStationIcon from '@material-ui/icons/EvStation';
 import {useTheme} from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import Blockie from '../components/Blockie';
-import {QRCodeCanvas} from 'qrcode.react';
 import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
 import NFTCard from '../components/NFTCard';
@@ -442,12 +441,6 @@ function AccountDetail(props) {
                 ) : (
                   ''
                 )}
-                <div style={{textAlign: 'center', margin: '15px 0'}}>
-                  <QRCodeCanvas value={account.address} size={128} includeMargin />
-                  <div style={{fontSize: '0.8em', color: '#888', marginTop: 5}}>
-                    Scan to receive ICP &amp; tokens
-                  </div>
-                </div>
               </>
             }
           />
