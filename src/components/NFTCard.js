@@ -30,7 +30,7 @@ function NFTCard(props) {
     props.onClick();
   };
   return (
-    <Grid style={styles.root} item xl={2} lg={3} md={4}>
+    <Grid style={styles.root} item xs={6} sm={4} md={4} lg={3} xl={2}>
       <Card onClick={handleClick} style={props.selected ? styles.selectedCard : styles.card }>
         <CardActionArea>
           <CardContent>
