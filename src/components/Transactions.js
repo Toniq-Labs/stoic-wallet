@@ -7,6 +7,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Pagination from '@material-ui/lab/Pagination';
+import ReceiptIcon from '@material-ui/icons/Receipt';
 import Typography from '@material-ui/core/Typography';
 import Skeleton from '@material-ui/lab/Skeleton';
 import Timestamp from 'react-timestamp';
@@ -35,7 +36,8 @@ export default function Transactions(props) {
         </div>
       ) : props.transactions.length === 0 ? (
         <div style={styles.empty}>
-          <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
+          <ReceiptIcon style={{fontSize: 48, color: '#ccc', display: 'block', margin: '20px auto 0'}} />
+          <Typography paragraph style={{paddingTop: 10, fontWeight: 'bold'}} align="center">
             No transactions available
           </Typography>
         </div>
