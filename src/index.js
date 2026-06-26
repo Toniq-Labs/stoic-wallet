@@ -390,6 +390,11 @@ if (params.get('stoicTunnel') !== null) {
     }
   }
 } else {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    });
+  }
   const root = createRoot(document.querySelector('#root'));
   root.render(
     <Provider store={store}>
