@@ -295,14 +295,16 @@ class ExtConnection {
         switch (this._standard) {
           case "ledger":
             let res;
-            while(true){
+            let attempts = 0;
+            while (true) {
               try {
                 res = await api.account_balance_dfx({
                   account: address,
                 });
                 break;
-              } catch(e) {
-                console.error(e, "trying again in 1000ms");
+              } catch (e) {
+                if (++attempts >= 5) throw e;
+                console.error(e, "retrying ledger balance in 2000ms (" + attempts + "/5)");
                 await new Promise(r => setTimeout(r, 2000));
               }
             }
@@ -368,7 +370,7 @@ class ExtConnection {
                 to: toAddress,
                 amount: {e8s: amount},
                 fee: {e8s: fee},
-                memo: memo ? Number(BigInt(memo)) : 0,
+                memo: memo ? BigInt(memo) : 0,
                 created_at_time: [],
               };
               const bh = await api.send_dfx(args);
