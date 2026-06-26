@@ -6,8 +6,10 @@ import ConnectList from '../components/ConnectList';
 import WalletDialog from '../components/WalletDialog';
 import {StoicIdentity} from '../ic/identity.js';
 import {  useDispatch } from 'react-redux'
+import {useTheme} from '@material-ui/core/styles';
 
 function Connect(props) {
+  const theme = useTheme();
   const [open, setOpen] = React.useState(true);
   const [initialRoute, setInitialRoute] = React.useState('');
   const dispatch = useDispatch()
@@ -69,7 +71,7 @@ function Connect(props) {
   return (
     <>
       <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}><img style={{maxHeight:'80px',marginTop:'5px'}} alt="Stoic Wallet by Toniq Labs" src="logo.png" /></DialogTitle>
+        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}><img style={{maxHeight:'80px',marginTop:'5px', ...(theme.palette.type === 'dark' ? {filter: 'brightness(0) invert(1)'} : {})}} alt="Stoic Wallet by Toniq Labs" src="logo.png" /></DialogTitle>
         <DialogContent>
           <p style={{textAlign: 'center', marginTop: 0, color: '#777', fontSize: '0.95em'}}>
             A non-custodial wallet for the Internet Computer.<br />
