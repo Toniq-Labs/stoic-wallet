@@ -39,6 +39,7 @@ export default function SendNFTForm(props) {
       return error('Please enter a valid address to send to');
     setStep(1);
   };
+  const submitting = React.useRef(false);
   const submit = async () => {
     var _from_principal = identity.principal;
     var _from_sa = currentAccount;
@@ -49,6 +50,8 @@ export default function SendNFTForm(props) {
     var _notify = false;
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error('Something wrong with your wallet, try logging in again');
+    if (submitting.current) return;
+    submitting.current = true;
     props.loader(true);
     handleClose();
     try {
@@ -66,6 +69,7 @@ export default function SendNFTForm(props) {
       error('There was an error: ' + (e.message || e));
     }
     props.loader(false);
+    submitting.current = false;
   };
 
   const handleClose = () => {
