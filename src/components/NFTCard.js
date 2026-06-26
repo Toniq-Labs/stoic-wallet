@@ -1,4 +1,5 @@
 import React from 'react';
+import Skeleton from '@material-ui/lab/Skeleton';
 import Card from '@material-ui/core/Card';
 import CardActionArea from '@material-ui/core/CardActionArea';
 import CardContent from '@material-ui/core/CardContent';
@@ -37,7 +38,7 @@ function NFTCard(props) {
               {props.title}
             </Typography>
             <Typography variant="h6" >
-            {props.count >= 0 ? props.count  : ''} {props.count >= 0 ? typeof props.count != "string" ? <> NFT{props.count === 1 ? "" : "s"}</> : "" : 'Loading...'}
+            {props.count >= 0 ? props.count  : ''} {props.count >= 0 ? typeof props.count != "string" ? <> NFT{props.count === 1 ? "" : "s"}</> : "" : <Skeleton variant="text" width={70} style={{display:'inline-block'}} />}
             </Typography>
             {/*<Typography style={styles.pos} color={props.selected ? "inherit" : "textSecondary"}>
               ~$123.04USD
