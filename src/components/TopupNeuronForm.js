@@ -43,7 +43,9 @@ export default function NeuronDelayForm(props) {
         })
         .catch(() => {});
     }
-    return () => { cancelled = true; };
+    return () => {
+      cancelled = true;
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subaccount, props.open]);
 

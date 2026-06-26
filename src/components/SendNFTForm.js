@@ -60,16 +60,16 @@ export default function SendNFTForm(props) {
     handleClose();
     try {
       let r = await extjs
-      .connect('https://icp0.io/', id)
-      .token(props.nft.tokenid, props.nft.standard.toLowerCase())
-      .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify);
+        .connect('https://icp0.io/', id)
+        .token(props.nft.tokenid, props.nft.standard.toLowerCase())
+        .transfer(_from_principal, _from_sa, _to_user, _amount, _fee, _memo, _notify);
       if (r !== false) {
         props.loadNfts();
         props.alert('Transaction complete', 'Your transfer was sent successfully');
       } else {
         error('Something went wrong with this transfer');
       }
-    } catch (e){
+    } catch (e) {
       error('There was an error: ' + (e.message || e));
     }
     props.loader(false);
@@ -83,7 +83,7 @@ export default function SendNFTForm(props) {
     props.close();
   };
   React.useEffect(() => {
-    if (props.nft ) setCanister(extjs.decodeTokenId(props.nft.tokenid).canister);
+    if (props.nft) setCanister(extjs.decodeTokenId(props.nft.tokenid).canister);
     else setCanister('');
     var contacts = [];
     addresses.forEach(el => {
@@ -108,56 +108,65 @@ export default function SendNFTForm(props) {
 
   return (
     <>
-      <Dialog open={props.open} onClose={handleClose} maxWidth={'sm'} fullWidth fullScreen={fullScreen}>
+      <Dialog
+        open={props.open}
+        onClose={handleClose}
+        maxWidth={'sm'}
+        fullWidth
+        fullScreen={fullScreen}
+      >
         <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
           Send NFT
         </DialogTitle>
         {step === 0 ? (
-            <DialogContent>
-              {canister === 'bxdf4-baaaa-aaaah-qaruq-cai' ? (
-                <Alert severity="error">
-                  It looks like you are sending a <strong>Wrapped ICPunk</strong> - please note that
-                  some wallets (like Plug wallet) do not support Wrapped ICPunks. Please unwrap it
-                  first if this is the case.
-                </Alert>
-              ) : (
-                ''
-              )}
-              <DialogContentText style={{textAlign: 'center', fontWeight: 'bold', marginTop: 10}}>
-                Please enter the recipient address and amount that you wish to send below.
-              </DialogContentText>
-              <Autocomplete
-                freeSolo
-                value={toOption}
-                onChange={(e, v) => {
-                  if (v) {
-                    setTo(v.address);
-                    setToOption(v.address);
+          <DialogContent>
+            {canister === 'bxdf4-baaaa-aaaah-qaruq-cai' ? (
+              <Alert severity="error">
+                It looks like you are sending a <strong>Wrapped ICPunk</strong> - please note that
+                some wallets (like Plug wallet) do not support Wrapped ICPunks. Please unwrap it
+                first if this is the case.
+              </Alert>
+            ) : (
+              ''
+            )}
+            <DialogContentText style={{textAlign: 'center', fontWeight: 'bold', marginTop: 10}}>
+              Please enter the recipient address and amount that you wish to send below.
+            </DialogContentText>
+            <Autocomplete
+              freeSolo
+              value={toOption}
+              onChange={(e, v) => {
+                if (v) {
+                  setTo(v.address);
+                  setToOption(v.address);
+                }
+              }}
+              inputValue={to}
+              onInputChange={(e, v) => setTo(v)}
+              getOptionLabel={contact => contact.name || contact}
+              groupBy={contact => contact.group}
+              options={contacts}
+              renderInput={params => (
+                <TextField
+                  {...params}
+                  autoFocus
+                  margin="dense"
+                  label="Address of the Recipient"
+                  type="text"
+                  fullWidth
+                  error={!!to && !validateAddress(to) && !validatePrincipal(to)}
+                  helperText={
+                    !!to && !validateAddress(to) && !validatePrincipal(to)
+                      ? 'Not a valid address or principal'
+                      : ''
                   }
-                }}
-                inputValue={to}
-                onInputChange={(e, v) => setTo(v)}
-                getOptionLabel={contact => contact.name || contact}
-                groupBy={contact => contact.group}
-                options={contacts}
-                renderInput={params => (
-                  <TextField
-                    {...params}
-                    autoFocus
-                    margin="dense"
-                    label="Address of the Recipient"
-                    type="text"
-                    fullWidth
-                    error={!!to && !validateAddress(to) && !validatePrincipal(to)}
-                    helperText={!!to && !validateAddress(to) && !validatePrincipal(to) ? 'Not a valid address or principal' : ''}
-                    InputLabelProps={{
-                      shrink: true,
-                    }}
-                  />
-                )}
-              />
-            </DialogContent>
-          
+                  InputLabelProps={{
+                    shrink: true,
+                  }}
+                />
+              )}
+            />
+          </DialogContent>
         ) : (
           <DialogContent>
             <DialogContentText style={{textAlign: 'center'}}>

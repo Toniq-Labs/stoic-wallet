@@ -16,14 +16,13 @@ export default function SnackbarButton(props) {
     if (reason === 'clickaway') {
       return;
     }
-
   };
 
-  return (  
+  return (
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
       <Snackbar
-        style={{position:"fixed"}}
+        style={{position: 'fixed'}}
         open={open}
         autoHideDuration={6000}
         anchorOrigin={props.anchorOrigin}
@@ -35,8 +34,8 @@ export default function SnackbarButton(props) {
               <CloseIcon fontSize="small" />
             </IconButton>
           </React.Fragment>
-        } 
-      /> 
+        }
+      />
     </>
   );
 }

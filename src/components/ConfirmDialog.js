@@ -7,7 +7,7 @@ import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
 
 export default function ConfirmDialog(props) {
-  const handleClick = (t) => {
+  const handleClick = t => {
     if (typeof props.handler != 'undefined') props.handler(t);
   };
   return (
@@ -21,12 +21,12 @@ export default function ConfirmDialog(props) {
         <DialogContentText id="alert-dialog-description">{props.message}</DialogContentText>
       </DialogContent>
       <DialogActions>
-      <Button onClick={() => handleClick(false)} color="primary">
-        {props.buttonCancel ?? "Cancel" }
-      </Button>
-      <Button onClick={() => handleClick(true)} color="primary">
-        {props.buttonConfirm ?? "Confirm" }
-      </Button>
+        <Button onClick={() => handleClick(false)} color="primary">
+          {props.buttonCancel ?? 'Cancel'}
+        </Button>
+        <Button onClick={() => handleClick(true)} color="primary">
+          {props.buttonConfirm ?? 'Confirm'}
+        </Button>
       </DialogActions>
     </Dialog>
   );

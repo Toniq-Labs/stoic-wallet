@@ -40,31 +40,31 @@ import {validatePrincipal, mnemonicToId} from '../ic/utils.js';
 import {clipboardCopy} from '../utils';
 import {makeStyles} from '@material-ui/core/styles';
 const knownTokens = {
-  "fjbi2-fyaaa-aaaan-qanjq-cai" : "ext",
-  "mxzaz-hqaaa-aaaar-qaada-cai" : "icrc",
-  "zfcdd-tqaaa-aaaaq-aaaga-cai" : "icrc",
-  "2ouva-viaaa-aaaaq-aaamq-cai" : "icrc",
-  "7ajy4-sqaaa-aaaaq-aaaqa-cai" : "icrc",
-  "73mez-iiaaa-aaaaq-aaasq-cai" : "icrc",
-  "6rdgd-kyaaa-aaaaq-aaavq-cai" : "icrc",
-  "4q2s2-oqaaa-aaaaq-aaaya-cai" : "icrc",
-  "4c4fd-caaaa-aaaaq-aaa3a-cai" : "icrc",
-  "5bqmf-wyaaa-aaaaq-aaa5q-cai" : "icrc",
-  "wedc6-xiaaa-aaaaq-aabaq-cai" : "icrc",
-  "wrett-waaaa-aaaaq-aabda-cai" : "icrc",
-  "xsi2v-cyaaa-aaaaq-aabfq-cai" : "icrc",
-  "viusj-4iaaa-aaaaq-aabkq-cai" : "icrc",
-  "uf2wh-taaaa-aaaaq-aabna-cai" : "icrc",
-  "rffwt-piaaa-aaaaq-aabqq-cai" : "icrc",
-  "rxdbk-dyaaa-aaaaq-aabtq-cai" : "icrc",
-  "qbizb-wiaaa-aaaaq-aabwq-cai" : "icrc",
-  "sotaq-jqaaa-aaaaq-aab2a-cai" : "icrc",
-  "tn7jw-5iaaa-aaaaq-aab4q-cai" : "icrc",
-  "tyyy3-4aaaa-aaaaq-aab7a-cai" : "icrc",
-  "emww2-4yaaa-aaaaq-aacbq-cai" : "icrc",
-  "f54if-eqaaa-aaaaq-aacea-cai" : "icrc",
-  "hvgxa-wqaaa-aaaaq-aacia-cai" : "icrc",
-}
+  'fjbi2-fyaaa-aaaan-qanjq-cai': 'ext',
+  'mxzaz-hqaaa-aaaar-qaada-cai': 'icrc',
+  'zfcdd-tqaaa-aaaaq-aaaga-cai': 'icrc',
+  '2ouva-viaaa-aaaaq-aaamq-cai': 'icrc',
+  '7ajy4-sqaaa-aaaaq-aaaqa-cai': 'icrc',
+  '73mez-iiaaa-aaaaq-aaasq-cai': 'icrc',
+  '6rdgd-kyaaa-aaaaq-aaavq-cai': 'icrc',
+  '4q2s2-oqaaa-aaaaq-aaaya-cai': 'icrc',
+  '4c4fd-caaaa-aaaaq-aaa3a-cai': 'icrc',
+  '5bqmf-wyaaa-aaaaq-aaa5q-cai': 'icrc',
+  'wedc6-xiaaa-aaaaq-aabaq-cai': 'icrc',
+  'wrett-waaaa-aaaaq-aabda-cai': 'icrc',
+  'xsi2v-cyaaa-aaaaq-aabfq-cai': 'icrc',
+  'viusj-4iaaa-aaaaq-aabkq-cai': 'icrc',
+  'uf2wh-taaaa-aaaaq-aabna-cai': 'icrc',
+  'rffwt-piaaa-aaaaq-aabqq-cai': 'icrc',
+  'rxdbk-dyaaa-aaaaq-aabtq-cai': 'icrc',
+  'qbizb-wiaaa-aaaaq-aabwq-cai': 'icrc',
+  'sotaq-jqaaa-aaaaq-aab2a-cai': 'icrc',
+  'tn7jw-5iaaa-aaaaq-aab4q-cai': 'icrc',
+  'tyyy3-4aaaa-aaaaq-aab7a-cai': 'icrc',
+  'emww2-4yaaa-aaaaq-aacbq-cai': 'icrc',
+  'f54if-eqaaa-aaaaq-aacea-cai': 'icrc',
+  'hvgxa-wqaaa-aaaaq-aacia-cai': 'icrc',
+};
 function useInterval(callback, delay) {
   const savedCallback = React.useRef();
   // Remember the latest callback.
@@ -105,8 +105,14 @@ function AccountDetail(props) {
   );
   const account = useSelector(state =>
     state.principals.length ? state.principals[currentPrincipal].accounts[currentAccount] : {},
-    );
-  const currentToken = useSelector(state => (state.currentToken < 0 ? 0 : state.currentToken >= account.tokens.length ? 0 : state.currentToken));
+  );
+  const currentToken = useSelector(state =>
+    state.currentToken < 0
+      ? 0
+      : state.currentToken >= account.tokens.length
+        ? 0
+        : state.currentToken,
+  );
   const [tokens, setTokens] = React.useState(account.tokens);
   const [nfts, setNfts] = React.useState(false);
   const [transactions, setTransactions] = React.useState(false);
@@ -247,7 +253,7 @@ function AccountDetail(props) {
     await refresh(true);
     props.loader(false);
   };
-  const refresh = async (hardRefresh) => {
+  const refresh = async hardRefresh => {
     let ps = [];
     if (hardRefresh) {
       setNfts(false);
@@ -260,7 +266,7 @@ function AccountDetail(props) {
         setTransactions(false);
       }
       ps.push(loadTransactions());
-    };
+    }
     await Promise.all(ps);
   };
   const loadNfts = async () => {
@@ -270,7 +276,7 @@ function AccountDetail(props) {
       setCollections(nfts[1]);
     });
   };
-  
+
   const loadTransactions = async () => {
     await updateTransactions(account.address, principal).then(txs => {
       if (txs[1] !== account.address || txs[2] !== principal) return;
@@ -280,24 +286,50 @@ function AccountDetail(props) {
   const loadBalances = async () => {
     await updateBalances(account.address, principal).then(balances => {
       if (balances[1] !== account.address || balances[2] !== principal) return;
-      const newTokens = balances[0].filter(item1 => !tokens.some(item2 => item1.canisterId === item2.id));
+      const newTokens = balances[0].filter(
+        item1 => !tokens.some(item2 => item1.canisterId === item2.id),
+      );
       newTokens.forEach(token => {
         if (knownTokens.hasOwnProperty(token.canisterId)) {
           //addToken(token.canisterId, knownTokens[token.canisterId], true);
-        };
-      })
+        }
+      });
     });
   };
   const updateNfts = async (_address, _principal) => {
-    let res = await (await fetch('https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/'+_principal+'/'+_address+'/nfts')).json();
+    let res = await (
+      await fetch(
+        'https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/' +
+          _principal +
+          '/' +
+          _address +
+          '/nfts',
+      )
+    ).json();
     return [res.nfts, res.collections, _address, _principal];
   };
   const updateTransactions = async (_address, _principal) => {
-    let txs = await (await fetch('https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/'+_principal+'/'+_address+'/transactions')).json();
+    let txs = await (
+      await fetch(
+        'https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/' +
+          _principal +
+          '/' +
+          _address +
+          '/transactions',
+      )
+    ).json();
     return [txs, _address, _principal];
   };
   const updateBalances = async (_address, _principal) => {
-    let balances = await (await fetch('https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/'+_principal+'/'+_address+'/tokens')).json();
+    let balances = await (
+      await fetch(
+        'https://us-central1-entrepot-api.cloudfunctions.net/api/nftgeek/user/' +
+          _principal +
+          '/' +
+          _address +
+          '/tokens',
+      )
+    ).json();
     return [balances, _address, _principal];
   };
 
@@ -305,18 +337,18 @@ function AccountDetail(props) {
     if (!transactions) return false;
     if (transactions.hasOwnProperty(account.tokens[currentToken].id)) {
       return transactions[account.tokens[currentToken].id];
-    } else {  
+    } else {
       return [];
     }
-  }
+  };
   const addToken = async (cid, standard, ignoreChange) => {
     //ext,icrc,dip20,drc20,ledger
-    if (cid === "ryjl3-tyaaa-aaaaa-aaaba-cai") throw new Error("Can't add ledger canister");
+    if (cid === 'ryjl3-tyaaa-aaaaa-aaaba-cai') throw new Error("Can't add ledger canister");
     if (tokens.some(token => token.id === cid)) throw new Error('Token already added');
     if (!validatePrincipal(cid)) throw new Error('Please enter a valid canister ID');
     if (!standard) throw new Error('Please enter a valid token standard');
     //Load metadata
-    try{
+    try {
       let metadata = await api.token(cid, standard).getMetadata();
       dispatch({
         type: 'account/token/add',
@@ -326,7 +358,7 @@ function AccountDetail(props) {
       });
       if (!ignoreChange) dispatch({type: 'currentToken', payload: {index: account.tokens.length}});
       return true;
-    } catch(e){
+    } catch (e) {
       console.error(e);
       throw new Error('There was a problem adding that token');
     }
@@ -368,7 +400,8 @@ function AccountDetail(props) {
                     <IconButton
                       aria-label="View in explorer"
                       href={'https://icscan.io/account/' + account.address}
-                      target="_blank" rel="noopener noreferrer"
+                      target="_blank"
+                      rel="noopener noreferrer"
                       edge="end"
                     >
                       <LaunchIcon />
@@ -401,7 +434,9 @@ function AccountDetail(props) {
                       size="small"
                       label="Address"
                     />{' '}
-                    <Tooltip title={account.address}><span>{account.address.slice(0, 29) + '...'}</span></Tooltip>
+                    <Tooltip title={account.address}>
+                      <span>{account.address.slice(0, 29) + '...'}</span>
+                    </Tooltip>
                   </span>
                   <SnackbarButton
                     message="Address Copied"
@@ -432,7 +467,9 @@ function AccountDetail(props) {
                         size="small"
                         label="Principal ID"
                       />{' '}
-                      <Tooltip title={principal}><span>{principal.slice(0, 32) + '...'}</span></Tooltip>
+                      <Tooltip title={principal}>
+                        <span>{principal.slice(0, 32) + '...'}</span>
+                      </Tooltip>
                     </span>
                     <SnackbarButton
                       message="Principal ID Copied"
@@ -477,7 +514,7 @@ function AccountDetail(props) {
           })}
           <NFTCard
             title={'NFTs'}
-            count={(nfts === false ? "Loading..." : nfts.length)}
+            count={nfts === false ? 'Loading...' : nfts.length}
             address={account.address}
             onClick={() => changeToken('nft')}
             selected={currentToken === 'nft'}
@@ -503,9 +540,7 @@ function AccountDetail(props) {
           </Grid>
         </Grid>
       </div>
-      {currentToken !== 0 &&
-      currentToken !== 'nft' &&
-      currentToken !== 'other' ? (
+      {currentToken !== 0 && currentToken !== 'nft' && currentToken !== 'other' ? (
         <div style={{marginLeft: '15px', color: 'rgba(0, 0, 0, 0.54)'}}>
           <strong>Token ID:</strong> {account.tokens[currentToken].id}
           <SnackbarButton
@@ -535,9 +570,9 @@ function AccountDetail(props) {
       )}
       {currentToken === 'nft' ? (
         <NFTList
-          loadNfts={loadNfts} 
-          nfts={nfts} 
-          collections={collections} 
+          loadNfts={loadNfts}
+          nfts={nfts}
+          collections={collections}
           alert={alert}
           error={error}
           confirm={props.confirm}
@@ -547,7 +582,12 @@ function AccountDetail(props) {
         ''
       )}
       {currentToken !== 'nft' && currentToken !== 'other' ? (
-        <Transactions transactions={getTransactions()} data={account.tokens[currentToken]} principal={principal} address={account.address} />
+        <Transactions
+          transactions={getTransactions()}
+          data={account.tokens[currentToken]}
+          principal={principal}
+          address={account.address}
+        />
       ) : (
         ''
       )}

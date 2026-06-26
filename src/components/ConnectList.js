@@ -9,55 +9,70 @@ import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import UsbIcon from '@material-ui/icons/Usb';
 import ExitToAppIcon from '@material-ui/icons/ExitToApp';
 export default function ConnectList(props) {
-  const handleClick = (t) => {
+  const handleClick = t => {
     props.handler(t);
   };
   return (
     <List component="nav" aria-label="secondary add principal">
-      <ListItem button onClick={() => handleClick('create') }>
+      <ListItem button onClick={() => handleClick('create')}>
         <ListItemIcon>
           <AddIcon />
         </ListItemIcon>
-        <ListItemText 
-          primary={props.add ? "Add a new Wallet" : "Create a new Wallet" }
-          secondary={props.add ? "I want to add a new wallet by generating a random seed phrase" : "I want to create a new wallet by generating a random seed phrase" }
+        <ListItemText
+          primary={props.add ? 'Add a new Wallet' : 'Create a new Wallet'}
+          secondary={
+            props.add
+              ? 'I want to add a new wallet by generating a random seed phrase'
+              : 'I want to create a new wallet by generating a random seed phrase'
+          }
         />
-        
       </ListItem>
-      <ListItem button onClick={() => handleClick('import') }>
+      <ListItem button onClick={() => handleClick('import')}>
         <ListItemIcon>
           <GetAppIcon />
         </ListItemIcon>
-        <ListItemText 
-          primary={props.add ? "Add an existing Wallet" : "Import an existing Wallet" }
-          secondary={props.add ? "I want to recover and add an existing wallet using a seed phrase, or as a read-only wallet" : "I want to recover an existing wallet using a seed phrase"}
+        <ListItemText
+          primary={props.add ? 'Add an existing Wallet' : 'Import an existing Wallet'}
+          secondary={
+            props.add
+              ? 'I want to recover and add an existing wallet using a seed phrase, or as a read-only wallet'
+              : 'I want to recover an existing wallet using a seed phrase'
+          }
         />
       </ListItem>
-      <ListItem button onClick={() => handleClick('link') }>
+      <ListItem button onClick={() => handleClick('link')}>
         <ListItemIcon>
           <AllInclusiveIcon />
         </ListItemIcon>
-        <ListItemText 
-          primary={props.add ? "Link your Internet Identity" : "Link your Internet Identity" }
-          secondary={props.add ? "I want to link another Wallet using an Internet Identity" : "I want to link a Wallet using an Internet Identity" }
+        <ListItemText
+          primary={props.add ? 'Link your Internet Identity' : 'Link your Internet Identity'}
+          secondary={
+            props.add
+              ? 'I want to link another Wallet using an Internet Identity'
+              : 'I want to link a Wallet using an Internet Identity'
+          }
         />
       </ListItem>
-      <ListItem button onClick={() => handleClick('3party') }>
+      <ListItem button onClick={() => handleClick('3party')}>
         <ListItemIcon>
           <ExitToAppIcon />
         </ListItemIcon>
-        <ListItemText 
-          primary={"Login using a trusted 3rd party via tor.us"}
-          secondary={"I want to login using a Google, Github, Facebook or Twitter account"}
+        <ListItemText
+          primary={'Login using a trusted 3rd party via tor.us'}
+          secondary={'I want to login using a Google, Github, Facebook or Twitter account'}
         />
       </ListItem>
-      <ListItem button onClick={() => handleClick('connect') }>
+      <ListItem button onClick={() => handleClick('connect')}>
         <ListItemIcon>
           <UsbIcon />
         </ListItemIcon>
-        <ListItemText 
-          primary={props.add ? "Connect Hardware Wallet" : "Connect Hardware Wallet" }
-          secondary={props.add ? "I want to import another Wallet from my Ledger or Trezor device" : "I want to import a wallet from my Ledger or Trezor device" }
+        <ListItemText
+          primary={props.add ? 'Connect Hardware Wallet' : 'Connect Hardware Wallet'}
+          secondary={
+            props.add
+              ? 'I want to import another Wallet from my Ledger or Trezor device'
+              : 'I want to import a wallet from my Ledger or Trezor device'
+          }
         />
       </ListItem>
     </List>

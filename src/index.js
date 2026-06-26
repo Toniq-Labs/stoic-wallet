@@ -4,16 +4,16 @@ import {createRoot} from 'react-dom/client';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
-import { Provider } from 'react-redux'
-import store from './store'
+import {Provider} from 'react-redux';
+import store from './store';
 import {StoicIdentity} from './ic/identity.js';
 import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
 import ThemeModeProvider from './ThemeModeProvider';
 import '@fontsource/roboto';
 function injectPopupStyles() {
-  if (!document.getElementById("popup-styles")) {
-    const style = document.createElement("style");
-    style.id = "popup-styles";
+  if (!document.getElementById('popup-styles')) {
+    const style = document.createElement('style');
+    style.id = 'popup-styles';
     style.textContent = `
       .popup-overlay, .loading-overlay {
         position: fixed;
@@ -94,11 +94,11 @@ function injectPopupStyles() {
 function showLoadingMessage() {
   removeLoadingMessage(); // Ensure any existing message is removed first
 
-  const loadingOverlay = document.createElement("div");
-  loadingOverlay.classList.add("loading-overlay");
+  const loadingOverlay = document.createElement('div');
+  loadingOverlay.classList.add('loading-overlay');
 
-  const loadingMessage = document.createElement("div");
-  loadingMessage.classList.add("loading-message");
+  const loadingMessage = document.createElement('div');
+  loadingMessage.classList.add('loading-message');
   loadingMessage.textContent = "Loading...please don't close this window.";
 
   loadingOverlay.appendChild(loadingMessage);
@@ -106,48 +106,48 @@ function showLoadingMessage() {
 }
 
 function removeLoadingMessage() {
-  const existingOverlay = document.querySelector(".loading-overlay");
+  const existingOverlay = document.querySelector('.loading-overlay');
   if (existingOverlay) {
     document.body.removeChild(existingOverlay);
   }
 }
 
-function jspopup(message, approveText = "Authorize", rejectText = "Reject") {
-  return new Promise((resolve) => {
+function jspopup(message, approveText = 'Authorize', rejectText = 'Reject') {
+  return new Promise(resolve => {
     injectPopupStyles();
     removeLoadingMessage(); // Remove loading message if it's showing
 
-    const overlay = document.createElement("div");
-    overlay.classList.add("popup-overlay");
+    const overlay = document.createElement('div');
+    overlay.classList.add('popup-overlay');
 
-    const popup = document.createElement("div");
-    popup.classList.add("popup-content");
+    const popup = document.createElement('div');
+    popup.classList.add('popup-content');
 
-    const title = document.createElement("div");
-    title.classList.add("popup-title");
-    title.textContent = "Authorize Application";
+    const title = document.createElement('div');
+    title.classList.add('popup-title');
+    title.textContent = 'Authorize Application';
     popup.appendChild(title);
 
-    const msg = document.createElement("div");
-    msg.classList.add("popup-message");
+    const msg = document.createElement('div');
+    msg.classList.add('popup-message');
     msg.textContent = message;
     popup.appendChild(msg);
 
-    const buttons = document.createElement("div");
-    buttons.classList.add("popup-buttons");
-    const approveButton = document.createElement("button");
-    approveButton.classList.add("popup-approve");
+    const buttons = document.createElement('div');
+    buttons.classList.add('popup-buttons');
+    const approveButton = document.createElement('button');
+    approveButton.classList.add('popup-approve');
     approveButton.textContent = approveText;
-    approveButton.addEventListener("click", () => {
+    approveButton.addEventListener('click', () => {
       showLoadingMessage(); // Show the loading message when approve is clicked
       resolve(true);
       closePopup();
     });
 
-    const rejectButton = document.createElement("button");
-    rejectButton.classList.add("popup-reject");
+    const rejectButton = document.createElement('button');
+    rejectButton.classList.add('popup-reject');
     rejectButton.textContent = rejectText;
-    rejectButton.addEventListener("click", () => {
+    rejectButton.addEventListener('click', () => {
       resolve(false);
       closePopup();
     });
@@ -165,31 +165,29 @@ function jspopup(message, approveText = "Authorize", rejectText = "Reject") {
   });
 }
 const params = new URLSearchParams(window.location.search);
-const hex2buf = (hex) => {
-  const view = new Uint8Array(hex.length / 2)
+const hex2buf = hex => {
+  const view = new Uint8Array(hex.length / 2);
   for (let i = 0; i < hex.length; i += 2) {
-    view[i / 2] = parseInt(hex.substring(i, i + 2), 16)
+    view[i / 2] = parseInt(hex.substring(i, i + 2), 16);
   }
   return view;
 };
 function buf2hex(buffer) {
-  return [...new Uint8Array(buffer)]
-    .map(x => x.toString(16).padStart(2, '0'))
-    .join('');
+  return [...new Uint8Array(buffer)].map(x => x.toString(16).padStart(2, '0')).join('');
 }
 const sendMessageToExtension = (e, success, data) => {
   // #69: never respond to opaque/empty origins, and never broadcast to '*'
   if (!e.origin || e.origin === 'null') return;
   let response = {
-    action : e.data.action,
-    listener : e.data.listener,
-    target : "STOIC-EXT",
-    success : success,
+    action: e.data.action,
+    listener: e.data.listener,
+    target: 'STOIC-EXT',
+    success: success,
     message: e.data,
-    data : data,
+    data: data,
     complete: true,
   };
-  if (e.data.target === "STOIC-POPUP") {
+  if (e.data.target === 'STOIC-POPUP') {
     if (e.data.endpoint === 'call') {
       response.complete = false;
     }
@@ -197,70 +195,70 @@ const sendMessageToExtension = (e, success, data) => {
   } else {
     window.parent.postMessage(response, e.origin);
   }
-}
+};
 const verify = async (data, apikey, sig) => {
   var enc = new TextEncoder();
   var encdata = enc.encode(data);
   var pubk = await window.crypto.subtle.importKey(
-    "spki",
+    'spki',
     hex2buf(apikey),
     {
-      name: "ECDSA",
-      namedCurve: "P-384"
+      name: 'ECDSA',
+      namedCurve: 'P-384',
     },
     true,
-    ["verify"]
+    ['verify'],
   );
   return await window.crypto.subtle.verify(
     {
-      name: "ECDSA",
-      hash: {name: "SHA-384"},
+      name: 'ECDSA',
+      hash: {name: 'SHA-384'},
     },
     pubk,
     hex2buf(sig),
-    encdata
+    encdata,
   );
 };
 const loadDbFast = () => {
   var db = localStorage.getItem('_db');
-  if (db){
+  if (db) {
     var appData = {
-      principals : [],
-      addresses : [],
-      currentPrincipal : 0,
-      currentAccount : 0,
-      currentToken : 0,
+      principals: [],
+      addresses: [],
+      currentPrincipal: 0,
+      currentAccount: 0,
+      currentToken: 0,
     };
     db = JSON.parse(db);
     //db versioning
     if (!Array.isArray(db)) {
-      db = [[db],[],[0,0,0]];
+      db = [[db], [], [0, 0, 0]];
     }
     if (db.length === 2) {
-      db[2] = [0,0,0];
+      db[2] = [0, 0, 0];
     }
     db[0].map(principal => {
       var _principal = {
-        accounts : [],
-        neurons : [],
-        apps : [],
-        identity : principal.identity
+        accounts: [],
+        neurons: [],
+        apps: [],
+        identity: principal.identity,
       };
       principal.accounts.map((account, subaccount) => {
         if (account.length === 2) account[2] = [];
         _principal.accounts.push({
-          name : account[0],
-          address : principalToAccountIdentifier(principal.identity.principal, subaccount),
-          tokens : [
+          name: account[0],
+          address: principalToAccountIdentifier(principal.identity.principal, subaccount),
+          tokens: [
             {
-              id : LEDGER_CANISTER_ID,
-              name : "Internet Computer",
-              symbol : "ICP",
-              decimals : 8,
-            }, 
-            ...account[1]
+              id: LEDGER_CANISTER_ID,
+              name: 'Internet Computer',
+              symbol: 'ICP',
+              decimals: 8,
+            },
+            ...account[1],
           ],
-        });    
+        });
         return true;
       });
       if (!principal.hasOwnProperty('apps')) principal.apps = [];
@@ -277,116 +275,152 @@ const loadDbFast = () => {
     appData.currentToken = db[2][2];
     return appData;
   } else return false;
-}
+};
 if (params.get('stoicTunnel') !== null) {
-  window.addEventListener("message", async function(e){
-    if (e && e.data && (e.data.target === 'STOIC-IFRAME' || e.data.target === 'STOIC-POPUP')) {
-      // #69: ignore messages from opaque/empty origins (sandboxed/data: frames)
-      if (!e.origin || e.origin === 'null') return;
-      const state = loadDbFast();
-      if (!state) {
-        sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
-      } else {
-        // #12: resolve the requested principal across ALL of the user's
-        // principals, not just the active one, so authorizing/using an app no
-        // longer requires manually switching to the right account first. The
-        // signature verification below is unchanged, so this doesn't weaken auth.
-        const principal =
-          state.principals.find(p => p.identity.principal === e.data.principal) ||
-          state.principals[state.currentPrincipal];
-        if (principal.identity.principal === e.data.principal) {
-          if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
-            let app = principal.apps.filter(a => a.apikey === e.data.apikey)[0];
-            StoicIdentity.load(principal.identity).then(async () => {
-              var id = StoicIdentity.getIdentity(e.data.principal);
-              if (id) {
-                var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
-                if (verified) {
-                  switch (e.data.action) {
-                    case 'sign':
-                      let requiresConfirmation = false;
-                      if (e.data.target === "STOIC-POPUP" && e.data.endpoint === 'call') {
-                        requiresConfirmation = true;
-                      }
-                      if (requiresConfirmation) {
-                        jspopup("Are you sure you want to sign this message from "+app.host+"?", "Sign", "Reject")
-                          .then(async (result) => {
-                            if (result) {
-                              var response = {
-                                signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
-                              };
-                              if (id.hasOwnProperty('_delegation') ) {
-                                response.chain = id.getDelegation().toJSON();
-                              }
-                              sendMessageToExtension(e, true, JSON.stringify(response));
-                            } else {
-                              sendMessageToExtension(e, false, "User rejected");
-                            }
-                          });
-                      } else {
-                        var response = {
-                          signed : buf2hex(await id.sign(hex2buf(e.data.payload)))
-                        };
-                        if (id.hasOwnProperty('_delegation') ) {
-                          response.chain = id.getDelegation().toJSON();
-                        }
-                        sendMessageToExtension(e, true, JSON.stringify(response));
-                      }
-                    break;
-                    case 'accounts':
-                      var accs = [];
-                      for(var i = 0; i < principal.accounts.length; i++){
-                        accs.push({
-                          name : principal.accounts[i].name,
-                          address : principal.accounts[i].address,
-                        });
-                      }
-                      if (e.data.target === "STOIC-POPUP") {
-                        jspopup("Are you sure you want to share your account details with "+app.host+"?", "Continue", "Reject")
-                          .then((result) => {
-                            if (result) {
-                              sendMessageToExtension(e, true, JSON.stringify(accs));
-                            } else {
-                              sendMessageToExtension(e, false, "User rejected");
-                            }
-                          });
-                      } else {
-                        sendMessageToExtension(e, true, JSON.stringify(accs));
-                      }
-                    break;
-                    default:
-                      sendMessageToExtension(e, false, "Error - nothing to do");
-                    break;
-                  }
-                } else {            
-                  sendMessageToExtension(e, false, "Invalid signature for payload");
-                }
-              } else {        
-                sendMessageToExtension(e, false, "The principal is not unlocked, please go to StoicWallet and unlock your wallet");
-              }
-            }).catch(err => {            
-              sendMessageToExtension(e, false, err);
-            });
-          } else {
-            sendMessageToExtension(e, false, "API key is not valid for this principal, please logout and login again.");
-          }
+  window.addEventListener(
+    'message',
+    async function (e) {
+      if (e && e.data && (e.data.target === 'STOIC-IFRAME' || e.data.target === 'STOIC-POPUP')) {
+        // #69: ignore messages from opaque/empty origins (sandboxed/data: frames)
+        if (!e.origin || e.origin === 'null') return;
+        const state = loadDbFast();
+        if (!state) {
+          sendMessageToExtension(
+            e,
+            false,
+            'There was an error - please ensure you have Cookies Enabled (known issue for Brave users)',
+          );
         } else {
-          sendMessageToExtension(e, false, "Incorrect Principal is logged in, please go to StoicWallet and ensure the correct Principal is active");
+          // #12: resolve the requested principal across ALL of the user's
+          // principals, not just the active one, so authorizing/using an app no
+          // longer requires manually switching to the right account first. The
+          // signature verification below is unchanged, so this doesn't weaken auth.
+          const principal =
+            state.principals.find(p => p.identity.principal === e.data.principal) ||
+            state.principals[state.currentPrincipal];
+          if (principal.identity.principal === e.data.principal) {
+            if (principal.apps.filter(a => a.apikey === e.data.apikey).length > 0) {
+              let app = principal.apps.filter(a => a.apikey === e.data.apikey)[0];
+              StoicIdentity.load(principal.identity)
+                .then(async () => {
+                  var id = StoicIdentity.getIdentity(e.data.principal);
+                  if (id) {
+                    var verified = await verify(e.data.payload, e.data.apikey, e.data.sig);
+                    if (verified) {
+                      switch (e.data.action) {
+                        case 'sign':
+                          let requiresConfirmation = false;
+                          if (e.data.target === 'STOIC-POPUP' && e.data.endpoint === 'call') {
+                            requiresConfirmation = true;
+                          }
+                          if (requiresConfirmation) {
+                            jspopup(
+                              'Are you sure you want to sign this message from ' + app.host + '?',
+                              'Sign',
+                              'Reject',
+                            ).then(async result => {
+                              if (result) {
+                                var response = {
+                                  signed: buf2hex(await id.sign(hex2buf(e.data.payload))),
+                                };
+                                if (id.hasOwnProperty('_delegation')) {
+                                  response.chain = id.getDelegation().toJSON();
+                                }
+                                sendMessageToExtension(e, true, JSON.stringify(response));
+                              } else {
+                                sendMessageToExtension(e, false, 'User rejected');
+                              }
+                            });
+                          } else {
+                            var response = {
+                              signed: buf2hex(await id.sign(hex2buf(e.data.payload))),
+                            };
+                            if (id.hasOwnProperty('_delegation')) {
+                              response.chain = id.getDelegation().toJSON();
+                            }
+                            sendMessageToExtension(e, true, JSON.stringify(response));
+                          }
+                          break;
+                        case 'accounts':
+                          var accs = [];
+                          for (var i = 0; i < principal.accounts.length; i++) {
+                            accs.push({
+                              name: principal.accounts[i].name,
+                              address: principal.accounts[i].address,
+                            });
+                          }
+                          if (e.data.target === 'STOIC-POPUP') {
+                            jspopup(
+                              'Are you sure you want to share your account details with ' +
+                                app.host +
+                                '?',
+                              'Continue',
+                              'Reject',
+                            ).then(result => {
+                              if (result) {
+                                sendMessageToExtension(e, true, JSON.stringify(accs));
+                              } else {
+                                sendMessageToExtension(e, false, 'User rejected');
+                              }
+                            });
+                          } else {
+                            sendMessageToExtension(e, true, JSON.stringify(accs));
+                          }
+                          break;
+                        default:
+                          sendMessageToExtension(e, false, 'Error - nothing to do');
+                          break;
+                      }
+                    } else {
+                      sendMessageToExtension(e, false, 'Invalid signature for payload');
+                    }
+                  } else {
+                    sendMessageToExtension(
+                      e,
+                      false,
+                      'The principal is not unlocked, please go to StoicWallet and unlock your wallet',
+                    );
+                  }
+                })
+                .catch(err => {
+                  sendMessageToExtension(e, false, err);
+                });
+            } else {
+              sendMessageToExtension(
+                e,
+                false,
+                'API key is not valid for this principal, please logout and login again.',
+              );
+            }
+          } else {
+            sendMessageToExtension(
+              e,
+              false,
+              'Incorrect Principal is logged in, please go to StoicWallet and ensure the correct Principal is active',
+            );
+          }
         }
       }
-    }
-  }, false);
+    },
+    false,
+  );
 
-  
-  if (params.get('transport') !== null && params.get('transport') === "popup" && params.get('lid') !== null) {
-    window.onload= () => {
+  if (
+    params.get('transport') !== null &&
+    params.get('transport') === 'popup' &&
+    params.get('lid') !== null
+  ) {
+    window.onload = () => {
       // '*' is intentional: load ping sent before the opener origin is known;
       // carries only the listener id, no sensitive data.
-      window.opener.postMessage({
-        action : "stoicPopupLoad",
-        listener : params.get('lid'),
-      }, '*');
-    }
+      window.opener.postMessage(
+        {
+          action: 'stoicPopupLoad',
+          listener: params.get('lid'),
+        },
+        '*',
+      );
+    };
   }
 } else {
   if ('serviceWorker' in navigator) {
@@ -404,5 +438,5 @@ if (params.get('stoicTunnel') !== null) {
         </ErrorBoundary>
       </ThemeModeProvider>
     </Provider>,
-  );      
+  );
 }
