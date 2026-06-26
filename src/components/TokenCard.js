@@ -44,6 +44,9 @@ const styles = {
     height: 132,
     overflow: 'hidden',
   },
+  actionArea: {
+    height: '100%',
+  },
   title: {
     fontSize: 14,
   },
@@ -94,7 +97,7 @@ function TokenCard(props) {
   return (
     <Grid style={styles.root} item xs={6} sm={4} md={4} lg={3} xl={2}>
       <Card onClick={handleClick} style={props.selected ? styles.selectedCard : styles.card}>
-        <CardActionArea>
+        <CardActionArea style={styles.actionArea}>
           <CardContent>
             <Typography
               style={styles.title}
