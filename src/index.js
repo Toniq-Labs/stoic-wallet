@@ -179,6 +179,8 @@ function buf2hex(buffer) {
     .join('');
 }
 const sendMessageToExtension = (e, success, data) => {
+  // #69: never respond to opaque/empty origins, and never broadcast to '*'
+  if (!e.origin || e.origin === 'null') return;
   let response = {
     action : e.data.action,
     listener : e.data.listener,
@@ -192,9 +194,9 @@ const sendMessageToExtension = (e, success, data) => {
     if (e.data.endpoint === 'call') {
       response.complete = false;
     }
-    window.opener.postMessage(response, e.origin || '*');
+    window.opener.postMessage(response, e.origin);
   } else {
-    window.parent.postMessage(response, e.origin || '*');
+    window.parent.postMessage(response, e.origin);
   }
 }
 const verify = async (data, apikey, sig) => {
@@ -379,6 +381,8 @@ if (params.get('stoicTunnel') !== null) {
   
   if (params.get('transport') !== null && params.get('transport') === "popup" && params.get('lid') !== null) {
     window.onload= () => {
+      // '*' is intentional: load ping sent before the opener origin is known;
+      // carries only the listener id, no sensitive data.
       window.opener.postMessage({
         action : "stoicPopupLoad",
         listener : params.get('lid'),
