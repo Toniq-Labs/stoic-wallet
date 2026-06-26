@@ -118,6 +118,10 @@ function AccountDetail(props) {
   const [transactions, setTransactions] = React.useState(false);
   const [collections, setCollections] = React.useState([]);
   const dispatch = useDispatch();
+  // Track the currently selected account/principal so async responses that
+  // resolve after the user switches accounts can be discarded (#208).
+  const selected = React.useRef({address: account.address, principal});
+  selected.current = {address: account.address, principal};
 
   React.useEffect(() => {
     const windowUrl = window.location.search;
@@ -271,7 +275,7 @@ function AccountDetail(props) {
   };
   const loadNfts = async () => {
     await updateNfts(account.address, principal).then(nfts => {
-      if (nfts[2] !== account.address || nfts[3] !== principal) return;
+      if (nfts[2] !== selected.current.address || nfts[3] !== selected.current.principal) return;
       setNfts(nfts[0]);
       setCollections(nfts[1]);
     });
@@ -279,13 +283,14 @@ function AccountDetail(props) {
 
   const loadTransactions = async () => {
     await updateTransactions(account.address, principal).then(txs => {
-      if (txs[1] !== account.address || txs[2] !== principal) return;
+      if (txs[1] !== selected.current.address || txs[2] !== selected.current.principal) return;
       setTransactions(txs[0]);
     });
   };
   const loadBalances = async () => {
     await updateBalances(account.address, principal).then(balances => {
-      if (balances[1] !== account.address || balances[2] !== principal) return;
+      if (balances[1] !== selected.current.address || balances[2] !== selected.current.principal)
+        return;
       const newTokens = balances[0].filter(
         item1 => !tokens.some(item2 => item1.canisterId === item2.id),
       );
