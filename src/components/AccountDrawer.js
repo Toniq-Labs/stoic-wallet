@@ -13,14 +13,14 @@ import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import LockIcon from '@material-ui/icons/Lock';
-import { makeStyles, useTheme } from '@material-ui/core/styles';
-import { useSelector, useDispatch } from 'react-redux'
+import {makeStyles, useTheme} from '@material-ui/core/styles';
+import {useSelector, useDispatch} from 'react-redux';
 
 import Blockie from '../components/Blockie';
 
 const drawerWidth = 300;
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   drawer: {
     [theme.breakpoints.up('sm')]: {
       width: drawerWidth,
@@ -30,53 +30,85 @@ const useStyles = makeStyles((theme) => ({
   toolbar: theme.mixins.toolbar,
   drawerPaper: {
     width: drawerWidth,
-    zIndex: 1
-  }
+    zIndex: 1,
+  },
 }));
-    
+
 export default function AccountDrawer(props) {
-  const { window } = props;
+  const {window} = props;
   const classes = useStyles();
   const theme = useTheme();
   const container = window !== undefined ? () => window().document.body : undefined;
-  const currentPrincipal = useSelector(state => state.currentPrincipal)
-  const currentAccount = useSelector(state => state.currentAccount)
-  const accounts = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts : []))
-  const idtype = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.type : ""));
-  const principal = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity.principal : ""));
-  const dispatch = useDispatch()
-  
+  const currentPrincipal = useSelector(state => state.currentPrincipal);
+  const currentAccount = useSelector(state => state.currentAccount);
+  const accounts = useSelector(state =>
+    state.principals.length ? state.principals[currentPrincipal].accounts : [],
+  );
+  const idtype = useSelector(state =>
+    state.principals.length ? state.principals[currentPrincipal].identity.type : '',
+  );
+  const principal = useSelector(state =>
+    state.principals.length ? state.principals[currentPrincipal].identity.principal : '',
+  );
+  const dispatch = useDispatch();
+
   const addAccount = () => {
     var nextid = accounts.length;
-    dispatch({ type: 'account/add', payload : {id : nextid, principal : principal}});
+    dispatch({type: 'account/add', payload: {id: nextid, principal: principal}});
     props.changeRoute('accountDetail', nextid);
   };
-  
+
   const accountsList = (
-    <div style={{marginTop:64, marginBottom: 100}}>
-      <div style={{width:drawerWidth-1, zIndex: 10, backgroundColor: theme.palette.background.paper, position:"fixed", top:0, textAlign:"center"}} className={classes.toolbar}>
+    <div style={{marginTop: 64, marginBottom: 100}}>
+      <div
+        style={{
+          width: drawerWidth - 1,
+          zIndex: 10,
+          backgroundColor: theme.palette.background.paper,
+          position: 'fixed',
+          top: 0,
+          textAlign: 'center',
+        }}
+        className={classes.toolbar}
+      >
         {/*<span style={{display:'block', fontSize:'x-large',padding:'15px 0', textAlign:'center',fontWeight:'bold'}}>Stoic Wallet <span style={{fontSize:'small',fontWeight:'normal'}}>By Toniq Labs</span></span>*/}
-        <img style={{maxHeight:'50px',marginTop:'5px', ...(theme.palette.type === 'dark' ? {filter: 'brightness(0) invert(1)'} : {})}} alt="Stoic Wallet by Toniq Labs" src="logo.png" />
+        <img
+          style={{
+            maxHeight: '50px',
+            marginTop: '5px',
+            ...(theme.palette.type === 'dark' ? {filter: 'brightness(0) invert(1)'} : {}),
+          }}
+          alt="Stoic Wallet by Toniq Labs"
+          src="logo.png"
+        />
       </div>
       <Divider />
       <List>
         {accounts.map((account, index) => {
           return (
             <div key={index}>
-              <ListItem button selected={props.route === 'accountDetail' && currentAccount === index} onClick={() => {props.onClose(); props.changeRoute('accountDetail', index)}}>
+              <ListItem
+                button
+                selected={props.route === 'accountDetail' && currentAccount === index}
+                onClick={() => {
+                  props.onClose();
+                  props.changeRoute('accountDetail', index);
+                }}
+              >
                 <ListItemAvatar>
                   <Avatar>
                     <Blockie address={account.address} />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText 
-                  primaryTypographyProps={{noWrap:true}} 
-                  secondaryTypographyProps={{noWrap:true}} 
+                <ListItemText
+                  primaryTypographyProps={{noWrap: true}}
+                  secondaryTypographyProps={{noWrap: true}}
                   primary={account.name}
-                  secondary={account.address} />
+                  secondary={account.address}
+                />
               </ListItem>
             </div>
-          )
+          );
         })}
         <ListItem button onClick={addAccount}>
           <ListItemAvatar>
@@ -89,30 +121,80 @@ export default function AccountDrawer(props) {
       </List>
       <Divider />
       <List>
-        <ListItem button selected={props.route === 'addressBook'} onClick={() => {props.onClose(); props.changeRoute('addressBook')}}>
-          <ListItemIcon><PeopleIcon /></ListItemIcon>
+        <ListItem
+          button
+          selected={props.route === 'addressBook'}
+          onClick={() => {
+            props.onClose();
+            props.changeRoute('addressBook');
+          }}
+        >
+          <ListItemIcon>
+            <PeopleIcon />
+          </ListItemIcon>
           <ListItemText primary="Address Book" />
         </ListItem>
-        <ListItem button selected={props.route === 'neurons'} onClick={() => {props.onClose(); props.changeRoute('neurons')}}>
-          <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
+        <ListItem
+          button
+          selected={props.route === 'neurons'}
+          onClick={() => {
+            props.onClose();
+            props.changeRoute('neurons');
+          }}
+        >
+          <ListItemIcon>
+            <AllInclusiveIcon />
+          </ListItemIcon>
           <ListItemText primary="Neurons" />
         </ListItem>
-        <ListItem button selected={props.route === 'applications'} onClick={() => {props.onClose(); props.changeRoute('applications')}}>
-          <ListItemIcon><AppsIcon /></ListItemIcon>
+        <ListItem
+          button
+          selected={props.route === 'applications'}
+          onClick={() => {
+            props.onClose();
+            props.changeRoute('applications');
+          }}
+        >
+          <ListItemIcon>
+            <AppsIcon />
+          </ListItemIcon>
           <ListItemText primary="Applications" />
         </ListItem>
-        {idtype === 'watch' ? "" :
-        <ListItem button onClick={() => {props.onClose(); props.lockWallet()}}>
-          <ListItemIcon><LockIcon /></ListItemIcon>
-          <ListItemText primary="Lock Wallet" />
-        </ListItem> }
+        {idtype === 'watch' ? (
+          ''
+        ) : (
+          <ListItem
+            button
+            onClick={() => {
+              props.onClose();
+              props.lockWallet();
+            }}
+          >
+            <ListItemIcon>
+              <LockIcon />
+            </ListItemIcon>
+            <ListItemText primary="Lock Wallet" />
+          </ListItem>
+        )}
       </List>
-      <div style={{width: drawerWidth-1, zIndex: 10, backgroundColor: theme.palette.background.paper, position:"fixed", bottom:0, textAlign:'center'}} className={classes.toolbar}>
-        <span style={{position:'absolute', bottom:'10px', left:'0', right:'0'}}>Connected to Mainnet - v2.0.0</span>
+      <div
+        style={{
+          width: drawerWidth - 1,
+          zIndex: 10,
+          backgroundColor: theme.palette.background.paper,
+          position: 'fixed',
+          bottom: 0,
+          textAlign: 'center',
+        }}
+        className={classes.toolbar}
+      >
+        <span style={{position: 'absolute', bottom: '10px', left: '0', right: '0'}}>
+          Connected to Mainnet - v2.0.0
+        </span>
       </div>
     </div>
   );
-  
+
   return (
     <nav className={classes.drawer} aria-label="mailbox folders">
       <Hidden smUp implementation="css">

@@ -127,14 +127,19 @@ export default function App() {
     let timer;
     const reset = () => {
       clearTimeout(timer);
-      timer = setTimeout(() => { logout(); }, minutes * 60 * 1000);
+      timer = setTimeout(
+        () => {
+          logout();
+        },
+        minutes * 60 * 1000,
+      );
     };
     const events = ['mousemove', 'mousedown', 'keydown', 'touchstart', 'scroll'];
-    events.forEach((e) => window.addEventListener(e, reset, {passive: true}));
+    events.forEach(e => window.addEventListener(e, reset, {passive: true}));
     reset();
     return () => {
       clearTimeout(timer);
-      events.forEach((e) => window.removeEventListener(e, reset));
+      events.forEach(e => window.removeEventListener(e, reset));
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [appState]);
@@ -156,23 +161,29 @@ export default function App() {
           </Backdrop>
         }
       >
-      {appState === 0 ? (
-        <Connect alert={alert} confirm={confirm} login={login} loader={loader} />
-      ) : (
-        ''
-      )}
-      {appState === 1 ? (
-        <Unlock alert={alert} confirm={confirm} login={login} remove={remove} loader={loader} />
-      ) : (
-        ''
-      )}
-      {appState === 2 ? (
-        <>
-          <Wallet alert={alert} confirm={confirm} logout={logout} remove={remove} loader={loader} />
-        </>
-      ) : (
-        ''
-      )}
+        {appState === 0 ? (
+          <Connect alert={alert} confirm={confirm} login={login} loader={loader} />
+        ) : (
+          ''
+        )}
+        {appState === 1 ? (
+          <Unlock alert={alert} confirm={confirm} login={login} remove={remove} loader={loader} />
+        ) : (
+          ''
+        )}
+        {appState === 2 ? (
+          <>
+            <Wallet
+              alert={alert}
+              confirm={confirm}
+              logout={logout}
+              remove={remove}
+              loader={loader}
+            />
+          </>
+        ) : (
+          ''
+        )}
       </Suspense>
       <InstallPrompt />
       <Backdrop className={classes.backdrop} open={loaderOpen} role="status" aria-live="polite">

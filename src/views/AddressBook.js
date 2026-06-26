@@ -1,5 +1,5 @@
 import React from 'react';
-import { useTheme } from '@material-ui/core/styles';
+import {useTheme} from '@material-ui/core/styles';
 import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
@@ -15,51 +15,59 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import EditIcon from '@material-ui/icons/Edit';
 import Typography from '@material-ui/core/Typography';
 import PeopleIcon from '@material-ui/icons/People';
-import { useSelector, useDispatch } from 'react-redux'
+import {useSelector, useDispatch} from 'react-redux';
 import SnackbarButton from '../components/SnackbarButton';
 import Blockie from '../components/Blockie';
-import { clipboardCopy } from '../utils';
+import {clipboardCopy} from '../utils';
 import {validatePrincipal, validateAddress} from '../ic/utils.js';
 function AddressBook(props) {
-  const addresses = useSelector(state => state.addresses)
-  const dispatch = useDispatch()
-  
+  const addresses = useSelector(state => state.addresses);
+  const dispatch = useDispatch();
+
   const editAddress = (name, address, index) => {
-    if (!name) return error("Please enter a valid contact name");
-    if (name.length > 30) return error("Max length or contact names is 30 characters");
-    if (!validateAddress(address) && !validatePrincipal(address)) return error("Please enter a valid address or principal");
-    dispatch({ type: 'addresses/edit', payload: {
-      index : index,
-      name : name,
-      address : address,
-    }});
+    if (!name) return error('Please enter a valid contact name');
+    if (name.length > 30) return error('Max length or contact names is 30 characters');
+    if (!validateAddress(address) && !validatePrincipal(address))
+      return error('Please enter a valid address or principal');
+    dispatch({
+      type: 'addresses/edit',
+      payload: {
+        index: index,
+        name: name,
+        address: address,
+      },
+    });
   };
-  const error = (e) => {
-    props.alert("There was an error", e);
+  const error = e => {
+    props.alert('There was an error', e);
   };
   const addAddress = (name, address) => {
-    if (!name) return error("Please enter a valid contact name");
-    if (name.length > 30) return error("Max length or contact names is 30 characters");
-    if (!validateAddress(address) && !validatePrincipal(address)) return error("Please enter a valid address or principal");
-    dispatch({ type: 'addresses/add', payload: {
-      name : name,
-      address : address,
-    }});
+    if (!name) return error('Please enter a valid contact name');
+    if (name.length > 30) return error('Max length or contact names is 30 characters');
+    if (!validateAddress(address) && !validatePrincipal(address))
+      return error('Please enter a valid address or principal');
+    dispatch({
+      type: 'addresses/add',
+      payload: {
+        name: name,
+        address: address,
+      },
+    });
   };
-  const deleteAddress = (id) => {
-    dispatch({ type: 'addresses/delete', payload: id});
+  const deleteAddress = id => {
+    dispatch({type: 'addresses/delete', payload: id});
   };
-  
+
   const theme = useTheme();
   const styles = {
-    root : {
+    root: {
       flexGrow: 1,
       padding: theme.spacing(3),
     },
-    empty : {
-      maxWidth:400,
-      margin : "0 auto",
-      paddingTop : 30
+    empty: {
+      maxWidth: 400,
+      margin: '0 auto',
+      paddingTop: 30,
     },
 
     largeIcon: {
@@ -70,7 +78,7 @@ function AddressBook(props) {
 
   return (
     <>
-      { addresses.length > 0 ?
+      {addresses.length > 0 ? (
         <List>
           {addresses.map((contact, index) => {
             return (
@@ -80,9 +88,9 @@ function AddressBook(props) {
                     <Blockie address={contact.address} />
                   </Avatar>
                 </ListItemAvatar>
-                <ListItemText 
-                  primaryTypographyProps={{noWrap:true}} 
-                  secondaryTypographyProps={{noWrap:true}} 
+                <ListItemText
+                  primaryTypographyProps={{noWrap: true}}
+                  secondaryTypographyProps={{noWrap: true}}
                   primary={contact.name}
                   secondary={
                     <>
@@ -96,11 +104,12 @@ function AddressBook(props) {
                         onClick={() => clipboardCopy(contact.address)}
                       >
                         <IconButton size="small" edge="end" aria-label="copy">
-                          <FileCopyIcon style={{ fontSize: 18 }} />
+                          <FileCopyIcon style={{fontSize: 18}} />
                         </IconButton>
                       </SnackbarButton>
                     </>
-                  } />
+                  }
+                />
                 <ListItemSecondaryAction>
                   <InputForm
                     onClick={(name, address) => editAddress(name, address, index)}
@@ -109,8 +118,8 @@ function AddressBook(props) {
                     secondaryInput="Contact Address"
                     content="Update the details of a saved contact"
                     buttonLabel="Save"
-                    defaultValue={contact.name} 
-                    defaultSecondaryValue={contact.address} 
+                    defaultValue={contact.name}
+                    defaultSecondaryValue={contact.address}
                   >
                     <IconButton edge="end" aria-label="edit">
                       <EditIcon />
@@ -121,21 +130,23 @@ function AddressBook(props) {
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>
-            )
+            );
           })}
-        </List> :
+        </List>
+      ) : (
         <div style={styles.empty}>
           <Typography paragraph align="center">
             <PeopleIcon style={styles.largeIcon} />
           </Typography>
-          <Typography paragraph style={{fontWeight:"bold"}} align="center">
+          <Typography paragraph style={{fontWeight: 'bold'}} align="center">
             Your address book is empty
           </Typography>
           <Typography paragraph align="center">
-            You can create contacts in your address book to associate addresses with easy to read names.
+            You can create contacts in your address book to associate addresses with easy to read
+            names.
           </Typography>
         </div>
-      }
+      )}
       <InputForm
         onClick={addAddress}
         title="Add contact to address book"
@@ -144,7 +155,9 @@ function AddressBook(props) {
         content="Save names and addresses of common people and services."
         buttonLabel="Save"
       >
-        <MainFab color="primary" aria-label="add"><AddIcon /></MainFab>
+        <MainFab color="primary" aria-label="add">
+          <AddIcon />
+        </MainFab>
       </InputForm>
     </>
   );

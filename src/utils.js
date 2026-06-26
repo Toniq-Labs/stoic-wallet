@@ -33,20 +33,20 @@ const identityTypes = {
   facebook: 'Facebook Account',
 };
 
-const clipboardCopy = (text) => {
+const clipboardCopy = text => {
   if (!navigator.clipboard) {
     fallbackCopyTextToClipboard(text);
     return;
   }
   navigator.clipboard.writeText(text).then(
     () => {},
-    (err) => {
+    err => {
       console.error('Async: Could not copy text: ', err);
     },
   );
 };
 
-const compressAddress = (a) => {
+const compressAddress = a => {
   if (!a) return '';
   if (a.length === 64 && isHex(a)) return a.substr(0, 16) + '...';
   const pp = a.split('-');
@@ -70,7 +70,7 @@ const numf = (n, d) => {
   return n.toFixed(d).replace(/\d(?=(\d{3})+\.)/g, '$&,');
 };
 
-const formatNumberForDisplay = (n) => {
+const formatNumberForDisplay = n => {
   // Expand scientific notation (e.g. 1e-7) to fixed decimals for display.
   const nStr = n.toString();
   if (nStr.includes('e-')) {

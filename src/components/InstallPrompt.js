@@ -7,7 +7,7 @@ export default function InstallPrompt() {
   const [deferred, setDeferred] = React.useState(null);
   const [open, setOpen] = React.useState(false);
   React.useEffect(() => {
-    const handler = (e) => {
+    const handler = e => {
       e.preventDefault();
       setDeferred(e);
       setOpen(true);
@@ -19,7 +19,9 @@ export default function InstallPrompt() {
     setOpen(false);
     if (!deferred) return;
     deferred.prompt();
-    try { await deferred.userChoice; } catch (e) {}
+    try {
+      await deferred.userChoice;
+    } catch (e) {}
     setDeferred(null);
   };
   return (
@@ -29,8 +31,12 @@ export default function InstallPrompt() {
       message="Install Stoic Wallet for quick access"
       action={
         <>
-          <Button color="secondary" size="small" onClick={install}>Install</Button>
-          <Button color="inherit" size="small" onClick={() => setOpen(false)}>Dismiss</Button>
+          <Button color="secondary" size="small" onClick={install}>
+            Install
+          </Button>
+          <Button color="inherit" size="small" onClick={() => setOpen(false)}>
+            Dismiss
+          </Button>
         </>
       }
     />

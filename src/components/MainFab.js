@@ -1,8 +1,8 @@
 import React from 'react';
-import { makeStyles } from '@material-ui/core/styles';
+import {makeStyles} from '@material-ui/core/styles';
 import Fab from '@material-ui/core/Fab';
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(theme => ({
   root: {
     '& > *': {
       margin: theme.spacing(1),
@@ -13,12 +13,12 @@ const useStyles = makeStyles((theme) => ({
 export default function MainFab(props) {
   const classes = useStyles();
   const style = {
-      margin: 0,
-      top: 'auto',
-      right: 20,
-      bottom: 20,
-      left: 'auto',
-      position: 'fixed',
+    margin: 0,
+    top: 'auto',
+    right: 20,
+    bottom: 20,
+    left: 'auto',
+    position: 'fixed',
   };
   return (
     <div className={classes.root}>
@@ -28,4 +28,3 @@ export default function MainFab(props) {
     </div>
   );
 }
-

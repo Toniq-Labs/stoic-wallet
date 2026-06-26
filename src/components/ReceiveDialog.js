@@ -53,7 +53,9 @@ export default function ReceiveDialog(props) {
           </div>
         </DialogContent>
         <DialogActions>
-          <Button onClick={handleClose} color="primary">Close</Button>
+          <Button onClick={handleClose} color="primary">
+            Close
+          </Button>
         </DialogActions>
       </Dialog>
     </>

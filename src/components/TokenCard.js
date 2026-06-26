@@ -14,10 +14,18 @@ let _icpUsdPromise = null;
 const getIcpPrice = () => {
   if (_icpUsd !== null) return Promise.resolve(_icpUsd);
   if (!_icpUsdPromise) {
-    _icpUsdPromise = fetch('https://api.coingecko.com/api/v3/simple/price?ids=internet-computer&vs_currencies=usd')
-      .then((r) => r.json())
-      .then((j) => { _icpUsd = (j['internet-computer'] || {}).usd ?? null; return _icpUsd; })
-      .catch(() => { _icpUsdPromise = null; return null; });
+    _icpUsdPromise = fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=internet-computer&vs_currencies=usd',
+    )
+      .then(r => r.json())
+      .then(j => {
+        _icpUsd = (j['internet-computer'] || {}).usd ?? null;
+        return _icpUsd;
+      })
+      .catch(() => {
+        _icpUsdPromise = null;
+        return null;
+      });
   }
   return _icpUsdPromise;
 };
@@ -50,7 +58,9 @@ function TokenCard(props) {
   const [usd, setUsd] = React.useState(null);
   React.useEffect(() => {
     if (props.data.symbol === 'ICP' && balance !== false && balance > 0) {
-      getIcpPrice().then((p) => { if (p) setUsd(p); });
+      getIcpPrice().then(p => {
+        if (p) setUsd(p);
+      });
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [balance, props.data.symbol]);
@@ -95,10 +105,18 @@ function TokenCard(props) {
               {props.data.name}
             </Typography>
             <Typography variant="h6" noWrap>
-              {balance === false ? 'Loading' : hideBalances ? '••••••' : balance + ' ' + props.data.symbol}
+              {balance === false
+                ? 'Loading'
+                : hideBalances
+                  ? '••••••'
+                  : balance + ' ' + props.data.symbol}
             </Typography>
             {usd && balance !== false && !hideBalances && props.data.symbol === 'ICP' ? (
-              <Typography style={styles.pos} variant="body2" color={props.selected ? "inherit" : "textSecondary"}>
+              <Typography
+                style={styles.pos}
+                variant="body2"
+                color={props.selected ? 'inherit' : 'textSecondary'}
+              >
                 ≈ ${(balance * usd).toFixed(2)} USD
               </Typography>
             ) : null}

@@ -1,6 +1,11 @@
 import {
-  to32bits, from32bits, toHexString, fromHexString, isHex,
-  validateAddress, getSubAccountArray,
+  to32bits,
+  from32bits,
+  toHexString,
+  fromHexString,
+  isHex,
+  validateAddress,
+  getSubAccountArray,
   amountToBigInt,
 } from './format.js';
 
@@ -16,7 +21,7 @@ describe('to32bits / from32bits (big-endian uint32)', () => {
     expect(from32bits([0, 0, 1, 0])).toBe(256);
   });
   test('round-trips', () => {
-    [0, 1, 256, 123456, 0xffffffff].forEach((n) => {
+    [0, 1, 256, 123456, 0xffffffff].forEach(n => {
       expect(from32bits(to32bits(n)) >>> 0).toBe(n);
     });
   });
@@ -64,7 +69,7 @@ describe('validateAddress', () => {
 describe('getSubAccountArray', () => {
   test('number subaccount -> 32 bytes, big-endian in last 4', () => {
     expect(getSubAccountArray(0)).toHaveLength(32);
-    expect(getSubAccountArray(0).every((b) => b === 0)).toBe(true);
+    expect(getSubAccountArray(0).every(b => b === 0)).toBe(true);
     expect(getSubAccountArray(1).slice(28)).toEqual([0, 0, 0, 1]);
   });
   test('array subaccount -> padded to 32', () => {

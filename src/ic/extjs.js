@@ -29,7 +29,7 @@ import logIDL from './candid/log.did.js';
 import icdripIDL from './candid/icdrip.did.js';
 import icrcIDL from './candid/icrc.did.js';
 import dip20IDL from './candid/dip20.did.js';
-import drc20IDL from './candid/drc20.did.js';//TODO
+import drc20IDL from './candid/drc20.did.js'; //TODO
 
 const constructUser = u => {
   if (isHex(u) && u.length === 64) {
@@ -102,10 +102,10 @@ class ExtConnection {
   };
   _metadata = {
     [LEDGER_CANISTER_ID]: {
-      id : LEDGER_CANISTER_ID,
-      name : "Internet Computer",
+      id: LEDGER_CANISTER_ID,
+      name: 'Internet Computer',
       symbol: 'ICP',
-      standard : 'ledger',
+      standard: 'ledger',
       fee: 10000,
       type: 'fungible',
       decimals: 8,
@@ -159,25 +159,25 @@ class ExtConnection {
   }
   token(tid, standard) {
     if (!tid) {
-      tid = LEDGER_CANISTER_ID; 
-      standard = "ledger";
-    }//defaults to ledger
-    switch(standard) {
+      tid = LEDGER_CANISTER_ID;
+      standard = 'ledger';
+    } //defaults to ledger
+    switch (standard) {
       case 'icpswap':
       case 'yumi':
         standard = 'ext';
         break;
-      default:;
+      default:
     }
     var tokenObj = decodeTokenId(tid);
     let idl = this._standard;
     if (!standard) {
       if (this._mapIdls.hasOwnProperty(tokenObj.canister)) {
         idl = this._mapIdls[tokenObj.canister];
-        this._standard = "custom";
+        this._standard = 'custom';
       } else {
         idl = _preloadedIdls['ext']; //ext is our token default...
-        this._standard = "ext";
+        this._standard = 'ext';
       }
     } else {
       this._standard = standard;
@@ -195,7 +195,7 @@ class ExtConnection {
           return this._metadata[tokenObj.canister];
         }
         switch (this._standard) {
-          case "icrc":
+          case 'icrc':
             try {
               let data = await api.icrc1_metadata();
               let ret = {};
@@ -215,14 +215,14 @@ class ExtConnection {
             } catch (e) {
               throw e; // or handle error as appropriate
             }
-          case "ext":
+          case 'ext':
             try {
               const r = await api.metadata(tokenObj.token);
               let fee = 0;
               try {
                 let res = await api.getFee();
                 if (res) fee = Number(res.ok);
-              } catch(e){};
+              } catch (e) {}
               if (typeof r.ok != 'undefined') {
                 if (typeof r.ok.fungible != 'undefined') {
                   return {
@@ -248,7 +248,7 @@ class ExtConnection {
               throw e; // or handle error as appropriate
             }
             break;
-          case "dip20":
+          case 'dip20':
             try {
               const r = await api.getMetadata(tokenObj.token);
               return {
@@ -259,20 +259,20 @@ class ExtConnection {
                 decimals: Number(r.decimals),
                 standard: this._standard,
                 type: 'fungible',
-                metadata: JSON.stringify(r)
+                metadata: JSON.stringify(r),
               };
             } catch (e) {
               console.error(e);
               throw e; // or handle error as appropriate
             }
-          case "drc20":
+          case 'drc20':
             try {
               const r = await Promise.all([
                 api.drc20_name(),
                 api.drc20_symbol(),
                 api.drc20_fee(),
                 api.drc20_decimals(),
-              ])
+              ]);
               return {
                 id: tid,
                 name: r[0],
@@ -281,7 +281,7 @@ class ExtConnection {
                 decimals: Number(r[3]),
                 standard: this._standard,
                 type: 'fungible',
-                metadata: JSON.stringify(r)
+                metadata: JSON.stringify(r),
               };
             } catch (e) {
               console.error(e);
@@ -293,7 +293,7 @@ class ExtConnection {
       },
       getBalance: async (address, principal, subaccount) => {
         switch (this._standard) {
-          case "ledger":
+          case 'ledger':
             let res;
             let attempts = 0;
             while (true) {
@@ -304,12 +304,12 @@ class ExtConnection {
                 break;
               } catch (e) {
                 if (++attempts >= 5) throw e;
-                console.error(e, "retrying ledger balance in 2000ms (" + attempts + "/5)");
+                console.error(e, 'retrying ledger balance in 2000ms (' + attempts + '/5)');
                 await new Promise(r => setTimeout(r, 2000));
               }
             }
             return res.e8s;
-          case "ext":
+          case 'ext':
             try {
               const args = {
                 user: constructUser(address),
@@ -323,8 +323,8 @@ class ExtConnection {
               throw e; // or handle error as appropriate
             }
             break;
-          
-          case "icrc":
+
+          case 'icrc':
             try {
               return await api.icrc1_balance_of({
                 owner: Principal.fromText(principal),
@@ -333,7 +333,7 @@ class ExtConnection {
             } catch (e) {
               throw e; // or handle error as appropriate
             }
-          case "dip20":
+          case 'dip20':
             try {
               return await api.balanceOf({
                 who: Principal.fromText(principal),
@@ -341,7 +341,7 @@ class ExtConnection {
             } catch (e) {
               throw e; // or handle error as appropriate
             }
-          case "drc20":
+          case 'drc20':
             try {
               return await api.drc20_balanceOf(address);
             } catch (e) {
@@ -354,12 +354,14 @@ class ExtConnection {
       transfer: async (from_principal, from_sa, to_user, amount, fee, memo, notify) => {
         var args;
         switch (this._standard) {
-          case "ledger":
+          case 'ledger':
             try {
               var toAddress = to_user;
               if (notify) {
                 if (!validatePrincipal(toAddress))
-                  throw new Error('You can only use notify when specifying a Principal as the To address');
+                  throw new Error(
+                    'You can only use notify when specifying a Principal as the To address',
+                  );
                 toAddress = principalToAccountIdentifier(toAddress, 0);
               } else {
                 if (validatePrincipal(toAddress))
@@ -389,8 +391,8 @@ class ExtConnection {
               console.error(e);
               throw e; // or handle error as appropriate
             }
-            
-          case "ext":
+
+          case 'ext':
             args = {
               token: tid,
               from: {address: principalToAccountIdentifier(from_principal, from_sa ?? 0)},
@@ -412,17 +414,18 @@ class ExtConnection {
               console.error(e);
               throw e;
             }
-          case "icrc":
-            if (!validatePrincipal(to_user))  throw new Error('Current you can only send to principals');
+          case 'icrc':
+            if (!validatePrincipal(to_user))
+              throw new Error('Current you can only send to principals');
             args = {
-              to : {
-                owner : Principal.fromText(to_user),
-                subaccount : [],
+              to: {
+                owner: Principal.fromText(to_user),
+                subaccount: [],
               },
               fee: [fee],
               memo: [],
-              from_subaccount : [getSubAccountArray(from_sa ?? 0)],
-              created_at_time : [],
+              from_subaccount: [getSubAccountArray(from_sa ?? 0)],
+              created_at_time: [],
               amount: amount,
             };
             try {
@@ -440,8 +443,9 @@ class ExtConnection {
               console.error(e);
               throw e;
             }
-          case "dip20":
-            if (!validatePrincipal(to_user))  throw new Error('Current you can only send to principals');
+          case 'dip20':
+            if (!validatePrincipal(to_user))
+              throw new Error('Current you can only send to principals');
             try {
               const b = await api.transfer(Principal.fromText(to_user), amount);
               if (typeof b.ok != 'undefined') {
@@ -452,9 +456,15 @@ class ExtConnection {
             } catch (e) {
               throw e;
             }
-          case "drc20":
+          case 'drc20':
             try {
-              const b = await api.drc20_transfer(to_user, amount, [], [getSubAccountArray(from_sa ?? 0)], []);
+              const b = await api.drc20_transfer(
+                to_user,
+                amount,
+                [],
+                [getSubAccountArray(from_sa ?? 0)],
+                [],
+              );
               if (typeof b.ok != 'undefined') {
                 return b.ok;
               } else {
@@ -470,7 +480,7 @@ class ExtConnection {
       },
       mintCycles: async (from_principal, from_sa, canister, amount, fee) => {
         switch (this._standard) {
-          case "ledger":
+          case 'ledger':
             try {
               var _to_sub = getCyclesTopupSubAccount(canister);
               var _to = principalToAccountIdentifier(CYCLES_MINTING_CANISTER_ID, _to_sub);
@@ -495,7 +505,9 @@ class ExtConnection {
               if (notifyRes.Err !== undefined) {
                 throw new Error(
                   'Cycles top-up notification failed: ' +
-                    JSON.stringify(notifyRes.Err, (k, v) => (typeof v === 'bigint' ? v.toString() : v)),
+                    JSON.stringify(notifyRes.Err, (k, v) =>
+                      typeof v === 'bigint' ? v.toString() : v,
+                    ),
                 );
               }
               return true; // notifyRes.Ok holds the cycles minted
