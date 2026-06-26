@@ -86,17 +86,11 @@ function Wallet(props) {
   };
   const renderView = (r) => {
     switch(r){
-      case "accountDetail":
-        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       case "settings":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader, clearWallet : clearWallet, lockWallet : lockWallet})
+      case "accountDetail":
       case "neurons":
-        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       case "applications":
-        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
-      case "marketplace":
-        return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
-      case "tokenregistry":
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm, loader : props.loader})
       default:
         return React.createElement(routes[r].view, {alert : props.alert, confirm : props.confirm})
