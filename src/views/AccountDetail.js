@@ -374,6 +374,13 @@ function AccountDetail(props) {
                       <LaunchIcon />
                     </IconButton>
                   </Tooltip>
+                  <ReceiveDialog address={account.address}>
+                    <Tooltip title="Receive (show QR)">
+                      <IconButton edge="end" aria-label="receive">
+                        <CropFreeIcon />
+                      </IconButton>
+                    </Tooltip>
+                  </ReceiveDialog>
                 </span>
               </>
             }
@@ -408,11 +415,6 @@ function AccountDetail(props) {
                       <FileCopyIcon style={{fontSize: 18}} />
                     </IconButton>
                   </SnackbarButton>
-                  <ReceiveDialog address={account.address}>
-                    <IconButton style={{top: '-10px'}} size="small" edge="end" aria-label="receive">
-                      <CropFreeIcon style={{fontSize: 18}} />
-                    </IconButton>
-                  </ReceiveDialog>
                 </div>
                 {currentAccount === 0 ? (
                   <div style={{fontSize: '0.9em'}}>

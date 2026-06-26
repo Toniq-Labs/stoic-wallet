@@ -192,31 +192,6 @@ function Settings(props) {
         </ListItem>
       </List>
       <Divider />
-      <List component="nav" subheader={<ListSubheader>Preferences</ListSubheader>}>
-        <ListItem>
-          <ListItemText primary="Auto-lock" secondary="Lock the wallet after this much inactivity" />
-          <ListItemSecondaryAction>
-            <FormControl size="small" variant="outlined" style={{minWidth: 130}}>
-              <Select
-                value={autoLock}
-                onChange={(e) => {
-                  setAutoLock(e.target.value);
-                  try { localStorage.setItem('stoic-autolock', String(e.target.value)); } catch (err) {}
-                }}
-                inputProps={{'aria-label': 'Auto-lock timeout'}}
-              >
-                <MenuItem value={0}>Never</MenuItem>
-                <MenuItem value={1}>1 minute</MenuItem>
-                <MenuItem value={5}>5 minutes</MenuItem>
-                <MenuItem value={15}>15 minutes</MenuItem>
-                <MenuItem value={30}>30 minutes</MenuItem>
-                <MenuItem value={60}>1 hour</MenuItem>
-              </Select>
-            </FormControl>
-          </ListItemSecondaryAction>
-        </ListItem>
-      </List>
-      <Divider />
       {principals.length > 1 ?
         <><List
           component="nav"
@@ -284,6 +259,31 @@ function Settings(props) {
         </List>
         <Divider /> </>: "" }
         
+      <List component="nav" subheader={<ListSubheader>Preferences</ListSubheader>}>
+        <ListItem>
+          <ListItemText primary="Auto-lock" secondary="Lock the wallet after this much inactivity" />
+          <ListItemSecondaryAction>
+            <FormControl size="small" variant="outlined" style={{minWidth: 130}}>
+              <Select
+                value={autoLock}
+                onChange={(e) => {
+                  setAutoLock(e.target.value);
+                  try { localStorage.setItem('stoic-autolock', String(e.target.value)); } catch (err) {}
+                }}
+                inputProps={{'aria-label': 'Auto-lock timeout'}}
+              >
+                <MenuItem value={0}>Never</MenuItem>
+                <MenuItem value={1}>1 minute</MenuItem>
+                <MenuItem value={5}>5 minutes</MenuItem>
+                <MenuItem value={15}>15 minutes</MenuItem>
+                <MenuItem value={30}>30 minutes</MenuItem>
+                <MenuItem value={60}>1 hour</MenuItem>
+              </Select>
+            </FormControl>
+          </ListItemSecondaryAction>
+        </ListItem>
+      </List>
+      <Divider />
       <ConnectList add handler={connectList} />
       <Divider />
       
