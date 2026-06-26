@@ -5,10 +5,13 @@ import CssBaseline from '@material-ui/core/CssBaseline';
 import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
+import VisibilityIcon from '@material-ui/icons/Visibility';
+import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
 import AccountDrawer from '../components/AccountDrawer';
+import {BalanceVisibilityContext} from '../balanceVisibility';
 
 import AccountDetail from '../views/AccountDetail';
 import AddressBook from '../views/AddressBook';
@@ -108,6 +111,7 @@ function Wallet(props) {
   const clearWallet = () => {
     props.remove();
   };
+  const [hideBalances, setHideBalances] = React.useState(false);
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -128,6 +132,13 @@ function Wallet(props) {
           <div className={classes.toolbarButtons}>
             <IconButton
               color="inherit"
+              aria-label={hideBalances ? 'Show balances' : 'Hide balances'}
+              onClick={() => setHideBalances(v => !v)}
+            >
+              {hideBalances ? <VisibilityOffIcon /> : <VisibilityIcon />}
+            </IconButton>
+            <IconButton
+              color="inherit"
               edge="end"
               aria-label="Settings" onClick={() => changeRoute('settings')}
             >
@@ -139,7 +150,9 @@ function Wallet(props) {
       <AccountDrawer lockWallet={lockWallet} changeRoute={changeRoute} onClose={handleDrawerClose} open={mobileOpen} />
       <main className={classes.content}>
         <div className={classes.toolbar} />
-          {renderView(route)}
+          <BalanceVisibilityContext.Provider value={hideBalances}>
+            {renderView(route)}
+          </BalanceVisibilityContext.Provider>
       </main>
     </div>
   );

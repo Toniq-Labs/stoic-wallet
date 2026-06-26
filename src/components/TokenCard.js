@@ -6,6 +6,7 @@ import Typography from '@material-ui/core/Typography';
 import Grid from '@material-ui/core/Grid';
 import extjs from '../ic/extjs.js';
 import {useSelector} from 'react-redux';
+import {BalanceVisibilityContext} from '../balanceVisibility';
 
 const styles = {
   root: {
@@ -30,6 +31,7 @@ var intervalId = 0;
 const api = extjs.connect('https://icp0.io/');
 function TokenCard(props) {
   const [balance, setBalance] = React.useState(false);
+  const hideBalances = React.useContext(BalanceVisibilityContext);
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const identity = useSelector(state =>
     state.principals.length ? state.principals[currentPrincipal].identity : {},
@@ -71,7 +73,7 @@ function TokenCard(props) {
               {props.data.name}
             </Typography>
             <Typography variant="h6">
-              {balance === false ? 'Loading' : balance + ' ' + props.data.symbol}
+              {balance === false ? 'Loading' : hideBalances ? '••••••' : balance + ' ' + props.data.symbol}
             </Typography>
             {/*<Typography style={styles.pos} color={props.selected ? "inherit" : "textSecondary"}>
               ~$123.04USD
