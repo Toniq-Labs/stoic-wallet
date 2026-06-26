@@ -8,6 +8,20 @@ import extjs from '../ic/extjs.js';
 import {useSelector} from 'react-redux';
 import {BalanceVisibilityContext} from '../balanceVisibility';
 
+// Cached ICP/USD spot price (one network call per session, shared by all cards).
+let _icpUsd = null;
+let _icpUsdPromise = null;
+const getIcpPrice = () => {
+  if (_icpUsd !== null) return Promise.resolve(_icpUsd);
+  if (!_icpUsdPromise) {
+    _icpUsdPromise = fetch('https://api.coingecko.com/api/v3/simple/price?ids=internet-computer&vs_currencies=usd')
+      .then((r) => r.json())
+      .then((j) => { _icpUsd = (j['internet-computer'] || {}).usd ?? null; return _icpUsd; })
+      .catch(() => { _icpUsdPromise = null; return null; });
+  }
+  return _icpUsdPromise;
+};
+
 const styles = {
   root: {
     height: '100%',
@@ -32,6 +46,13 @@ const api = extjs.connect('https://icp0.io/');
 function TokenCard(props) {
   const [balance, setBalance] = React.useState(false);
   const hideBalances = React.useContext(BalanceVisibilityContext);
+  const [usd, setUsd] = React.useState(null);
+  React.useEffect(() => {
+    if (props.data.symbol === 'ICP' && balance !== false && balance > 0) {
+      getIcpPrice().then((p) => { if (p) setUsd(p); });
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balance, props.data.symbol]);
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const identity = useSelector(state =>
     state.principals.length ? state.principals[currentPrincipal].identity : {},
@@ -75,9 +96,11 @@ function TokenCard(props) {
             <Typography variant="h6">
               {balance === false ? 'Loading' : hideBalances ? '••••••' : balance + ' ' + props.data.symbol}
             </Typography>
-            {/*<Typography style={styles.pos} color={props.selected ? "inherit" : "textSecondary"}>
-              ~$123.04USD
-            </Typography>*/}
+            {usd && balance !== false && !hideBalances && props.data.symbol === 'ICP' ? (
+              <Typography style={styles.pos} variant="body2" color={props.selected ? "inherit" : "textSecondary"}>
+                ≈ ${(balance * usd).toFixed(2)} USD
+              </Typography>
+            ) : null}
           </CardContent>
         </CardActionArea>
       </Card>

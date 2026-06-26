@@ -6,12 +6,16 @@ import IconButton from '@material-ui/core/IconButton';
 import MenuIcon from '@material-ui/icons/Menu';
 import AccountCircleIcon from '@material-ui/icons/AccountCircle';
 import VisibilityIcon from '@material-ui/icons/Visibility';
+import Brightness4Icon from '@material-ui/icons/Brightness4';
+import Brightness7Icon from '@material-ui/icons/Brightness7';
 import VisibilityOffIcon from '@material-ui/icons/VisibilityOff';
 import Toolbar from '@material-ui/core/Toolbar';
 import Typography from '@material-ui/core/Typography';
 
 import AccountDrawer from '../components/AccountDrawer';
+import ScrollTop from '../components/ScrollTop';
 import {BalanceVisibilityContext} from '../balanceVisibility';
+import {ThemeModeContext} from '../ThemeModeProvider';
 
 import AccountDetail from '../views/AccountDetail';
 import AddressBook from '../views/AddressBook';
@@ -112,6 +116,7 @@ function Wallet(props) {
     props.remove();
   };
   const [hideBalances, setHideBalances] = React.useState(false);
+  const {mode, toggle} = React.useContext(ThemeModeContext);
   return (
     <div className={classes.root}>
       <CssBaseline />
@@ -130,6 +135,9 @@ function Wallet(props) {
             {toolbarTitle}
           </Typography>
           <div className={classes.toolbarButtons}>
+            <IconButton color="inherit" aria-label="Toggle dark mode" onClick={toggle}>
+              {mode === 'dark' ? <Brightness7Icon /> : <Brightness4Icon />}
+            </IconButton>
             <IconButton
               color="inherit"
               aria-label={hideBalances ? 'Show balances' : 'Hide balances'}
@@ -154,6 +162,7 @@ function Wallet(props) {
             {renderView(route)}
           </BalanceVisibilityContext.Provider>
       </main>
+      <ScrollTop />
     </div>
   );
 }

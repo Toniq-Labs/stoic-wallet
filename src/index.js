@@ -2,14 +2,13 @@ import './polyfills';
 import React from 'react';
 import {createRoot} from 'react-dom/client';
 import CssBaseline from '@material-ui/core/CssBaseline';
-import { ThemeProvider } from '@material-ui/core/styles';
 import App from './App';
 import ErrorBoundary from './components/ErrorBoundary';
 import { Provider } from 'react-redux'
 import store from './store'
 import {StoicIdentity} from './ic/identity.js';
 import {principalToAccountIdentifier, LEDGER_CANISTER_ID} from './ic/utils.js';
-import theme from './theme';
+import ThemeModeProvider from './ThemeModeProvider';
 import '@fontsource/roboto';
 function injectPopupStyles() {
   if (!document.getElementById("popup-styles")) {
@@ -390,15 +389,20 @@ if (params.get('stoicTunnel') !== null) {
     }
   }
 } else {
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('/service-worker.js').catch(() => {});
+    });
+  }
   const root = createRoot(document.querySelector('#root'));
   root.render(
     <Provider store={store}>
-      <ThemeProvider theme={theme}>
+      <ThemeModeProvider>
         <CssBaseline />
         <ErrorBoundary>
           <App />
         </ErrorBoundary>
-      </ThemeProvider>
+      </ThemeModeProvider>
     </Provider>,
   );      
 }

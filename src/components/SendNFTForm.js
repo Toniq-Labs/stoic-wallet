@@ -1,5 +1,7 @@
 /* global BigInt */
 import React from 'react';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import {useTheme} from '@material-ui/core/styles';
 import {validateAddress, validatePrincipal} from '../ic/utils.js';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
@@ -24,6 +26,8 @@ export default function SendNFTForm(props) {
     state.principals.length ? state.principals[currentPrincipal].identity : {},
   );
   const [step, setStep] = React.useState(0);
+  const _theme = useTheme();
+  const fullScreen = useMediaQuery(_theme.breakpoints.down('xs'));
 
   const [to, setTo] = React.useState('');
   const [toOption, setToOption] = React.useState('');
@@ -104,7 +108,7 @@ export default function SendNFTForm(props) {
 
   return (
     <>
-      <Dialog open={props.open} onClose={handleClose} maxWidth={'sm'} fullWidth>
+      <Dialog open={props.open} onClose={handleClose} maxWidth={'sm'} fullWidth fullScreen={fullScreen}>
         <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
           Send NFT
         </DialogTitle>

@@ -1,5 +1,7 @@
 /* global BigInt */
 import React from 'react';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import {useTheme} from '@material-ui/core/styles';
 import Button from '@material-ui/core/Button';
 import TextField from '@material-ui/core/TextField';
 import Dialog from '@material-ui/core/Dialog';
@@ -25,6 +27,8 @@ export default function SendForm(props) {
     state.principals.length ? state.principals[currentPrincipal].identity : {},
   );
   const [open, setOpen] = React.useState(false);
+  const _theme = useTheme();
+  const fullScreen = useMediaQuery(_theme.breakpoints.down('xs'));
   const [step, setStep] = React.useState(0);
   const [balance, setBalance] = React.useState(false);
 
@@ -113,6 +117,10 @@ export default function SendForm(props) {
       if (t) setTo(t.trim());
     } catch (e) {}
   };
+  const setPct = (p) => {
+    const max = balance - Number(fee);
+    setAmount(max > 0 ? Math.round((max * p / 100) * 1e8) / 1e8 : 0);
+  };
   const handleClick = () => {
     setOpen(true);
   };
@@ -163,7 +171,7 @@ export default function SendForm(props) {
   return (
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
-      <Dialog open={open} onClose={handleClose} maxWidth={'sm'} fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth={'sm'} fullWidth fullScreen={fullScreen}>
         <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
           Send {props.data.name} Tokens ({props.data.symbol})
         </DialogTitle>
@@ -230,6 +238,9 @@ export default function SendForm(props) {
               ) : (
                 ''
               )}
+              <Button size="small" onClick={() => setPct(25)} color="primary">25%</Button>
+              <Button size="small" onClick={() => setPct(50)} color="primary">50%</Button>
+              <Button size="small" onClick={() => setPct(75)} color="primary">75%</Button>
               <Button size="small" variant="outlined" onClick={sendMax} color="primary">Max</Button>
               <DialogContentText
                 style={{fontSize: 'small', textAlign: 'center', marginTop: '20px'}}

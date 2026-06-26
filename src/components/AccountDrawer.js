@@ -17,6 +17,11 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux'
 
 import Blockie from '../components/Blockie';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import SnackbarButton from '../components/SnackbarButton';
+import {clipboardCopy} from '../utils';
 
 const drawerWidth = 300;
 
@@ -54,7 +59,7 @@ export default function AccountDrawer(props) {
   
   const accountsList = (
     <div style={{marginTop:64, marginBottom: 100}}>
-      <div style={{width:drawerWidth-1, zIndex: 10, backgroundColor:'white', position:"fixed", top:0, textAlign:"center"}} className={classes.toolbar}>
+      <div style={{width:drawerWidth-1, zIndex: 10, backgroundColor: theme.palette.background.paper, position:"fixed", top:0, textAlign:"center"}} className={classes.toolbar}>
         {/*<span style={{display:'block', fontSize:'x-large',padding:'15px 0', textAlign:'center',fontWeight:'bold'}}>Stoic Wallet <span style={{fontSize:'small',fontWeight:'normal'}}>By Toniq Labs</span></span>*/}
         <img style={{maxHeight:'50px',marginTop:'5px'}} alt="Stoic Wallet by Toniq Labs" src="logo.png" />
       </div>
@@ -74,6 +79,17 @@ export default function AccountDrawer(props) {
                   secondaryTypographyProps={{noWrap:true}} 
                   primary={account.name}
                   secondary={account.address} />
+                <ListItemSecondaryAction>
+                  <SnackbarButton
+                    message="Address Copied"
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+                    onClick={() => clipboardCopy(account.address)}
+                  >
+                    <IconButton edge="end" size="small" aria-label="copy address">
+                      <FileCopyIcon style={{fontSize: 18}} />
+                    </IconButton>
+                  </SnackbarButton>
+                </ListItemSecondaryAction>
               </ListItem>
             </div>
           )
@@ -107,7 +123,7 @@ export default function AccountDrawer(props) {
           <ListItemText primary="Lock Wallet" />
         </ListItem> }
       </List>
-      <div style={{width: drawerWidth-1, zIndex: 10, backgroundColor:'white', position:"fixed", bottom:0, textAlign:'center'}} className={classes.toolbar}>
+      <div style={{width: drawerWidth-1, zIndex: 10, backgroundColor: theme.palette.background.paper, position:"fixed", bottom:0, textAlign:'center'}} className={classes.toolbar}>
         <span style={{position:'absolute', bottom:'10px', left:'0', right:'0'}}>Connected to Mainnet - v2.0.0</span>
       </div>
     </div>
