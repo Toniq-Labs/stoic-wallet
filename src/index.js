@@ -1,6 +1,6 @@
 import './polyfills';
 import React from 'react';
-import ReactDOM from 'react-dom';
+import {createRoot} from 'react-dom/client';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import { ThemeProvider } from '@material-ui/core/styles';
 import App from './App';
@@ -386,7 +386,8 @@ if (params.get('stoicTunnel') !== null) {
     }
   }
 } else {
-  ReactDOM.render(
+  const root = createRoot(document.querySelector('#root'));
+  root.render(
     <Provider store={store}>
       <ThemeProvider theme={theme}>
         <CssBaseline />
@@ -395,6 +396,5 @@ if (params.get('stoicTunnel') !== null) {
         </ErrorBoundary>
       </ThemeProvider>
     </Provider>,
-    document.querySelector('#root'),
   );      
 }
