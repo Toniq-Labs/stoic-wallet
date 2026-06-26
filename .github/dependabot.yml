@@ -1,33 +1,22 @@
 version: 2
+# Dependabot is configured for SECURITY UPDATES ONLY.
+#
+# Routine version-update PRs are disabled below via `open-pull-requests-limit: 0`.
+# This app has tightly-coupled, pinned stacks (@dfinity/*, React, CRA) whose major
+# bumps can't be applied automatically, so the weekly version PRs were just noise.
+#
+# Security updates are NOT affected by this limit: when a dependency has a known
+# vulnerability, Dependabot will still open a PR. (Make sure "Dependabot security
+# updates" is enabled under Settings -> Advanced Security.)
+#
+# No `ignore` rules here on purpose — `ignore` can also suppress security PRs, and
+# we never want to silence a vulnerability fix. To resume routine version bumps,
+# raise the limit and re-add the grouping/ignore rules from git history.
 updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "weekly"
-    open-pull-requests-limit: 5
+    open-pull-requests-limit: 0
     labels:
       - "dependencies"
-    groups:
-      # Batch low-risk updates into one PR to cut review noise
-      minor-and-patch:
-        update-types:
-          - "minor"
-          - "patch"
-    ignore:
-      # The @dfinity/* agent stack is tightly coupled and pinned at 0.9.x.
-      # These are 0.x packages, so a 0.9 -> 0.14 bump is a *minor* in semver terms
-      # but still breaking — it must be upgraded as a coordinated, tested whole
-      # (see #55/#128). Allow only patch updates here; do majors/minors by hand.
-      - dependency-name: "@dfinity/*"
-        update-types:
-          - "version-update:semver-major"
-          - "version-update:semver-minor"
-      # react + react-dom must move together as a deliberate framework upgrade,
-      # never as a lone dependabot bump (see #126, react-dom 17 -> 19 mismatch).
-      - dependency-name: "react"
-        update-types: ["version-update:semver-major"]
-      - dependency-name: "react-dom"
-        update-types: ["version-update:semver-major"]
-      # react-scripts / CRA toolchain majors are handled by the migration (#107).
-      - dependency-name: "react-scripts"
-        update-types: ["version-update:semver-major"]
