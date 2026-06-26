@@ -546,7 +546,7 @@ function AccountDetail(props) {
         </Grid>
       </div>
       {currentToken !== 0 && currentToken !== 'nft' && currentToken !== 'other' ? (
-        <div style={{marginLeft: '15px', color: 'rgba(0, 0, 0, 0.54)'}}>
+        <div style={{marginLeft: '15px', color: theme.palette.text.secondary}}>
           <strong>Token ID:</strong> {account.tokens[currentToken].id}
           <SnackbarButton
             message="Token ID Copied"
