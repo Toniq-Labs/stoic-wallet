@@ -81,7 +81,12 @@ const useStyles = makeStyles((theme) => ({
 function Wallet(props) {
   const classes = useStyles();
   const [mobileOpen, setMobileOpen] = React.useState(false);
-  const [route, setRoute] = React.useState('accountDetail');
+  const [route, setRoute] = React.useState(() => {
+    try {
+      const saved = localStorage.getItem('stoic-route');
+      return saved && routes[saved] ? saved : 'accountDetail';
+    } catch (e) { return 'accountDetail'; }
+  });
   const [toolbarTitle, setToolbarTitle] = React.useState(routes[route].title);
   const dispatch = useDispatch()
   
@@ -106,6 +111,7 @@ function Wallet(props) {
   const changeRoute = (r, i) => {
     setToolbarTitle(routes[r].title);
     setRoute(r);
+    try { localStorage.setItem('stoic-route', r); } catch (e) {}
     if (typeof i !== 'undefined') dispatch({ type: 'currentAccount', payload: {index:i}});
   };
   
