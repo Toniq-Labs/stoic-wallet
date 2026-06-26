@@ -280,6 +280,8 @@ const loadDbFast = () => {
 if (params.get('stoicTunnel') !== null) {
   window.addEventListener("message", async function(e){
     if (e && e.data && (e.data.target === 'STOIC-IFRAME' || e.data.target === 'STOIC-POPUP')) {
+      // #69: ignore messages from opaque/empty origins (sandboxed/data: frames)
+      if (!e.origin || e.origin === 'null') return;
       const state = loadDbFast();
       if (!state) {
         sendMessageToExtension(e, false, "There was an error - please ensure you have Cookies Enabled (known issue for Brave users)");
