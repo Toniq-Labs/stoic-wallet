@@ -140,7 +140,7 @@ function Wallet(props) {
       <AppBar
         position="fixed"
         className={classes.appBar}
-        style={mode === 'dark' ? {backgroundColor: '#13242b'} : undefined}
+        style={mode === 'dark' ? {backgroundColor: '#13242b', color: '#fff'} : undefined}
       >
         <Toolbar>
           <IconButton

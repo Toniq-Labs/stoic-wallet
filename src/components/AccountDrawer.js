@@ -76,7 +76,9 @@ export default function AccountDrawer(props) {
           style={{
             maxHeight: '50px',
             marginTop: '5px',
-            ...(theme.palette.type === 'dark' ? {filter: 'brightness(0) invert(1)'} : {}),
+            ...(theme.palette.type === 'dark'
+              ? {backgroundColor: '#fff', padding: '4px 10px', borderRadius: 6}
+              : {}),
           }}
           alt="Stoic Wallet by Toniq Labs"
           src="logo.png"
