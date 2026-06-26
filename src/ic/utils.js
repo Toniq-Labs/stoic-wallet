@@ -4,6 +4,7 @@ import { Ed25519KeyIdentity } from "@dfinity/identity";
 import { getCrc32 } from "@dfinity/principal/lib/esm/utils/getCrc"
 import { sha224 } from '@dfinity/principal/lib/esm/utils/sha224';
 import RosettaApi from './RosettaApi.js';
+import {amountToBigInt, getSubAccountArray, from32bits, to32bits, toHexString, fromHexString, isHex, validateAddress} from './format.js';
 const LEDGER_CANISTER_ID = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 const GOVERNANCE_CANISTER_ID = "rrkah-fqaaa-aaaaa-aaaaq-cai";
 const NNS_CANISTER_ID = "qoctq-giaaa-aaaaa-aaaea-cai";
@@ -18,15 +19,6 @@ const getCyclesTopupAddress = (canisterId) => {
 const getCyclesTopupSubAccount = (canisterId) => {
   var pb = Array.from(Principal.fromText(canisterId).toUint8Array());
   return [pb.length, ...pb];
-}
-const amountToBigInt = (amount, decimals) => {
-  //decimals = decimals ?? 8;
-  if (amount < 1) {
-    amount = BigInt(amount*(10**decimals));
-  } else {
-    amount = BigInt(amount)*BigInt(10**decimals)
-  }
-  return amount;
 }
 const principalToAccountIdentifier = (p, s) => {
   const padding = Buffer.from("\x0Aaccount-id");
@@ -43,37 +35,6 @@ const principalToAccountIdentifier = (p, s) => {
   ]);
   return toHexString(array2);
 };
-const getSubAccountArray = (s) => {
-  if (Array.isArray(s)){
-    return s.concat(Array(32-s.length).fill(0));
-  } else {
-    //32 bit number only
-    return Array(28).fill(0).concat(to32bits(s ? s : 0))
-  }
-};
-const from32bits = ba => {
-  var value;
-  for (var i = 0; i < 4; i++) {
-    value = (value << 8) | ba[i];
-  }
-  return value;
-}
-const to32bits = num => {
-  let b = new ArrayBuffer(4);
-  new DataView(b).setUint32(0, num);
-  return Array.from(new Uint8Array(b));
-}
-const toHexString = (byteArray)  =>{
-  return Array.from(byteArray, function(byte) {
-    return ('0' + (byte & 0xFF).toString(16)).slice(-2);
-  }).join('')
-}
-const fromHexString = (hex) => {
-  if (hex.substr(0,2) === "0x") hex = hex.substr(2);
-  for (var bytes = [], c = 0; c < hex.length; c += 2)
-  bytes.push(parseInt(hex.substr(c, 2), 16));
-  return bytes;
-}
 const mnemonicToId = (mnemonic) => {
   var seed = bip39.mnemonicToSeedSync(mnemonic);
   seed = Array.from(seed);
@@ -100,13 +61,6 @@ const decrypt = (data, principal, password) => {
       }
     });
   });
-}
-const isHex = (h) => {
-  var regexp = /^[0-9a-fA-F]+$/;
-  return regexp.test(h);
-};
-const validateAddress = (a) => {
-  return (isHex(a) && a.length === 64)
 }
 const validatePrincipal = (p) => {
   try {
