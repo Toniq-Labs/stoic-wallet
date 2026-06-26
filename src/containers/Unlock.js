@@ -22,6 +22,9 @@ import FacebookIcon from '@material-ui/icons/Facebook';
 import GitHubIcon from '@material-ui/icons/GitHub';
 import { useFilePicker } from 'use-file-picker';
 import { identityTypes } from '../utils';
+import useMediaQuery from '@material-ui/core/useMediaQuery';
+import { useTheme } from '@material-ui/core/styles';
+import CheckIcon from '@material-ui/icons/Check';
 
 function Unlock(props) {
   const principals = useSelector(state => state.principals)
@@ -73,7 +76,7 @@ function Unlock(props) {
     if (!StoicIdentity.validatePassword(password)) return error("Password is invalid, please try again");
     props.loader(true);
     setOpen(false);
-    
+
     StoicIdentity.unlock(identity, {password : password}).then(r => {
       props.login();
     }).catch(e => {
@@ -86,7 +89,7 @@ function Unlock(props) {
   }
   const pemLogin = () => {
     openFileSelector();
-    
+
   }
   const iiLogin = () => {
     props.loader(true);
@@ -104,138 +107,124 @@ function Unlock(props) {
   };
   const capitalizeFirstLetter = ([ first, ...rest ], locale = navigator.language) =>
   first.toLocaleUpperCase(locale) + rest.join('')
-  return (
+
+  // --- presentation only below; the unlock handlers above are unchanged ---
+  const theme = useTheme();
+  const fullScreen = useMediaQuery(theme.breakpoints.down('xs'));
+  const isSocial = ['google', 'twitter', 'facebook', 'github'].indexOf(identity.type) >= 0;
+  const socialIcon = {
+    google: <MailIcon />, twitter: <TwitterIcon />, facebook: <FacebookIcon />, github: <GitHubIcon />,
+  }[identity.type];
+
+  // Footer actions shared by every unlock method.
+  const commonActions = (
     <>
-    {changeDialog ?
-      <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Select a Principal</DialogTitle>
-        <DialogContent>
-          <List
-            component="nav"
-            aria-labelledby="settings-list"
-          >
-            {principals.map((principal, i) => {
-              const firstAccount = principal.accounts[0];
-              const accountCount = principal.accounts.length;
-              return (
-              <ListItem key={principal.identity.principal} button selected={i === currentPrincipal} onClick={() => changePrincipal(i)}>
-                <ListItemAvatar>
-                  <Avatar>
-                    <Blockie address={firstAccount ? firstAccount.address : (principal.identity.principal ?? '')} />
-                  </Avatar>
-                </ListItemAvatar>
-                <ListItemText 
-                  primaryTypographyProps={{noWrap:true}} 
-                  secondaryTypographyProps={{noWrap:true, component:'span'}}
-                  primary={principal.identity.principal}
-                  secondary={
-                    <>
-                      {identityTypes[principal.identity.type]} · {accountCount} account{accountCount === 1 ? '' : 's'}
-                      {firstAccount ? <><br />{firstAccount.address.substr(0, 24) + '…'}</> : ''}
-                    </>
-                  } />
-              </ListItem>) 
-            })}
-          </List>
-            
-        </DialogContent>
-      </Dialog>
-    :
-    <>
-      {identity.type === 'ii' ?
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-          <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
-          <DialogContent>
-            <List component="nav" aria-label="secondary add principal">
-              <ListItem button onClick={iiLogin}>
-                <ListItemIcon>
-                  <AllInclusiveIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Re-authenticate your Internet Identity" 
-                  secondary="We need to authenticate your Internet Identity" 
-                />
-              </ListItem>
-            </List> 
-              
-          </DialogContent>
-          <DialogActions>
-            { principals.length > 1 ? <Button onClick={change} color="primary">Change Account</Button> : "" }
-            <Button onClick={clear} color="primary">Clear Wallet</Button>
-          </DialogActions>
-        </Dialog>: ""}
-        {identity.type === 'pem' ?
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-          <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
-          <DialogContent>
-            <List component="nav" aria-label="secondary add principal">
-              <ListItem button onClick={pemLogin}>
-                <ListItemIcon>
-                  <InsertDriveFileIcon />
-                </ListItemIcon>
-                <ListItemText 
-                  primary="Select your PEM file to access your wallet" 
-                  secondary="We need to authenticate your PEM file" 
-                />
-              </ListItem>
-            </List> 
-              
-          </DialogContent>
-          <DialogActions>
-            { principals.length > 1 ? <Button onClick={change} color="primary">Change Account</Button> : "" }
-            <Button onClick={clear} color="primary">Clear Wallet</Button>
-          </DialogActions>
-        </Dialog>: ""}
-        {identity.type === 'private' ?
-          <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-            <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
-            <DialogContent>
-              <p><strong>Enter your password to unlock your wallet.</strong></p>
-              <TextField
-                id="standard-textarea"
-                label="Enter Password"
-                fullWidth
-                required
-                type="password" autoComplete="off"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onKeyDown={(e) => { if (e.key === 'Enter') loginPassword(); }}
-              />
-            </DialogContent>
-            <DialogActions>
-              { principals.length > 1 ? <Button onClick={change} color="primary">Change Account</Button> : "" }
-              <Button onClick={clear} color="primary">Clear Wallet</Button>
-              <Button onClick={loginPassword} color="primary">Unlock</Button>
-            </DialogActions>
-          </Dialog>
-        : ""}
-        {['google', 'twitter', 'facebook', 'github'].indexOf(identity.type) >= 0 ?
-        <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-          <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}>Unlock your Wallet</DialogTitle>
-          <DialogContent>
-            <List component="nav" aria-label="secondary add principal">
-              <ListItem button onClick={iiLogin}>
-                <ListItemIcon>
-                  {identity.type === 'google' ? <MailIcon /> : ""}
-                  {identity.type === 'twitter' ? <TwitterIcon /> : ""}
-                  {identity.type === 'facebook' ? <FacebookIcon /> : ""}
-                  {identity.type === 'github' ? <GitHubIcon /> : ""}
-                </ListItemIcon>
-                <ListItemText 
-                  primary={"Login to your " + capitalizeFirstLetter(identity.type) + " account"} 
-                  secondary="We need to authenticate your account to continue" 
-                />
-              </ListItem>
-            </List> 
-              
-          </DialogContent>
-          <DialogActions>
-            { principals.length > 1 ? <Button onClick={change} color="primary">Change Account</Button> : "" }
-            <Button onClick={clear} color="primary">Clear Wallet</Button>
-          </DialogActions>
-        </Dialog>: ""}
-      </> }
+      {principals.length > 1 ? <Button onClick={change} color="primary">Change Account</Button> : ''}
+      <Button onClick={clear} color="primary">Clear Wallet</Button>
     </>
+  );
+
+  // The unlock-method-specific content + actions (single source instead of a
+  // duplicated <Dialog> per method).
+  let content = null;
+  let actions = commonActions;
+  if (identity.type === 'ii') {
+    content = (
+      <List component="nav" aria-label="unlock method">
+        <ListItem button onClick={iiLogin}>
+          <ListItemIcon><AllInclusiveIcon /></ListItemIcon>
+          <ListItemText primary="Re-authenticate your Internet Identity" secondary="We need to authenticate your Internet Identity" />
+        </ListItem>
+      </List>
+    );
+  } else if (identity.type === 'pem') {
+    content = (
+      <List component="nav" aria-label="unlock method">
+        <ListItem button onClick={pemLogin}>
+          <ListItemIcon><InsertDriveFileIcon /></ListItemIcon>
+          <ListItemText primary="Select your PEM file to access your wallet" secondary="We need to authenticate your PEM file" />
+        </ListItem>
+      </List>
+    );
+  } else if (identity.type === 'private') {
+    content = (
+      <>
+        <p><strong>Enter your password to unlock your wallet.</strong></p>
+        <TextField
+          id="standard-textarea"
+          label="Enter Password"
+          fullWidth
+          required
+          type="password" autoComplete="off"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          onKeyDown={(e) => { if (e.key === 'Enter') loginPassword(); }}
+        />
+      </>
+    );
+    actions = (<>{commonActions}<Button onClick={loginPassword} color="primary">Unlock</Button></>);
+  } else if (isSocial) {
+    content = (
+      <List component="nav" aria-label="unlock method">
+        <ListItem button onClick={iiLogin}>
+          <ListItemIcon>{socialIcon}</ListItemIcon>
+          <ListItemText primary={"Login to your " + capitalizeFirstLetter(identity.type) + " account"} secondary="We need to authenticate your account to continue" />
+        </ListItem>
+      </List>
+    );
+  }
+
+  return (
+    <Dialog hideBackdrop maxWidth={'sm'} fullWidth fullScreen={fullScreen} open={open}>
+      {changeDialog ? (
+        <>
+          <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>Switch Principal</DialogTitle>
+          <DialogContent>
+            <List component="nav" aria-label="principals">
+              {principals.map((principal, i) => {
+                const firstAccount = principal.accounts[0];
+                const accountCount = principal.accounts.length;
+                return (
+                  <ListItem
+                    key={principal.identity.principal}
+                    button
+                    selected={i === currentPrincipal}
+                    onClick={() => changePrincipal(i)}
+                  >
+                    <ListItemAvatar>
+                      <Avatar>
+                        <Blockie address={firstAccount ? firstAccount.address : (principal.identity.principal ?? '')} />
+                      </Avatar>
+                    </ListItemAvatar>
+                    <ListItemText
+                      primaryTypographyProps={{noWrap: true}}
+                      secondaryTypographyProps={{noWrap: true, component: 'span'}}
+                      primary={principal.identity.principal}
+                      secondary={
+                        <>
+                          {identityTypes[principal.identity.type]} · {accountCount} account{accountCount === 1 ? '' : 's'}
+                          {firstAccount ? <><br />{firstAccount.address.substr(0, 24) + '…'}</> : ''}
+                        </>
+                      }
+                    />
+                    {i === currentPrincipal ? <CheckIcon style={{color: '#00b894'}} /> : null}
+                  </ListItem>
+                );
+              })}
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setChangeDialog(false)} color="primary">Back</Button>
+          </DialogActions>
+        </>
+      ) : (
+        <>
+          <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>Unlock your Wallet</DialogTitle>
+          <DialogContent>{content}</DialogContent>
+          <DialogActions>{actions}</DialogActions>
+        </>
+      )}
+    </Dialog>
   );
 }
 
