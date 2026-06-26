@@ -18,6 +18,10 @@ import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
 import ConnectList from '../components/ConnectList';
 import WalletDialog from '../components/WalletDialog';
+import InputForm from '../components/InputForm';
+import EditIcon from '@material-ui/icons/Edit';
+import extjs from '../ic/extjs.js';
+import {LEDGER_CANISTER_ID} from '../ic/utils.js';
 
 function Settings(props) {
   const [assets, setAssets] = React.useState([]);
@@ -27,6 +31,26 @@ function Settings(props) {
   const accounts = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].accounts : []));
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}));
   const principals = useSelector(state => state.principals);
+  const [balances, setBalances] = React.useState({});
+  React.useEffect(() => {
+    let cancelled = false;
+    const api = extjs.connect('https://icp0.io/');
+    principals.forEach(async (principal, i) => {
+      let sum = 0;
+      await Promise.all(principal.accounts.map(async (acc) => {
+        try {
+          const b = await api.token(LEDGER_CANISTER_ID, 'ledger').getBalance(acc.address, principal.identity.principal);
+          sum += Number(b);
+        } catch (e) {}
+      }));
+      if (!cancelled) setBalances((prev) => ({...prev, [i]: sum / 1e8}));
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [principals.length]);
+  const renamePrincipal = (index, name) => {
+    dispatch({ type: 'principal/edit', payload: {index: index, name: (name || '').trim()} });
+  };
   const error = (e) => {
     props.alert("There was an error", e);
   }
@@ -131,7 +155,7 @@ function Settings(props) {
             primaryTypographyProps={{noWrap:true}} 
             primary={
               <>
-                {identity.principal}
+                {principals[currentPrincipal] && principals[currentPrincipal].name ? principals[currentPrincipal].name : identity.principal}
                 <SnackbarButton
                   message="Principal Copied"
                   anchorOrigin={{
@@ -152,6 +176,9 @@ function Settings(props) {
               </>
             } />
           <ListItemSecondaryAction>
+            <InputForm title="Name this principal" content="Give this principal a memorable name to tell it apart." inputLabel="Principal name" buttonLabel="Save" defaultValue={(principals[currentPrincipal] && principals[currentPrincipal].name) || ''} onClick={(name) => renamePrincipal(currentPrincipal, name)}>
+              <IconButton edge="end" aria-label="Name this principal"><EditIcon /></IconButton>
+            </InputForm>
             <IconButton href={"https://icscan.io/principal/"+identity.principal} target="_blank" rel="noopener noreferrer" edge="end" aria-label="search">
               <LaunchIcon />
             </IconButton>
@@ -175,14 +202,14 @@ function Settings(props) {
             <ListItem key={principal.identity.principal} button onClick={() => changePrincipal(i)}>
               <ListItemAvatar>
                 <Avatar>
-                  <Blockie address={principal.identity.principal ?? ''} />
+                  <Blockie address={principal.accounts[0] ? principal.accounts[0].address : (principal.identity.principal ?? '')} />
                 </Avatar>
               </ListItemAvatar>
               <ListItemText 
                 primaryTypographyProps={{noWrap:true}} 
                 primary={
                   <>
-                    {principal.identity.principal}
+                    {principal.name ? principal.name : principal.identity.principal}
                       {/*<SnackbarButton
                       message="Principal Copied"
                       anchorOrigin={{
@@ -197,13 +224,19 @@ function Settings(props) {
                       </SnackbarButton>*/}
                   </>
                 } 
+                secondaryTypographyProps={{component: 'span'}}
                 secondary={
                   <>
-                    <>{identityTypes[principal.identity.type]}</>
+                    {identityTypes[principal.identity.type]} · {principal.accounts.length} account{principal.accounts.length === 1 ? '' : 's'}
+                    {principal.accounts[0] ? <><br />{principal.accounts[0].address.substr(0, 24) + '…'}</> : ''}
+                    <br />{balances[i] === undefined ? 'Loading balance…' : '≈ ' + balances[i].toFixed(4) + ' ICP'}
                   </>
                 } 
               />
               <ListItemSecondaryAction>
+                <InputForm title="Name this principal" content="Give this principal a memorable name to tell it apart." inputLabel="Principal name" buttonLabel="Save" defaultValue={principal.name || ''} onClick={(name) => renamePrincipal(i, name)}>
+                  <IconButton edge="end" aria-label="Name this principal"><EditIcon /></IconButton>
+                </InputForm>
                 <IconButton aria-label="Copy principal" onClick={() => clipboardCopy(principal.identity.principal)} edge="end">
                   <FileCopyIcon />
                 </IconButton>
