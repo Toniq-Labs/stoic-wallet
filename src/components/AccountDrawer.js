@@ -56,7 +56,7 @@ export default function AccountDrawer(props) {
     <div style={{marginTop:64, marginBottom: 100}}>
       <div style={{width:drawerWidth-1, zIndex: 10, backgroundColor: theme.palette.background.paper, position:"fixed", top:0, textAlign:"center"}} className={classes.toolbar}>
         {/*<span style={{display:'block', fontSize:'x-large',padding:'15px 0', textAlign:'center',fontWeight:'bold'}}>Stoic Wallet <span style={{fontSize:'small',fontWeight:'normal'}}>By Toniq Labs</span></span>*/}
-        <img style={{maxHeight:'50px',marginTop:'5px', ...(theme.palette.type === 'dark' ? {filter: 'brightness(0) invert(1)'} : {})}} alt="Stoic Wallet by Toniq Labs" src="logo.png" />
+        <img style={{maxHeight:'50px',marginTop:'5px', ...(theme.palette.type === 'dark' ? {backgroundColor: '#fff', padding: '4px 10px', borderRadius: 6} : {})}} alt="Stoic Wallet by Toniq Labs" src="logo.png" />
       </div>
       <Divider />
       <List>

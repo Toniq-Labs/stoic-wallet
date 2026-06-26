@@ -19,6 +19,7 @@ export const makeTheme = (mode = 'light') => {
       MuiCssBaseline: {
         '@global': {
           body: isDark ? { backgroundImage: 'none' } : { backgroundImage: 'url(./bg.png)' },
+          a: isDark ? { color: '#4dd0e1' } : {},
         },
       },
       MuiIconButton: { label: { color: '#00b894' } },

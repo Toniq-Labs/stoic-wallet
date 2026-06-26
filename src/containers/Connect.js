@@ -71,7 +71,7 @@ function Connect(props) {
   return (
     <>
       <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
-        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}><img style={{maxHeight:'80px',marginTop:'5px', ...(theme.palette.type === 'dark' ? {filter: 'brightness(0) invert(1)'} : {})}} alt="Stoic Wallet by Toniq Labs" src="logo.png" /></DialogTitle>
+        <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}><img style={{maxHeight:'80px',marginTop:'5px', ...(theme.palette.type === 'dark' ? {backgroundColor: '#fff', padding: '4px 10px', borderRadius: 6} : {})}} alt="Stoic Wallet by Toniq Labs" src="logo.png" /></DialogTitle>
         <DialogContent>
           <p style={{textAlign: 'center', marginTop: 0, color: '#777', fontSize: '0.95em'}}>
             A non-custodial wallet for the Internet Computer.<br />

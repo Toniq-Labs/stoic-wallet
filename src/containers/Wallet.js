@@ -126,7 +126,7 @@ function Wallet(props) {
   return (
     <div className={classes.root}>
       <CssBaseline />
-      <AppBar position="fixed" className={classes.appBar} style={mode === 'dark' ? {backgroundColor: '#13242b'} : undefined}>
+      <AppBar position="fixed" className={classes.appBar} style={mode === 'dark' ? {backgroundColor: '#13242b', color: '#fff'} : undefined}>
         <Toolbar>
           <IconButton
             color="inherit"
