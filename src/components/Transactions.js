@@ -80,24 +80,21 @@ export default function Transactions(props) {
         </div>
       ) : (
         <>
-          <div style={{display: 'flex', gap: '8px', alignItems: 'center', marginTop: '13px', marginBottom: '10px', flexWrap: 'wrap'}}>
+          <div style={{display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap', margin: '13px 0'}}>
             <TextField
               size="small"
               variant="outlined"
               placeholder="Search address, amount, sent/received…"
               value={query}
               onChange={(e) => { setQuery(e.target.value); setPage(1); }}
-              style={{flex: 1, minWidth: 200, maxWidth: 360}}
+              style={{flex: 1, minWidth: 180, maxWidth: 300}}
             />
             <Button size="small" variant="outlined" startIcon={<GetAppIcon />} onClick={exportCsv}>
               Export CSV
             </Button>
-          </div>
-          <div style={{float:"right", marginTop: '13px', marginBottom: '20px'}}>
-            <span style={{display:"inline-block", paddingTop: '3px'}}>Data powered by <a href="https://nftgeek.app/" target="_blank" rel="noreferrer">nftGeek</a></span>
+            <span style={{marginLeft: 'auto', fontSize: 'small', whiteSpace: 'nowrap'}}>Data powered by <a href="https://nftgeek.app/" target="_blank" rel="noreferrer">nftGeek</a></span>
             {list.length > perPage ? (
               <Pagination
-                style={{float: 'right', marginLeft:"10px"}}
                 size="small"
                 count={Math.ceil(list.length / perPage)}
                 page={page}
@@ -107,6 +104,13 @@ export default function Transactions(props) {
               ''
             )}
           </div>
+          {list.length === 0 ? (
+            <div style={styles.empty}>
+              <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
+                No transactions match your search.
+              </Typography>
+            </div>
+          ) : (
           <TableContainer component={Paper}>
             <Table style={styles.table} aria-label="simple table">
               <TableHead>
@@ -183,6 +187,7 @@ export default function Transactions(props) {
               </TableBody>
             </Table>
           </TableContainer>
+          )}
         </>
       )}
     </>
