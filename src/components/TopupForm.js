@@ -41,6 +41,7 @@ export default function TopupForm(props) {
     if (Number(amount) + Number(fee) > balance) return error('You have insufficient ICP');
     setStep(1);
   };
+  const submitting = React.useRef(false);
   const submit = () => {
     //Submit to blockchain here
     var _from_principal = identity.principal;
@@ -52,6 +53,8 @@ export default function TopupForm(props) {
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error('Something wrong with your wallet, try logging in again');
 
+    if (submitting.current) return;
+    submitting.current = true;
     props.loader(true);
     handleClose();
 
@@ -71,6 +74,7 @@ export default function TopupForm(props) {
       })
       .finally(() => {
         props.loader(false);
+        submitting.current = false;
       });
   };
   const handleClick = () => {
