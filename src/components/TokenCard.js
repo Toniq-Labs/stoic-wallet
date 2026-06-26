@@ -41,7 +41,6 @@ const styles = {
     marginBottom: 12,
   },
 };
-var intervalId = 0;
 const api = extjs.connect('https://icp0.io/');
 function TokenCard(props) {
   const [balance, setBalance] = React.useState(false);
@@ -66,14 +65,13 @@ function TokenCard(props) {
       .getBalance(props.address, identity.principal)
       .then(b => {
         setBalance(Number(b) / 10 ** props.data.decimals);
-      });
+      })
+      .catch(() => {});
   };
   React.useEffect(() => {
     updateBalance();
-    intervalId = setInterval(() => updateBalance(), 10000);
-    return () => {
-      clearInterval(intervalId);
-    };
+    const id = setInterval(() => updateBalance(), 10000);
+    return () => clearInterval(id);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
   React.useEffect(() => {
