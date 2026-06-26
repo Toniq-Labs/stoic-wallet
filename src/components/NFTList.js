@@ -410,7 +410,7 @@ export default function NFTList(props) {
                                         key={1}
                                         onClick={() => {
                                           handleClose();
-                                          nftAction(nft.tokenid, nft.standard, 0);
+                                          nftAction(nft.tokenid, '00', nft.standard);
                                         }}
                                       >
                                         Remove Wearables
