@@ -8,6 +8,7 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Pagination from '@material-ui/lab/Pagination';
 import Typography from '@material-ui/core/Typography';
+import Skeleton from '@material-ui/lab/Skeleton';
 import Timestamp from 'react-timestamp';
 const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
@@ -27,10 +28,10 @@ export default function Transactions(props) {
   return (
     <>
       {props.transactions === false ? (
-        <div style={styles.empty}>
-          <Typography paragraph style={{paddingTop: 20, fontWeight: 'bold'}} align="center">
-            Loading transactions...
-          </Typography>
+        <div style={{padding: '20px 0'}}>
+          {[...Array(5)].map((_, i) => (
+            <Skeleton key={i} variant="text" height={40} />
+          ))}
         </div>
       ) : props.transactions.length === 0 ? (
         <div style={styles.empty}>
