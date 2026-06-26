@@ -16,6 +16,8 @@ import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
 import {StoicIdentity} from '../ic/identity.js';
+import extjs from '../ic/extjs.js';
+import {LEDGER_CANISTER_ID} from '../ic/utils.js';
 import { useSelector, useDispatch } from 'react-redux'
 import ListItemAvatar from '@material-ui/core/ListItemAvatar';
 import Avatar from '@material-ui/core/Avatar';
@@ -33,6 +35,7 @@ function Unlock(props) {
   const identity = useSelector(state => (state.principals.length ? state.principals[currentPrincipal].identity : {}))
   const [open, setOpen] = React.useState(true);
   const [changeDialog, setChangeDialog] = React.useState(false);
+  const [balances, setBalances] = React.useState({});
   const [password, setPassword] = React.useState('');
   const dispatch = useDispatch()
   const [openFileSelector, fsobj] = useFilePicker({
@@ -66,6 +69,24 @@ function Unlock(props) {
       }
     });
   };
+  React.useEffect(() => {
+    if (!changeDialog) return;
+    let cancelled = false;
+    setBalances({});
+    const api = extjs.connect('https://icp0.io/');
+    principals.forEach(async (principal, i) => {
+      let sum = 0;
+      await Promise.all(principal.accounts.map(async (acc) => {
+        try {
+          const b = await api.token(LEDGER_CANISTER_ID, 'ledger').getBalance(acc.address, principal.identity.principal);
+          sum += Number(b);
+        } catch (e) {}
+      }));
+      if (!cancelled) setBalances(prev => ({...prev, [i]: sum / 1e8}));
+    });
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [changeDialog]);
   const renamePrincipal = (index, name) => {
     dispatch({ type: 'principal/edit', payload : {index : index, name : (name || '').trim()}});
   };
@@ -139,6 +160,7 @@ function Unlock(props) {
                     <>
                       {identityTypes[principal.identity.type]} · {accountCount} account{accountCount === 1 ? '' : 's'}
                       {firstAccount ? <><br />{firstAccount.address.substr(0, 24) + '…'}</> : ''}
+                      <br />{balances[i] === undefined ? 'Loading balance…' : '≈ ' + balances[i].toFixed(4) + ' ICP'}
                     </>
                   } />
                 <ListItemSecondaryAction>
