@@ -17,6 +17,11 @@ import { makeStyles, useTheme } from '@material-ui/core/styles';
 import { useSelector, useDispatch } from 'react-redux'
 
 import Blockie from '../components/Blockie';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
+import FileCopyIcon from '@material-ui/icons/FileCopy';
+import SnackbarButton from '../components/SnackbarButton';
+import {clipboardCopy} from '../utils';
 
 const drawerWidth = 300;
 
@@ -74,6 +79,17 @@ export default function AccountDrawer(props) {
                   secondaryTypographyProps={{noWrap:true}} 
                   primary={account.name}
                   secondary={account.address} />
+                <ListItemSecondaryAction>
+                  <SnackbarButton
+                    message="Address Copied"
+                    anchorOrigin={{vertical: 'bottom', horizontal: 'left'}}
+                    onClick={() => clipboardCopy(account.address)}
+                  >
+                    <IconButton edge="end" size="small" aria-label="copy address">
+                      <FileCopyIcon style={{fontSize: 18}} />
+                    </IconButton>
+                  </SnackbarButton>
+                </ListItemSecondaryAction>
               </ListItem>
             </div>
           )
