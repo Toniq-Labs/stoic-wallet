@@ -18,6 +18,9 @@ import Blockie from '../components/Blockie';
 import SnackbarButton from '../components/SnackbarButton';
 import ConnectList from '../components/ConnectList';
 import WalletDialog from '../components/WalletDialog';
+import Select from '@material-ui/core/Select';
+import MenuItem from '@material-ui/core/MenuItem';
+import FormControl from '@material-ui/core/FormControl';
 import InputForm from '../components/InputForm';
 import EditIcon from '@material-ui/icons/Edit';
 import extjs from '../ic/extjs.js';
@@ -133,6 +136,9 @@ function Settings(props) {
     makeAssets();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentPrincipal]);
+  const [autoLock, setAutoLock] = React.useState(() => {
+    try { return parseInt(localStorage.getItem('stoic-autolock') || '15', 10); } catch (e) { return 15; }
+  });
   return (
     <>
       <List
@@ -182,6 +188,31 @@ function Settings(props) {
             <IconButton href={"https://icscan.io/principal/"+identity.principal} target="_blank" rel="noopener noreferrer" edge="end" aria-label="search">
               <LaunchIcon />
             </IconButton>
+          </ListItemSecondaryAction>
+        </ListItem>
+      </List>
+      <Divider />
+      <List component="nav" subheader={<ListSubheader>Preferences</ListSubheader>}>
+        <ListItem>
+          <ListItemText primary="Auto-lock" secondary="Lock the wallet after this much inactivity" />
+          <ListItemSecondaryAction>
+            <FormControl size="small" variant="outlined" style={{minWidth: 130}}>
+              <Select
+                value={autoLock}
+                onChange={(e) => {
+                  setAutoLock(e.target.value);
+                  try { localStorage.setItem('stoic-autolock', String(e.target.value)); } catch (err) {}
+                }}
+                inputProps={{'aria-label': 'Auto-lock timeout'}}
+              >
+                <MenuItem value={0}>Never</MenuItem>
+                <MenuItem value={1}>1 minute</MenuItem>
+                <MenuItem value={5}>5 minutes</MenuItem>
+                <MenuItem value={15}>15 minutes</MenuItem>
+                <MenuItem value={30}>30 minutes</MenuItem>
+                <MenuItem value={60}>1 hour</MenuItem>
+              </Select>
+            </FormControl>
           </ListItemSecondaryAction>
         </ListItem>
       </List>
