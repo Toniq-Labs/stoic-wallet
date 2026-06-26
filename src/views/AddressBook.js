@@ -25,6 +25,9 @@ function AddressBook(props) {
   const dispatch = useDispatch()
   
   const editAddress = (name, address, index) => {
+    if (!name) return error("Please enter a valid contact name");
+    if (name.length > 30) return error("Max length or contact names is 30 characters");
+    if (!validateAddress(address) && !validatePrincipal(address)) return error("Please enter a valid address or principal");
     dispatch({ type: 'addresses/edit', payload: {
       index : index,
       name : name,
