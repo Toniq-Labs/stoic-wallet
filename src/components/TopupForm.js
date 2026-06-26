@@ -51,8 +51,8 @@ export default function TopupForm(props) {
     var _from_principal = identity.principal;
     var _from_sa = currentAccount;
     var _canister = to;
-    var _amount = BigInt(amount * 10 ** 8);
-    var _fee = BigInt(0.0001 * 10 ** 8);
+    var _amount = BigInt(Math.round(Number(amount) * 10 ** 8));
+    var _fee = BigInt(10000);
     //Load signing ID
     const id = StoicIdentity.getIdentity(identity.principal);
     if (!id) return error('Something wrong with your wallet, try logging in again');
