@@ -28,7 +28,7 @@ export default function TopupForm(props) {
   const [to, setTo] = React.useState('');
 
   //cold API
-  const fee = 0.0002;
+  const fee = 0.0001;
   const api = extjs.connect('https://icp0.io/');
 
   const error = e => {
@@ -36,6 +36,7 @@ export default function TopupForm(props) {
   };
   const review = () => {
     if (isNaN(amount)) return error('Please enter a valid amount to send');
+    if (Number(amount) <= 0) return error('Please enter an amount greater than 0');
     if (!validatePrincipal(to)) return error('Please enter a valid canister ID');
     if (Number(amount) + Number(fee) > balance) return error('You have insufficient ICP');
     setStep(1);
@@ -140,7 +141,7 @@ export default function TopupForm(props) {
                 style={{fontSize: 'small', textAlign: 'center', marginTop: '20px'}}
               >
                 {balance !== false ? 'Balance: ' + balance + ' ' + props.data.symbol + ' ' : ''}
-                Min Fee: 0.0002
+                Min Fee: 0.0001
                 <br />
                 <strong style={{color: '#00b894'}}>1ICP converts to ~{rate}T Cycles</strong>
               </DialogContentText>
