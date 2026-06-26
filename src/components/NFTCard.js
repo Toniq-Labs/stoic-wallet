@@ -11,12 +11,14 @@ const styles = {
     height: '100%',
   },
   selectedCard: {
-    height: '100%',
+    height: 132,
+    overflow: 'hidden',
     backgroundColor: '#003240',
     color: 'white',
   },
   card: {
-    height: '100%',
+    height: 132,
+    overflow: 'hidden',
   },
   title: {
     fontSize: 14,
@@ -38,10 +40,11 @@ function NFTCard(props) {
               style={styles.title}
               color={props.selected ? 'inherit' : 'textSecondary'}
               gutterBottom
+              noWrap
             >
               {props.title}
             </Typography>
-            <Typography variant="h6">
+            <Typography variant="h6" noWrap>
               {props.count >= 0 ? props.count : ''}{' '}
               {props.count >= 0 ? (
                 typeof props.count != 'string' ? (
