@@ -302,6 +302,19 @@ function Settings(props) {
             primary="Remove all wallets from this device"/>
         </ListItem>
       </List>
+      <Divider />
+      <List component="nav" subheader={<ListSubheader>About</ListSubheader>}>
+        <ListItem>
+          <ListItemText primary="Stoic Wallet" secondary="Version 2.0.0 · Connected to Mainnet" />
+        </ListItem>
+        <ListItem button component="a" href="https://github.com/Toniq-Labs/stoic-wallet" target="_blank" rel="noopener noreferrer">
+          <ListItemText primary="Source code" secondary="github.com/Toniq-Labs/stoic-wallet" />
+          <LaunchIcon style={{color: '#00b894'}} />
+        </ListItem>
+        <ListItem button component="a" href="mailto:support@toniqlabs.com">
+          <ListItemText primary="Support" secondary="support@toniqlabs.com" />
+        </ListItem>
+      </List>
       <WalletDialog alert={props.alert} initialRoute={initialRoute} cancel={cancel} submit={submit} />
     </>
   );
