@@ -55,6 +55,7 @@ function initDb(_db){
         accounts : [],
         neurons : [],
         apps : [],
+        name : principal.name,
         identity : principal.identity
       };
       principal.accounts.forEach((account, subaccount) => {
@@ -161,6 +162,7 @@ function saveDb(newState){
       accounts : [],
       neurons : [],
       apps : [],
+      name : principal.name,
       identity : principal.identity
     };
     principal.accounts.forEach(account => {
@@ -360,6 +362,17 @@ function rootReducer(state = initDb(), action) {
       return saveDb({
         ...state,
         currentToken : action.payload.index ?? 0
+      });
+    case "principal/edit":
+      return saveDb({
+        ...state,
+        principals : state.principals.map((principal,i) => {
+          if (i === action.payload.index) {
+            return { ...principal, name : action.payload.name };
+          } else {
+            return principal;
+          }
+        }),
       });
     case "account/edit":
       return saveDb({

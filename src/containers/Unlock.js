@@ -8,6 +8,10 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemIcon from '@material-ui/core/ListItemIcon';
 import ListItemText from '@material-ui/core/ListItemText';
+import ListItemSecondaryAction from '@material-ui/core/ListItemSecondaryAction';
+import IconButton from '@material-ui/core/IconButton';
+import EditIcon from '@material-ui/icons/Edit';
+import InputForm from '../components/InputForm';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
 import InsertDriveFileIcon from '@material-ui/icons/InsertDriveFile';
 import TextField from '@material-ui/core/TextField';
@@ -61,6 +65,9 @@ function Unlock(props) {
         props.remove();
       }
     });
+  };
+  const renamePrincipal = (index, name) => {
+    dispatch({ type: 'principal/edit', payload : {index : index, name : (name || '').trim()}});
   };
   const changePrincipal = (p) => {
     dispatch({ type: 'currentPrincipal', payload : {index : p}});
@@ -127,13 +134,27 @@ function Unlock(props) {
                 <ListItemText 
                   primaryTypographyProps={{noWrap:true}} 
                   secondaryTypographyProps={{noWrap:true, component:'span'}}
-                  primary={principal.identity.principal}
+                  primary={principal.name ? principal.name : principal.identity.principal}
                   secondary={
                     <>
                       {identityTypes[principal.identity.type]} · {accountCount} account{accountCount === 1 ? '' : 's'}
                       {firstAccount ? <><br />{firstAccount.address.substr(0, 24) + '…'}</> : ''}
                     </>
                   } />
+                <ListItemSecondaryAction>
+                  <InputForm
+                    title="Name this principal"
+                    content="Give this principal a memorable name to tell it apart when switching."
+                    inputLabel="Principal name"
+                    buttonLabel="Save"
+                    defaultValue={principal.name ?? ''}
+                    onClick={(name) => renamePrincipal(i, name)}
+                  >
+                    <IconButton edge="end" aria-label="Name this principal" size="small">
+                      <EditIcon fontSize="small" />
+                    </IconButton>
+                  </InputForm>
+                </ListItemSecondaryAction>
               </ListItem>) 
             })}
           </List>
