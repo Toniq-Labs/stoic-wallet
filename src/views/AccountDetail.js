@@ -392,7 +392,7 @@ function AccountDetail(props) {
                       size="small"
                       label="Address"
                     />{' '}
-                    {account.address.substr(0, 29) + '...'}
+                    <Tooltip title={account.address}><span>{account.address.substr(0, 29) + '...'}</span></Tooltip>
                   </span>
                   <SnackbarButton
                     message="Address Copied"
@@ -423,7 +423,7 @@ function AccountDetail(props) {
                         size="small"
                         label="Principal ID"
                       />{' '}
-                      {principal.substr(0, 32) + '...'}
+                      <Tooltip title={principal}><span>{principal.substr(0, 32) + '...'}</span></Tooltip>
                     </span>
                     <SnackbarButton
                       message="Principal ID Copied"
