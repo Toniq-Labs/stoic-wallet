@@ -107,6 +107,10 @@ export default function SendForm(props) {
   const sendMax = () => {
     setAmount(balance - Number(fee))
   };
+  const setPct = (p) => {
+    const max = balance - Number(fee);
+    setAmount(max > 0 ? Math.round((max * p / 100) * 1e8) / 1e8 : 0);
+  };
   const handleClick = () => {
     setOpen(true);
   };
@@ -223,6 +227,9 @@ export default function SendForm(props) {
               ) : (
                 ''
               )}
+              <Button size="small" onClick={() => setPct(25)} color="primary">25%</Button>
+              <Button size="small" onClick={() => setPct(50)} color="primary">50%</Button>
+              <Button size="small" onClick={() => setPct(75)} color="primary">75%</Button>
               <Button size="small" variant="outlined" onClick={sendMax} color="primary">Max</Button>
               <DialogContentText
                 style={{fontSize: 'small', textAlign: 'center', marginTop: '20px'}}
