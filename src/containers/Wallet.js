@@ -136,7 +136,7 @@ function Wallet(props) {
           </div>
         </Toolbar>
       </AppBar>
-      <AccountDrawer lockWallet={lockWallet} changeRoute={changeRoute} onClose={handleDrawerClose} open={mobileOpen} />
+      <AccountDrawer route={route} lockWallet={lockWallet} changeRoute={changeRoute} onClose={handleDrawerClose} open={mobileOpen} />
       <main className={classes.content}>
         <div className={classes.toolbar} />
           {renderView(route)}
