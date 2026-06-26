@@ -46,6 +46,9 @@ const styles = {
   },
   actionArea: {
     height: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'center',
   },
   title: {
     fontSize: 14,
