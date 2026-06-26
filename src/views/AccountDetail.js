@@ -12,6 +12,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Avatar from '@material-ui/core/Avatar';
 import LaunchIcon from '@material-ui/icons/Launch';
 import SendIcon from '@material-ui/icons/Send';
+import CropFreeIcon from '@material-ui/icons/CropFree';
 import FileCopyIcon from '@material-ui/icons/FileCopy';
 import EditIcon from '@material-ui/icons/Edit';
 import Fab from '@material-ui/core/Fab';
@@ -24,6 +25,7 @@ import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
 import NFTCard from '../components/NFTCard';
 import SendForm from '../components/SendForm';
+import ReceiveDialog from '../components/ReceiveDialog';
 import TopupForm from '../components/TopupForm';
 import Transactions from '../components/Transactions';
 import NFTList from '../components/NFTList';
@@ -406,6 +408,11 @@ function AccountDetail(props) {
                       <FileCopyIcon style={{fontSize: 18}} />
                     </IconButton>
                   </SnackbarButton>
+                  <ReceiveDialog address={account.address}>
+                    <IconButton style={{top: '-10px'}} size="small" edge="end" aria-label="receive">
+                      <CropFreeIcon style={{fontSize: 18}} />
+                    </IconButton>
+                  </ReceiveDialog>
                 </div>
                 {currentAccount === 0 ? (
                   <div style={{fontSize: '0.9em'}}>
