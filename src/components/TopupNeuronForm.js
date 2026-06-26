@@ -30,6 +30,7 @@ export default function NeuronDelayForm(props) {
   const [balance, setBalance] = React.useState(false);
 
   React.useEffect(() => {
+    let cancelled = false;
     if (subaccount !== false) {
       api
         .token()
@@ -38,9 +39,11 @@ export default function NeuronDelayForm(props) {
           identity.principal,
         )
         .then(b => {
-          setBalance(Number(b) / 10 ** 8);
-        });
+          if (!cancelled) setBalance(Number(b) / 10 ** 8);
+        })
+        .catch(() => {});
     }
+    return () => { cancelled = true; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [subaccount, props.open]);
 
