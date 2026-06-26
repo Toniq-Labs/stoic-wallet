@@ -71,6 +71,10 @@ function Connect(props) {
       <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
         <DialogTitle id="form-dialog-title" style={{textAlign:'center'}}><img style={{maxHeight:'80px',marginTop:'5px'}} alt="Stoic Wallet by Toniq Labs" src="logo.png" /></DialogTitle>
         <DialogContent>
+          <p style={{textAlign: 'center', marginTop: 0, color: '#777', fontSize: '0.95em'}}>
+            A non-custodial wallet for the Internet Computer.<br />
+            Your keys are encrypted and never leave your device.
+          </p>
           <ConnectList handler={handleClick} />
         </DialogContent>
       </Dialog>
