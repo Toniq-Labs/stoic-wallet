@@ -119,6 +119,8 @@ function AccountDetail(props) {
       window.addEventListener(
         'message',
         function (e) {
+          // #69: ignore opaque/empty origins; never broadcast auth responses to '*'
+          if (!e.origin || e.origin === 'null') return;
           if (e.source === window.opener) {
             if (e.data.action === 'requestAuthorization') {
               var app = apps.find(a => a.host === e.origin);
@@ -131,7 +133,7 @@ function AccountDetail(props) {
                   : 'Standard',
               };
               if (app && app.apikey === e.data.apikey) {
-                window.opener.postMessage(authResponse, e.origin || '*');
+                window.opener.postMessage(authResponse, e.origin);
               } else {
                 props
                   .confirm(
@@ -156,9 +158,9 @@ function AccountDetail(props) {
                         app.apikey = e.data.apikey;
                         dispatch({type: 'app/edit', payload: {app: app}});
                       }
-                      window.opener.postMessage(authResponse, e.origin || '*');
+                      window.opener.postMessage(authResponse, e.origin);
                     } else {
-                      window.opener.postMessage({action: 'rejectAuthorization'}, e.origin || '*');
+                      window.opener.postMessage({action: 'rejectAuthorization'}, e.origin);
                     }
                   });
               }
@@ -167,6 +169,8 @@ function AccountDetail(props) {
         },
         false,
       );
+      // '*' is intentional here: the handshake trigger is sent before the opener
+      // origin is known and carries no sensitive data (unlike the auth responses).
       window.opener.postMessage({action: 'initiateStoicConnect'}, '*');
     }
     const nfttransfer = params.get('nftTx');
