@@ -107,6 +107,12 @@ export default function SendForm(props) {
   const sendMax = () => {
     setAmount(balance - Number(fee))
   };
+  const pasteAddress = async () => {
+    try {
+      const t = await navigator.clipboard.readText();
+      if (t) setTo(t.trim());
+    } catch (e) {}
+  };
   const handleClick = () => {
     setOpen(true);
   };
@@ -196,6 +202,7 @@ export default function SendForm(props) {
                   />
                 )}
               />
+              <Button size="small" onClick={pasteAddress} color="primary" style={{marginTop: 2}}>Paste address</Button>
 
               <TextField
                 style={{width: '49%', marginRight: '2%'}}
