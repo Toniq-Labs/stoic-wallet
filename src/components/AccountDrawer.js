@@ -54,7 +54,7 @@ export default function AccountDrawer(props) {
   
   const accountsList = (
     <div style={{marginTop:64, marginBottom: 100}}>
-      <div style={{width:drawerWidth-1, zIndex: 10, backgroundColor:'white', position:"fixed", top:0, textAlign:"center"}} className={classes.toolbar}>
+      <div style={{width:drawerWidth-1, zIndex: 10, backgroundColor: theme.palette.background.paper, position:"fixed", top:0, textAlign:"center"}} className={classes.toolbar}>
         {/*<span style={{display:'block', fontSize:'x-large',padding:'15px 0', textAlign:'center',fontWeight:'bold'}}>Stoic Wallet <span style={{fontSize:'small',fontWeight:'normal'}}>By Toniq Labs</span></span>*/}
         <img style={{maxHeight:'50px',marginTop:'5px'}} alt="Stoic Wallet by Toniq Labs" src="logo.png" />
       </div>
@@ -107,7 +107,7 @@ export default function AccountDrawer(props) {
           <ListItemText primary="Lock Wallet" />
         </ListItem> }
       </List>
-      <div style={{width: drawerWidth-1, zIndex: 10, backgroundColor:'white', position:"fixed", bottom:0, textAlign:'center'}} className={classes.toolbar}>
+      <div style={{width: drawerWidth-1, zIndex: 10, backgroundColor: theme.palette.background.paper, position:"fixed", bottom:0, textAlign:'center'}} className={classes.toolbar}>
         <span style={{position:'absolute', bottom:'10px', left:'0', right:'0'}}>Connected to Mainnet - v2.0.0</span>
       </div>
     </div>
