@@ -25,6 +25,7 @@ import InputForm from '../components/InputForm';
 import EditIcon from '@material-ui/icons/Edit';
 import extjs from '../ic/extjs.js';
 import {LEDGER_CANISTER_ID} from '../ic/utils.js';
+import {CURRENCIES, getCurrency, setCurrency} from '../ic/RosettaApi';
 
 function Settings(props) {
   const [assets, setAssets] = React.useState([]);
@@ -175,6 +176,7 @@ function Settings(props) {
       return 15;
     }
   });
+  const [currency, setCurrencyValue] = React.useState(getCurrency);
   return (
     <>
       <List
@@ -386,6 +388,30 @@ function Settings(props) {
                 <MenuItem value={15}>15 minutes</MenuItem>
                 <MenuItem value={30}>30 minutes</MenuItem>
                 <MenuItem value={60}>1 hour</MenuItem>
+              </Select>
+            </FormControl>
+          </ListItemSecondaryAction>
+        </ListItem>
+        <ListItem>
+          <ListItemText
+            primary="Display currency"
+            secondary="Currency used for portfolio and fiat values"
+          />
+          <ListItemSecondaryAction>
+            <FormControl size="small" variant="outlined" style={{minWidth: 130}}>
+              <Select
+                value={currency}
+                onChange={e => {
+                  setCurrencyValue(e.target.value);
+                  setCurrency(e.target.value);
+                }}
+                inputProps={{'aria-label': 'Display currency'}}
+              >
+                {Object.keys(CURRENCIES).map(code => (
+                  <MenuItem key={code} value={code}>
+                    {CURRENCIES[code].label}
+                  </MenuItem>
+                ))}
               </Select>
             </FormControl>
           </ListItemSecondaryAction>
