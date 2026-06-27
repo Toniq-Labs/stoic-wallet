@@ -66,10 +66,32 @@ function Connect(props) {
             props.loader(false);
           });
         break;
-      case 'connect':
-        //Show error
-        error('Hardware wallet support is coming soon!');
-        setOpen(true);
+      case 'ledger':
+        if (!(window.navigator && window.navigator.hid)) {
+          error(
+            'Your browser does not support WebHID. Please use Chrome, Edge or Brave to connect a Ledger device.',
+          );
+          setOpen(true);
+          break;
+        }
+        props.alert(
+          'Connect your Ledger',
+          'Plug in your Ledger, unlock it and open the Internet Computer app, then confirm the connection on the device.',
+        );
+        props.loader(true);
+        StoicIdentity.setup('ledger')
+          .then(identity => {
+            dispatch({type: 'createwallet', payload: {identity: identity}});
+            props.login();
+          })
+          .catch(e => {
+            console.error(e);
+            error(e && e.message ? e.message : 'Could not connect to your Ledger device');
+          })
+          .finally(() => {
+            setOpen(true);
+            props.loader(false);
+          });
         break;
       default:
         break;
