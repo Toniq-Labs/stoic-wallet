@@ -145,6 +145,12 @@ function AccountDetail(props) {
                   : 'Standard',
               };
               if (app && app.apikey === e.data.apikey) {
+                // Silent re-approval of an already authorized origin: refresh its
+                // last-used timestamp so the Connected Apps list stays accurate.
+                dispatch({
+                  type: 'app/edit',
+                  payload: {app: {host: e.origin, apikey: e.data.apikey, lastUsed: Date.now()}},
+                });
                 window.opener.postMessage(authResponse, e.origin);
               } else {
                 props
@@ -164,10 +170,14 @@ function AccountDetail(props) {
                         app = {
                           host: e.origin,
                           apikey: e.data.apikey,
+                          principal: principal,
+                          lastUsed: Date.now(),
                         };
                         dispatch({type: 'app/add', payload: {app: app}});
                       } else {
                         app.apikey = e.data.apikey;
+                        app.principal = principal;
+                        app.lastUsed = Date.now();
                         dispatch({type: 'app/edit', payload: {app: app}});
                       }
                       window.opener.postMessage(authResponse, e.origin);
