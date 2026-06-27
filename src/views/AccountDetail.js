@@ -18,6 +18,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import EvStationIcon from '@material-ui/icons/EvStation';
+import DynamicFeedIcon from '@material-ui/icons/DynamicFeed';
 import {useTheme} from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import Blockie from '../components/Blockie';
@@ -25,6 +26,7 @@ import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
 import NFTCard from '../components/NFTCard';
 import SendForm from '../components/SendForm';
+import BulkSendForm from '../components/BulkSendForm';
 import ReceiveDialog from '../components/ReceiveDialog';
 import TopupForm from '../components/TopupForm';
 import Transactions from '../components/Transactions';
@@ -632,6 +634,26 @@ function AccountDetail(props) {
                 <SendIcon />
               </MainFab>
             </SendForm>
+          ) : (
+            ''
+          )}
+          {currentToken === 0 ? (
+            <BulkSendForm
+              refresh={refresh}
+              alert={alert}
+              loader={props.loader}
+              error={error}
+              address={account.address}
+              data={account.tokens[0]}
+            >
+              <MainFab
+                style={{inset: 'auto 90px 20px auto', position: 'fixed'}}
+                color="primary"
+                aria-label="bulk send"
+              >
+                <DynamicFeedIcon />
+              </MainFab>
+            </BulkSendForm>
           ) : (
             ''
           )}
