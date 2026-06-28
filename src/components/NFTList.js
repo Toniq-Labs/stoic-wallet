@@ -33,6 +33,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import {compressAddress, clipboardCopy, formatNumberForDisplay} from '../utils.js';
 import {useSelector, useDispatch} from 'react-redux';
 import NftThumbnail from './NftThumbnail';
+import useIsMobile from '../useIsMobile';
 const wrapableCanisters = [
   'xkbqi-2qaaa-aaaah-qbpqq-cai',
   'qcg3w-tyaaa-aaaah-qakea-cai',
@@ -52,6 +53,7 @@ const _showPrice = (n, e) => {
   return formatNumberForDisplay(n);
 };
 export default function NFTList(props) {
+  const isMobile = useIsMobile();
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount);
   const identity = useSelector(state =>
@@ -83,7 +85,7 @@ export default function NFTList(props) {
       margin: '0 auto',
     },
     table: {
-      minWidth: 650,
+      minWidth: isMobile ? 0 : 650,
     },
   };
   //Custom Actions
