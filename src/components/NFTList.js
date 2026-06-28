@@ -256,7 +256,12 @@ export default function NFTList(props) {
           {props.nfts.slice().filter(a => collection === false || a.canister === collection)
             .length > perPage ? (
             <Pagination
-              style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '10px',
+                marginBottom: '20px',
+              }}
               size="small"
               count={Math.ceil(
                 props.nfts.filter(a => collection === false || a.canister === collection).length /
@@ -440,7 +445,12 @@ export default function NFTList(props) {
           {props.nfts.slice().filter(a => collection === false || a.canister === collection)
             .length > perPage ? (
             <Pagination
-              style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '10px',
+                marginBottom: '20px',
+              }}
               size="small"
               count={Math.ceil(
                 props.nfts.filter(a => collection === false || a.canister === collection).length /

@@ -34,6 +34,8 @@ function injectPopupStyles() {
         border-radius: 4px;
         box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.2); /* Light shadow */
         width: 400px;
+        max-width: 90vw; /* stay within small/mobile viewports */
+        box-sizing: border-box;
         font-family: 'Roboto', sans-serif; /* Material Design look */
       }
 
