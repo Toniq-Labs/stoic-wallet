@@ -15,6 +15,7 @@ import ListItemText from '@material-ui/core/ListItemText';
 import Blockie from '../components/Blockie';
 import extjs from '../ic/extjs.js';
 import {principalToAccountIdentifier} from '../ic/utils.js';
+import useIsMobile from '../useIsMobile';
 const api = extjs.connect('https://icp0.io/');
 export default function NeuronDelayForm(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
@@ -28,6 +29,7 @@ export default function NeuronDelayForm(props) {
   const [step, setStep] = React.useState(0);
   const [subaccount, setSubaccount] = React.useState(0);
   const [balance, setBalance] = React.useState(false);
+  const fullScreen = useIsMobile();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -51,7 +53,13 @@ export default function NeuronDelayForm(props) {
 
   return (
     <>
-      <Dialog open={props.open} onClose={props.onClose} maxWidth={'xs'} fullWidth>
+      <Dialog
+        open={props.open}
+        onClose={props.onClose}
+        maxWidth={'xs'}
+        fullWidth
+        fullScreen={fullScreen}
+      >
         {step === 0 ? (
           <>
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>

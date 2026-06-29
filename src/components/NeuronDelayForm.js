@@ -10,10 +10,12 @@ import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
 import TextField from '@material-ui/core/TextField';
+import useIsMobile from '../useIsMobile';
 export default function NeuronDelayForm(props) {
   const [delay, setDelay] = React.useState(false);
   const [amount, setAmount] = React.useState(10);
   const [period, setPeriod] = React.useState(60);
+  const fullScreen = useIsMobile();
   const _formatDateHelper = (d, t) => {
     return d + ' ' + t + (d !== 1 ? 's' : '');
   };
@@ -42,7 +44,13 @@ export default function NeuronDelayForm(props) {
   }, [amount, period]);
   return (
     <>
-      <Dialog open={props.open} onClose={props.onClose} maxWidth={'xs'} fullWidth>
+      <Dialog
+        open={props.open}
+        onClose={props.onClose}
+        maxWidth={'xs'}
+        fullWidth
+        fullScreen={fullScreen}
+      >
         <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
           Increase Dissolve Delay
         </DialogTitle>

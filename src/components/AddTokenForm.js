@@ -9,6 +9,7 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import useIsMobile from '../useIsMobile';
 const standards = [
   ['ext', 'EXT'],
   ['icrc', 'ICRC'],
@@ -20,6 +21,7 @@ export default function AddTokenForm(props) {
   const [open, setOpen] = React.useState(false);
   const [canisterId, setCanisterId] = React.useState('');
   const [standard, setStandard] = React.useState('ext');
+  const fullScreen = useIsMobile();
 
   const submit = async () => {
     if (typeof props.onClick != 'undefined') {
@@ -51,6 +53,7 @@ export default function AddTokenForm(props) {
       <Dialog
         maxWidth={'sm'}
         fullWidth
+        fullScreen={fullScreen}
         open={open}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
