@@ -279,22 +279,30 @@ export default function NFTList(props) {
             <Table style={styles.table} aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell width="70" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '70'} style={{fontWeight: 'bold'}}>
                     #
                   </TableCell>
-                  <TableCell width="220" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '220'} style={{fontWeight: 'bold'}}>
                     ID
                   </TableCell>
-                  <TableCell width="100" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '100'} style={{fontWeight: 'bold'}}>
                     Preview
                   </TableCell>
-                  <TableCell width="220" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '220'} style={{fontWeight: 'bold'}}>
                     Collection/Canister
                   </TableCell>
-                  <TableCell align="right" width="300" style={{fontWeight: 'bold'}}>
+                  <TableCell
+                    align="right"
+                    width={isMobile ? undefined : '300'}
+                    style={{fontWeight: 'bold'}}
+                  >
                     Floor Price
                   </TableCell>
-                  <TableCell width="150" align="right" style={{fontWeight: 'bold'}}>
+                  <TableCell
+                    width={isMobile ? undefined : '150'}
+                    align="right"
+                    style={{fontWeight: 'bold'}}
+                  >
                     Actions
                   </TableCell>
                 </TableRow>
