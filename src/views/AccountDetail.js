@@ -37,6 +37,7 @@ import Chip from '@material-ui/core/Chip';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, mnemonicToId} from '../ic/utils.js';
+import {getIcpPrice, formatFiat, getCurrency, useCurrency, CURRENCIES} from '../ic/RosettaApi';
 import {clipboardCopy} from '../utils';
 import {makeStyles} from '@material-ui/core/styles';
 const knownTokens = {
@@ -114,6 +115,10 @@ function AccountDetail(props) {
         : state.currentToken,
   );
   const [tokens, setTokens] = React.useState(account.tokens);
+  // Total account value in the selected fiat currency. null = loading,
+  // 'N/A' = no price feed available.
+  const [portfolio, setPortfolio] = React.useState(null);
+  const currency = useCurrency();
   const [nfts, setNfts] = React.useState(false);
   const [transactions, setTransactions] = React.useState(false);
   const [collections, setCollections] = React.useState([]);
@@ -222,6 +227,11 @@ function AccountDetail(props) {
     refresh(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount, currentPrincipal]);
+  React.useEffect(() => {
+    setPortfolio(null);
+    loadPortfolio();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency]);
   useInterval(() => refresh(), 60 * 1000);
   const theme = useTheme();
   const styles = {
@@ -264,6 +274,7 @@ function AccountDetail(props) {
       setCollections([]);
     }
     ps.push(loadBalances());
+    ps.push(loadPortfolio());
     ps.push(loadNfts());
     if (currentToken !== 'nft') {
       if (hardRefresh) {
@@ -272,6 +283,31 @@ function AccountDetail(props) {
       ps.push(loadTransactions());
     }
     await Promise.all(ps);
+  };
+  // Aggregate the fiat value of every token in the account that has a known
+  // price (currently ICP). Zero-price tokens are skipped; if no price feed is
+  // available at all, the total resolves to 'N/A'.
+  const computePortfolio = async (_address, _principal, _currency) => {
+    const price = await getIcpPrice(_currency);
+    if (price == null) return ['N/A', _address, _principal];
+    let total = 0;
+    await Promise.all(
+      account.tokens.map(async token => {
+        const tokenPrice = token.symbol === 'ICP' ? price : null;
+        if (!tokenPrice) return;
+        try {
+          const b = await api.token(token.id, token.standard).getBalance(_address, _principal);
+          total += (Number(b) / 10 ** token.decimals) * tokenPrice;
+        } catch (e) {}
+      }),
+    );
+    return [total, _address, _principal];
+  };
+  const loadPortfolio = async () => {
+    await computePortfolio(account.address, principal, getCurrency()).then(res => {
+      if (res[1] !== selected.current.address || res[2] !== selected.current.principal) return;
+      setPortfolio(res[0]);
+    });
   };
   const loadNfts = async () => {
     await updateNfts(account.address, principal).then(nfts => {
@@ -455,6 +491,19 @@ function AccountDetail(props) {
                       <FileCopyIcon style={{fontSize: 18}} />
                     </IconButton>
                   </SnackbarButton>
+                </div>
+                <div style={{fontSize: '0.9em'}}>
+                  <Chip
+                    color={'default'}
+                    style={{fontSize: '0.9em'}}
+                    size="small"
+                    label="Portfolio"
+                  />{' '}
+                  {portfolio === null
+                    ? 'Loading…'
+                    : portfolio === 'N/A'
+                      ? 'N/A'
+                      : '≈ ' + formatFiat(portfolio, currency) + ' ' + CURRENCIES[currency].code}
                 </div>
                 {currentAccount === 0 ? (
                   <div style={{fontSize: '0.9em'}}>
