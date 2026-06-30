@@ -195,6 +195,14 @@ export default function SendForm(props) {
                 getOptionLabel={contact => contact.name || contact}
                 groupBy={contact => contact.group}
                 options={contacts}
+                renderOption={contact => (
+                  <div>
+                    <div style={{fontWeight: 'bold'}}>{contact.name}</div>
+                    <div style={{fontSize: 'small', color: '#888'}}>
+                      {compressAddress(contact.address)}
+                    </div>
+                  </div>
+                )}
                 renderInput={params => (
                   <TextField
                     {...params}
