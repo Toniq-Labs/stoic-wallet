@@ -16,6 +16,7 @@ import CallReceivedIcon from '@material-ui/icons/CallReceived';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import GetAppIcon from '@material-ui/icons/GetApp';
+import {transactionsToCsv} from '../ic/format.js';
 const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
@@ -46,22 +47,7 @@ export default function Transactions(props) {
       : props.transactions
     : [];
   const exportCsv = () => {
-    const head = ['Date', 'Direction', 'From', 'To', 'Amount', 'Fee', 'Hash'];
-    const rows = (Array.isArray(props.transactions) ? props.transactions : []).map(tx => {
-      const ms = tx.timestamp < 1e12 ? tx.timestamp * 1000 : tx.timestamp;
-      return [
-        new Date(ms).toISOString(),
-        tx.from === props.address ? 'Sent' : 'Received',
-        tx.from,
-        tx.to,
-        tx.amount,
-        tx.fee,
-        tx.hash,
-      ];
-    });
-    const csv = [head, ...rows]
-      .map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(','))
-      .join('\n');
+    const csv = transactionsToCsv(props.transactions, props.address);
     const url = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
     const a = document.createElement('a');
     a.href = url;
