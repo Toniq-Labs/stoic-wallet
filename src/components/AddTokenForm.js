@@ -15,6 +15,7 @@ const standards = [
   ['dip20', 'DIP20'],
   ['drc20', 'DRC20'],
   ['ledger', 'ICP Ledger'],
+  ['odin', 'Odin'],
 ];
 export default function AddTokenForm(props) {
   const [open, setOpen] = React.useState(false);
@@ -59,13 +60,15 @@ export default function AddTokenForm(props) {
           <h3>Add Token</h3>
           <div>
             <DialogContentText>
-              Add the Canister ID and the Token Standard for the token you wish to add
+              {standard === 'odin'
+                ? 'Enter the Odin token ID (e.g. "btc" or a launched token id like "hjsu"). All Odin assets appear under your main account.'
+                : 'Add the Canister ID and the Token Standard for the token you wish to add'}
             </DialogContentText>
             <FormControl style={{width: '49%', top: 0, marginRight: 5}}>
               <TextField
                 autoFocus
                 margin="dense"
-                label="Canister ID"
+                label={standard === 'odin' ? 'Token ID' : 'Canister ID'}
                 value={canisterId}
                 onChange={e => setCanisterId(e.target.value)}
                 type="text"
