@@ -212,6 +212,8 @@ function rootReducer(state = initDb(), action) {
                   return {
                     ...app,
                     apikey: action.payload.app.apikey,
+                    principal: action.payload.app.principal ?? app.principal,
+                    lastUsed: action.payload.app.lastUsed ?? app.lastUsed,
                   };
                 } else {
                   return app;
