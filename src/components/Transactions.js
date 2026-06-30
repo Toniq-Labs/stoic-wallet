@@ -45,29 +45,49 @@ export default function Transactions(props) {
         )
       : props.transactions
     : [];
-  const exportCsv = () => {
-    const head = ['Date', 'Direction', 'From', 'To', 'Amount', 'Fee', 'Hash'];
-    const rows = (Array.isArray(props.transactions) ? props.transactions : []).map(tx => {
+  const exportColumns = [
+    'date',
+    'type',
+    'amount',
+    'fee',
+    'from',
+    'to',
+    'memo',
+    'block-height',
+  ];
+  // Normalise the currently-loaded transactions into the export columns. Works for ICP (Rosetta)
+  // as well as DIP20/ICRC history, falling back gracefully when a field is unavailable.
+  const exportRecords = () =>
+    (Array.isArray(props.transactions) ? props.transactions : []).map(tx => {
       const ms = tx.timestamp < 1e12 ? tx.timestamp * 1000 : tx.timestamp;
-      return [
-        new Date(ms).toISOString(),
-        tx.from === props.address ? 'Sent' : 'Received',
-        tx.from,
-        tx.to,
-        tx.amount,
-        tx.fee,
-        tx.hash,
-      ];
+      return {
+        date: new Date(ms).toISOString(),
+        type: tx.from === props.address ? 'Sent' : 'Received',
+        amount: tx.amount,
+        fee: tx.fee,
+        from: tx.from,
+        to: tx.to,
+        memo: tx.memo ?? '',
+        'block-height': tx.blockHeight ?? tx.block ?? tx.blockIndex ?? tx.height ?? '',
+      };
     });
-    const csv = [head, ...rows]
-      .map(r => r.map(c => '"' + String(c ?? '').replace(/"/g, '""') + '"').join(','))
-      .join('\n');
-    const url = URL.createObjectURL(new Blob([csv], {type: 'text/csv'}));
+  const download = (contents, type, extension) => {
+    const url = URL.createObjectURL(new Blob([contents], {type}));
     const a = document.createElement('a');
     a.href = url;
-    a.download = (props.data.symbol || 'token') + '-transactions.csv';
+    a.download = (props.data.symbol || 'token') + '-transactions.' + extension;
     a.click();
     URL.revokeObjectURL(url);
+  };
+  const exportCsv = () => {
+    const escape = c => '"' + String(c ?? '').replace(/"/g, '""') + '"';
+    const csv = [exportColumns, ...exportRecords().map(r => exportColumns.map(col => r[col]))]
+      .map(row => row.map(escape).join(','))
+      .join('\n');
+    download(csv, 'text/csv', 'csv');
+  };
+  const exportJson = () => {
+    download(JSON.stringify(exportRecords(), null, 2), 'application/json', 'json');
   };
   return (
     <>
@@ -110,6 +130,9 @@ export default function Transactions(props) {
             />
             <Button size="small" variant="outlined" startIcon={<GetAppIcon />} onClick={exportCsv}>
               Export CSV
+            </Button>
+            <Button size="small" variant="outlined" startIcon={<GetAppIcon />} onClick={exportJson}>
+              Export JSON
             </Button>
             <span style={{marginLeft: 'auto', fontSize: 'small', whiteSpace: 'nowrap'}}>
               Data powered by{' '}
