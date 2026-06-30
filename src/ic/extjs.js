@@ -386,7 +386,7 @@ class ExtConnection {
                 };
                 await api.notify_dfx(args);
               }
-              return true; // Success
+              return bh; // Success - returns the ledger block height (truthy)
             } catch (e) {
               console.error(e);
               throw e; // or handle error as appropriate
