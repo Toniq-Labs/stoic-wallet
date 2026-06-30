@@ -347,11 +347,19 @@ function AccountDetail(props) {
     }
   };
   const addToken = async (cid, standard, ignoreChange) => {
-    //ext,icrc,dip20,drc20,ledger
-    if (cid === 'ryjl3-tyaaa-aaaaa-aaaba-cai') throw new Error("Can't add ledger canister");
-    if (tokens.some(token => token.id === cid)) throw new Error('Token already added');
-    if (!validatePrincipal(cid)) throw new Error('Please enter a valid canister ID');
+    //ext,icrc,dip20,drc20,ledger,odin
     if (!standard) throw new Error('Please enter a valid token standard');
+    if (standard === 'odin') {
+      // Odin tokens are registered by text token id (not a canister principal).
+      cid = (cid ?? '').trim().toLowerCase();
+      if (!cid) throw new Error('Please enter a valid Odin token ID');
+      if (tokens.some(token => token.standard === 'odin' && token.id === cid))
+        throw new Error('Token already added');
+    } else {
+      if (cid === 'ryjl3-tyaaa-aaaaa-aaaba-cai') throw new Error("Can't add ledger canister");
+      if (tokens.some(token => token.id === cid)) throw new Error('Token already added');
+      if (!validatePrincipal(cid)) throw new Error('Please enter a valid canister ID');
+    }
     //Load metadata
     try {
       let metadata = await api.token(cid, standard).getMetadata();
