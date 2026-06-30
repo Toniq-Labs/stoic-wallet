@@ -62,16 +62,16 @@ export default function ConnectList(props) {
           secondary={'I want to login using a Google, Github, Facebook or Twitter account'}
         />
       </ListItem>
-      <ListItem button onClick={() => handleClick('connect')}>
+      <ListItem button onClick={() => handleClick('ledger')}>
         <ListItemIcon>
           <UsbIcon />
         </ListItemIcon>
         <ListItemText
-          primary={props.add ? 'Connect Hardware Wallet' : 'Connect Hardware Wallet'}
+          primary={'Connect Ledger'}
           secondary={
             props.add
-              ? 'I want to import another Wallet from my Ledger or Trezor device'
-              : 'I want to import a wallet from my Ledger or Trezor device'
+              ? 'I want to add a Wallet from my Ledger hardware device (requires WebHID)'
+              : 'I want to connect a Wallet from my Ledger hardware device (requires WebHID)'
           }
         />
       </ListItem>

@@ -77,6 +77,14 @@ const StoicIdentity = {
           localStorage.setItem('_pem', optdata.pem);
           id = Secp256k1KeyIdentity.fromPem(optdata.pem);
           return resolve(processId(id, type));
+        case 'ledger':
+          try {
+            const {LedgerIdentity} = await import('./ledger.js');
+            id = await LedgerIdentity.connect();
+            return resolve(processId(id, type));
+          } catch (e) {
+            return reject(e);
+          }
         case 'watch':
           return resolve({
             principal: optdata.principal,
@@ -148,7 +156,10 @@ const StoicIdentity = {
               type: _id.type,
             });
           }
+        case 'ledger':
         case 'watch':
+          // A Ledger session restores read-only (so balances render) without the
+          // device present; reconnecting to sign happens on demand via unlock().
           return resolve({
             principal: _id.principal,
             type: _id.type,
@@ -234,6 +245,21 @@ const StoicIdentity = {
               id = Secp256k1KeyIdentity.fromPem(optdata.pem);
               localStorage.setItem('_pem', optdata.pem);
               return resolve(processId(id, _id.type));
+            case 'ledger':
+              try {
+                const {LedgerIdentity} = await import('./ledger.js');
+                id = await LedgerIdentity.connect();
+                if (id.getPrincipal().toString() !== _id.principal)
+                  return reject(
+                    'Connected using the incorrect Ledger account ' +
+                      id.getPrincipal().toString() +
+                      ' but expecting ' +
+                      _id.principal,
+                  );
+                return resolve(processId(id, _id.type));
+              } catch (e) {
+                return reject(e);
+              }
             default:
               break;
           }
