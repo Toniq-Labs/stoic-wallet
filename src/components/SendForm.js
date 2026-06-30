@@ -16,6 +16,7 @@ import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, validateAddress} from '../ic/utils.js';
 import {compressAddress, formatNumberForDisplay} from '../utils.js';
+import QrScannerDialog from './QrScannerDialog';
 import {useSelector} from 'react-redux';
 
 export default function SendForm(props) {
@@ -221,7 +222,13 @@ export default function SendForm(props) {
                   />
                 )}
               />
-              <div style={{textAlign: 'right'}}>
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
+                <QrScannerDialog
+                  onScan={v => {
+                    setTo(v);
+                    setToOption(v);
+                  }}
+                />
                 <Button size="small" onClick={pasteAddress} color="primary">
                   Paste address
                 </Button>
