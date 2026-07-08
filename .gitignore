@@ -22,3 +22,5 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
+# local screenshot harness output
+screenshots/
