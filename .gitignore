@@ -22,5 +22,5 @@ yarn-debug.log*
 yarn-error.log*
 
 .env
-# local screenshot output from scripts/mobile-screenshots.cjs
+# local screenshot harness output (scripts/mobile-screenshots.cjs)
 /screenshots
