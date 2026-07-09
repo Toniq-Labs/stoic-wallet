@@ -30,6 +30,18 @@ import icdripIDL from './candid/icdrip.did.js';
 import icrcIDL from './candid/icrc.did.js';
 import dip20IDL from './candid/dip20.did.js';
 import drc20IDL from './candid/drc20.did.js'; //TODO
+import odinIDL from './candid/odin.did.js';
+
+// Odin is a single ICRC ledger that holds many tokens, addressed by a per-token
+// 32-byte "pointer" carried in the subaccount field (ICRC-80). A wallet "odin"
+// token is registered by its text token id (e.g. "btc", "hjsu") rather than a
+// canister id; every odin token routes to this one ledger canister.
+// NOTE: this is Odin's dev ledger — swap in the production canister id on launch.
+const ODIN_LEDGER_CANISTER_ID = 'w5cxm-6iaaa-aaaaj-az4jq-cai';
+// BTC and Odin-launched tokens both use 11 decimals (msats scale, 1e11).
+const ODIN_DECIMALS = 11;
+// Flat fee for any ledger op: 100,000 msats (100 sats), always paid in BTC.
+const ODIN_FEE = 100000;
 
 const constructUser = u => {
   if (isHex(u) && u.length === 64) {
@@ -79,6 +91,7 @@ const _preloadedIdls = {
   icrc: icrcIDL,
   dip20: dip20IDL,
   drc20: drc20IDL,
+  odin: odinIDL,
   default: extIDL,
   wrapper: wrapperIDL,
 };
@@ -169,7 +182,13 @@ class ExtConnection {
         break;
       default:
     }
-    var tokenObj = decodeTokenId(tid);
+    // Odin tokens are registered by text token id (not a canister principal),
+    // so skip canister-id decoding and pin them to the Odin ledger canister.
+    // tokenObj.token carries the Odin token id (e.g. "btc", "hjsu").
+    var tokenObj =
+      standard === 'odin'
+        ? {index: 0, canister: ODIN_LEDGER_CANISTER_ID, token: tid}
+        : decodeTokenId(tid);
     let idl = this._standard;
     if (!standard) {
       if (this._mapIdls.hasOwnProperty(tokenObj.canister)) {
@@ -191,10 +210,45 @@ class ExtConnection {
     return {
       call: api,
       getMetadata: async () => {
-        if (this._metadata.hasOwnProperty(tokenObj.canister)) {
+        // The metadata cache is keyed by canister id; every odin token shares
+        // one ledger canister, so never serve it from that cache.
+        if (this._standard !== 'odin' && this._metadata.hasOwnProperty(tokenObj.canister)) {
           return this._metadata[tokenObj.canister];
         }
         switch (this._standard) {
+          case 'odin':
+            try {
+              const odinId = tokenObj.token;
+              // BTC is the ledger's primary asset; tokens carry their text id as
+              // the display name (Odin's ledger Token record has no name/ticker
+              // — richer metadata would come from Odin's off-chain API).
+              if (odinId === 'btc') {
+                return {
+                  id: tid,
+                  standard: 'odin',
+                  type: 'fungible',
+                  name: 'Bitcoin',
+                  symbol: 'BTC',
+                  decimals: ODIN_DECIMALS,
+                  fee: ODIN_FEE,
+                };
+              }
+              // Resolve the pointer so an invalid token id fails fast on add.
+              await api.odin_token_pointer(odinId);
+              return {
+                id: tid,
+                standard: 'odin',
+                type: 'fungible',
+                name: odinId,
+                symbol: odinId.toUpperCase(),
+                decimals: ODIN_DECIMALS,
+                // Fee is charged in BTC, not in this token, so the token itself
+                // carries a 0 fee for display/validation purposes.
+                fee: 0,
+              };
+            } catch (e) {
+              throw e;
+            }
           case 'icrc':
             try {
               let data = await api.icrc1_metadata();
@@ -324,6 +378,20 @@ class ExtConnection {
             }
             break;
 
+          case 'odin':
+            try {
+              // BTC = null subaccount; any other token = its 32-byte pointer.
+              const subaccount =
+                tokenObj.token === 'btc'
+                  ? []
+                  : [Array.from(await api.odin_token_pointer(tokenObj.token))];
+              return await api.icrc1_balance_of({
+                owner: Principal.fromText(principal),
+                subaccount: subaccount,
+              });
+            } catch (e) {
+              throw e;
+            }
           case 'icrc':
             try {
               return await api.icrc1_balance_of({
@@ -409,6 +477,39 @@ class ExtConnection {
                 return b.ok;
               } else {
                 throw new Error(JSON.stringify(b.err));
+              }
+            } catch (e) {
+              console.error(e);
+              throw e;
+            }
+          case 'odin':
+            if (!validatePrincipal(to_user))
+              throw new Error('Odin transfers must be sent to a principal');
+            try {
+              // ICRC-80: from_subaccount and to.subaccount must be the SAME
+              // token pointer (null for BTC). The fee is fixed and paid in BTC
+              // by the ledger, so fee/memo/created_at_time must be null.
+              const sub =
+                tokenObj.token === 'btc'
+                  ? []
+                  : [Array.from(await api.odin_token_pointer(tokenObj.token))];
+              args = {
+                to: {owner: Principal.fromText(to_user), subaccount: sub},
+                fee: [],
+                memo: [],
+                from_subaccount: sub,
+                created_at_time: [],
+                amount: amount,
+              };
+              const b = await api.icrc1_transfer(args);
+              if (typeof b.Ok != 'undefined') {
+                return b.Ok;
+              } else if (typeof b.ok != 'undefined') {
+                return b.ok;
+              } else {
+                const err = b.Err ?? b.err;
+                if (err && err.GenericError) throw new Error(err.GenericError.message);
+                throw new Error(JSON.stringify(err));
               }
             } catch (e) {
               console.error(e);
