@@ -251,6 +251,45 @@ function rootReducer(state = initDb(), action) {
           }
         }),
       });
+    // ICRC-25: grant a relying party (by origin/host) a set of permission scopes.
+    // Upserts the app entry so it also shows in the Applications view.
+    case 'app/permissions/grant':
+      return saveDb({
+        ...state,
+        principals: state.principals.map((principal, i) => {
+          if (i !== state.currentPrincipal) return principal;
+          const host = action.payload.host;
+          const newScopes = action.payload.scopes || [];
+          if (principal.apps.some(a => a && a.host === host)) {
+            return {
+              ...principal,
+              apps: principal.apps.map(a =>
+                a && a.host === host
+                  ? {...a, scopes: Array.from(new Set([...(a.scopes || []), ...newScopes]))}
+                  : a,
+              ),
+            };
+          }
+          return {...principal, apps: [...principal.apps, {host, scopes: newScopes}]};
+        }),
+      });
+    // ICRC-25: revoke specific scopes for an origin, or all scopes when none given.
+    case 'app/permissions/revoke':
+      return saveDb({
+        ...state,
+        principals: state.principals.map((principal, i) => {
+          if (i !== state.currentPrincipal) return principal;
+          const {host, scopes: revoke} = action.payload;
+          return {
+            ...principal,
+            apps: principal.apps.map(a =>
+              a && a.host === host
+                ? {...a, scopes: revoke ? (a.scopes || []).filter(s => !revoke.includes(s)) : []}
+                : a,
+            ),
+          };
+        }),
+      });
     case 'neuron/add': //TODO
       return saveDb({
         ...state,

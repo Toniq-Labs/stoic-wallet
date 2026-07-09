@@ -9,6 +9,7 @@ import AlertDialog from './components/AlertDialog';
 import InstallPrompt from './components/InstallPrompt';
 import ConfirmDialog from './components/ConfirmDialog';
 import OfflineBanner from './components/OfflineBanner';
+import SignerListener from './components/SignerListener';
 const Wallet = React.lazy(() => import('./containers/Wallet'));
 const Connect = React.lazy(() => import('./containers/Connect'));
 const Unlock = React.lazy(() => import('./containers/Unlock'));
@@ -206,6 +207,7 @@ export default function App() {
         handler={confirmData.handler}
       />
       <OfflineBanner />
+      <SignerListener confirm={confirm} appState={appState} />
     </>
   );
 }
