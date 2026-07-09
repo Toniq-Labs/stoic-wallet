@@ -12,6 +12,8 @@ import {
 import {buildDelegation} from '../ic/icrc/delegation.js';
 import {bytesFromParam} from '../ic/icrc/bytes.js';
 import {validateTrustedOrigins} from '../ic/icrc/trustedOrigins.js';
+import {callCanister} from '../ic/icrc/caller.js';
+import {fetchConsentMessage} from '../ic/icrc/consent.js';
 import {getSubAccountArray} from '../ic/format.js';
 import {StoicIdentity} from '../ic/identity.js';
 
@@ -125,6 +127,39 @@ export default function SignerListener({confirm, appState}) {
       });
     };
 
+    const handleCall = async (origin, params) => {
+      await waitForUnlock();
+      const p = activePrincipal();
+      const identity = p && StoicIdentity.getIdentity(p.identity.principal);
+      if (!identity || typeof identity.sign !== 'function') {
+        throw new RpcError(ERROR_CODES.GENERIC, 'This account type cannot make calls');
+      }
+      // The requested sender must be the connected account.
+      if (params.sender && params.sender !== identity.getPrincipal().toText()) {
+        throw new RpcError(ERROR_CODES.GENERIC, 'Sender does not match the connected account');
+      }
+      const argBytes = bytesFromParam(params.arg);
+      // ICRC-21: show the canister's consent message when available; otherwise
+      // warn that this is a blind approval. User approval is never skipped.
+      const consent = await fetchConsentMessage({
+        canisterId: params.canisterId,
+        method: params.method,
+        arg: argBytes,
+      });
+      const detail = consent
+        ? consent
+        : `${params.canisterId} · ${params.method}\n\nThis canister provides no consent message. Approve only if you trust "${origin}".`;
+      const ok = await ctxRef.current.confirm('Approve transaction', detail, 'Reject', 'Approve');
+      if (!ok) throw actionAborted();
+      grant(origin, ['icrc49_call_canister']);
+      return callCanister(identity, {
+        canisterId: params.canisterId,
+        method: params.method,
+        arg: argBytes,
+        nonce: params.nonce ? bytesFromParam(params.nonce) : undefined,
+      });
+    };
+
     const onRequest = async (request, origin) => {
       const params = request.params || {};
       switch (request.method) {
@@ -171,6 +206,8 @@ export default function SignerListener({confirm, appState}) {
           return {accounts: buildAccounts()};
         case 'icrc34_delegation':
           return handleDelegation(origin, params);
+        case 'icrc49_call_canister':
+          return handleCall(origin, params);
         default:
           throw notSupported(request.method);
       }
