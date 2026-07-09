@@ -12,23 +12,25 @@ import Tooltip from '@material-ui/core/Tooltip';
 import DeleteIcon from '@material-ui/icons/Delete';
 import {useSelector, useDispatch} from 'react-redux';
 import {useTheme} from '@material-ui/core/styles';
+import useIsMobile from '../useIsMobile';
 
 function Applications(props) {
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const apps = useSelector(state => state.principals[currentPrincipal].apps);
   const dispatch = useDispatch();
   const theme = useTheme();
+  const isMobile = useIsMobile();
   const styles = {
     root: {
       flexGrow: 1,
-      padding: theme.spacing(3),
+      padding: theme.spacing(isMobile ? 1 : 3),
     },
     empty: {
       maxWidth: 400,
       margin: '0 auto',
     },
     table: {
-      minWidth: 650,
+      minWidth: isMobile ? 0 : 650,
     },
   };
   const deleteApp = host => {

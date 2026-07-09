@@ -57,6 +57,7 @@
     "test": "craco test --watchAll=false",
     "eject": "react-scripts eject",
     "smoke": "node scripts/smoke-test.cjs",
+    "screenshots": "node scripts/mobile-screenshots.cjs",
     "format": "prettier --write \"src/**/*.{js,jsx,json,css}\"",
     "format:check": "prettier --check \"src/**/*.{js,jsx,json,css}\""
   },

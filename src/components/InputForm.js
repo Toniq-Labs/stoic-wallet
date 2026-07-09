@@ -6,8 +6,10 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogContentText from '@material-ui/core/DialogContentText';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import useIsMobile from '../useIsMobile';
 
 export default function InputForm(props) {
+  const fullScreen = useIsMobile();
   const [open, setOpen] = React.useState(false);
   const [value, setValue] = React.useState(props.defaultValue ?? '');
   const [secondaryValue, setSecondaryValue] = React.useState(props.defaultSecondaryValue ?? '');
@@ -29,7 +31,12 @@ export default function InputForm(props) {
   return (
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
-      <Dialog open={open} onClose={handleClose} aria-labelledby="form-dialog-title">
+      <Dialog
+        open={open}
+        onClose={handleClose}
+        fullScreen={fullScreen}
+        aria-labelledby="form-dialog-title"
+      >
         <DialogTitle id="form-dialog-title">{props.title}</DialogTitle>
         <DialogContent>
           <DialogContentText>{props.content}</DialogContentText>

@@ -39,6 +39,7 @@ import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, mnemonicToId} from '../ic/utils.js';
 import {clipboardCopy} from '../utils';
 import {makeStyles} from '@material-ui/core/styles';
+import useIsMobile from '../useIsMobile';
 const knownTokens = {
   'fjbi2-fyaaa-aaaan-qanjq-cai': 'ext',
   'mxzaz-hqaaa-aaaar-qaada-cai': 'icrc',
@@ -96,6 +97,7 @@ const useStyles = makeStyles(theme => ({
 const api = extjs.connect('https://icp0.io/');
 function AccountDetail(props) {
   const classes = useStyles();
+  const isMobile = useIsMobile();
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount);
   const principal = useSelector(state => state.principals[currentPrincipal].identity.principal);
@@ -227,11 +229,11 @@ function AccountDetail(props) {
   const styles = {
     root: {
       flexGrow: 1,
-      padding: theme.spacing(3),
+      padding: theme.spacing(isMobile ? 1 : 3),
     },
     grid: {
       flexGrow: 1,
-      padding: theme.spacing(2),
+      padding: theme.spacing(isMobile ? 1 : 2),
     },
   };
   const error = e => {
@@ -387,8 +389,8 @@ function AccountDetail(props) {
             </Avatar>
           </ListItemAvatar>
           <ListItemText
-            style={{paddingLeft: 20}}
-            primaryTypographyProps={{noWrap: true, variant: 'h4'}}
+            style={{paddingLeft: isMobile ? 10 : 20}}
+            primaryTypographyProps={{noWrap: true, variant: isMobile ? 'h5' : 'h4'}}
             secondaryTypographyProps={{noWrap: true, variant: 'subtitle1'}}
             primary={
               <>
