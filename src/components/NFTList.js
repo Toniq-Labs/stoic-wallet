@@ -19,12 +19,14 @@ import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import LaunchIcon from '@material-ui/icons/Launch';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import Paper from '@material-ui/core/Paper';
 import SendIcon from '@material-ui/icons/Send';
 import Typography from '@material-ui/core/Typography';
 import SnackbarButton from '../components/SnackbarButton';
 import Pagination from '@material-ui/lab/Pagination';
 import SendNFTForm from '../components/SendNFTForm';
+import NFTDetailModal from '../components/NFTDetailModal';
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import extjs from '../ic/extjs.js';
@@ -33,6 +35,7 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import {compressAddress, clipboardCopy, formatNumberForDisplay} from '../utils.js';
 import {useSelector, useDispatch} from 'react-redux';
 import NftThumbnail from './NftThumbnail';
+import useIsMobile from '../useIsMobile';
 const wrapableCanisters = [
   'xkbqi-2qaaa-aaaah-qbpqq-cai',
   'qcg3w-tyaaa-aaaah-qakea-cai',
@@ -52,6 +55,7 @@ const _showPrice = (n, e) => {
   return formatNumberForDisplay(n);
 };
 export default function NFTList(props) {
+  const isMobile = useIsMobile();
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount);
   const identity = useSelector(state =>
@@ -64,6 +68,7 @@ export default function NFTList(props) {
   const [page, setPage] = React.useState(1);
   const [openNFTForm, setOpenNFTForm] = React.useState(false);
   const [tokenNFT, setTokenNFT] = React.useState('');
+  const [detailNFT, setDetailNFT] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState({});
   const handleClick = (id, target) => {
     setAnchorEl({id: id, target: target});
@@ -83,7 +88,7 @@ export default function NFTList(props) {
       margin: '0 auto',
     },
     table: {
-      minWidth: 650,
+      minWidth: isMobile ? 0 : 650,
     },
   };
   //Custom Actions
@@ -190,6 +195,12 @@ export default function NFTList(props) {
     setOpenNFTForm(false);
     setTokenNFT('');
   };
+  const openDetail = nft => {
+    setDetailNFT(nft);
+  };
+  const closeDetail = () => {
+    setDetailNFT(false);
+  };
   //UTILITY
   const error = e => {
     props.loader(false);
@@ -256,7 +267,12 @@ export default function NFTList(props) {
           {props.nfts.slice().filter(a => collection === false || a.canister === collection)
             .length > perPage ? (
             <Pagination
-              style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '10px',
+                marginBottom: '20px',
+              }}
               size="small"
               count={Math.ceil(
                 props.nfts.filter(a => collection === false || a.canister === collection).length /
@@ -272,22 +288,30 @@ export default function NFTList(props) {
             <Table style={styles.table} aria-label="simple table">
               <TableHead>
                 <TableRow>
-                  <TableCell width="70" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '70'} style={{fontWeight: 'bold'}}>
                     #
                   </TableCell>
-                  <TableCell width="220" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '220'} style={{fontWeight: 'bold'}}>
                     ID
                   </TableCell>
-                  <TableCell width="100" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '100'} style={{fontWeight: 'bold'}}>
                     Preview
                   </TableCell>
-                  <TableCell width="220" style={{fontWeight: 'bold'}}>
+                  <TableCell width={isMobile ? undefined : '220'} style={{fontWeight: 'bold'}}>
                     Collection/Canister
                   </TableCell>
-                  <TableCell align="right" width="300" style={{fontWeight: 'bold'}}>
+                  <TableCell
+                    align="right"
+                    width={isMobile ? undefined : '300'}
+                    style={{fontWeight: 'bold'}}
+                  >
                     Floor Price
                   </TableCell>
-                  <TableCell width="150" align="right" style={{fontWeight: 'bold'}}>
+                  <TableCell
+                    width={isMobile ? undefined : '150'}
+                    align="right"
+                    style={{fontWeight: 'bold'}}
+                  >
                     Actions
                   </TableCell>
                 </TableRow>
@@ -344,6 +368,17 @@ export default function NFTList(props) {
                         <TableCell align="right">
                           <>
                             <>
+                              <Tooltip title="View details">
+                                <IconButton
+                                  aria-label="View details"
+                                  id={'details-' + nft.tokenid}
+                                  size="small"
+                                  onClick={() => openDetail(nft)}
+                                  edge="end"
+                                >
+                                  <InfoOutlinedIcon />
+                                </IconButton>
+                              </Tooltip>
                               <Tooltip title="More actions">
                                 <IconButton
                                   aria-label="More actions"
@@ -440,7 +475,12 @@ export default function NFTList(props) {
           {props.nfts.slice().filter(a => collection === false || a.canister === collection)
             .length > perPage ? (
             <Pagination
-              style={{float: 'right', marginTop: '10px', marginBottom: '20px'}}
+              style={{
+                display: 'flex',
+                justifyContent: 'flex-end',
+                marginTop: '10px',
+                marginBottom: '20px',
+              }}
               size="small"
               count={Math.ceil(
                 props.nfts.filter(a => collection === false || a.canister === collection).length /
@@ -462,6 +502,17 @@ export default function NFTList(props) {
         loader={props.loader}
         error={error}
         nft={tokenNFT}
+      />
+      <NFTDetailModal
+        open={detailNFT !== false}
+        nft={detailNFT || false}
+        collectionName={
+          detailNFT
+            ? props.collections.find(a => a.canisterId === detailNFT.canister)?.name
+            : ''
+        }
+        close={closeDetail}
+        onSend={sendNft}
       />
     </>
   );

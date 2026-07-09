@@ -1,0 +1,122 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Stoic ICRC signer — test harness</title>
+    <style>
+      body { font-family: system-ui, sans-serif; max-width: 820px; margin: 24px auto; padding: 0 16px; }
+      h1 { font-size: 1.3rem; }
+      .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin: 10px 0; }
+      input { padding: 6px 8px; font: inherit; }
+      button { padding: 6px 12px; font: inherit; cursor: pointer; }
+      pre { background: #0d1b21; color: #b6f0c6; padding: 12px; border-radius: 6px; overflow: auto; max-height: 55vh; }
+      .muted { color: #667; font-size: 0.9rem; }
+    </style>
+  </head>
+  <body>
+    <h1>Stoic ICRC signer — test harness</h1>
+    <p class="muted">
+      A dependency-free relying party that speaks ICRC-29 to a Stoic signer window.
+      Open the signer, then exercise ICRC-25 / 27 / 34 / 49. Log in inside the Stoic
+      popup when prompted to approve.
+    </p>
+
+    <div class="row">
+      <label>Signer URL <input id="url" size="34" value="/" /></label>
+      <button onclick="openSigner()">Open signer</button>
+      <span id="state" class="muted">not connected</span>
+    </div>
+
+    <div class="row">
+      <button onclick="send('icrc25_supported_standards')">supported_standards</button>
+      <button onclick="requestPermissions()">request_permissions</button>
+      <button onclick="send('icrc25_permissions')">permissions</button>
+      <button onclick="send('icrc27_accounts')">accounts</button>
+    </div>
+    <div class="row">
+      <label>targets (csv, optional) <input id="targets" size="34" placeholder="canisterId,canisterId" /></label>
+      <button onclick="delegation()">delegation</button>
+    </div>
+    <div class="row muted">
+      delegation needs a DER session public key — paste one (hex) or leave blank to
+      send a demo key:
+      <input id="pubkey" size="30" placeholder="DER public key (hex)" />
+    </div>
+
+    <pre id="log"></pre>
+
+    <script>
+      let signer = null;
+      let origin = null;
+      let ready = false;
+      let nextId = 1;
+      const pending = {};
+      const log = (m, o) =>
+        (document.getElementById('log').textContent =
+          '› ' + m + (o ? '\n' + JSON.stringify(o, bytesReplacer, 2) : '') + '\n\n' +
+          document.getElementById('log').textContent);
+      // Show Uint8Array/ArrayBuffer as hex so delegation blobs are readable.
+      function bytesReplacer(k, v) {
+        if (v && v.constructor === Uint8Array) return 'hex:' + [...v].map(b => b.toString(16).padStart(2, '0')).join('');
+        if (v instanceof ArrayBuffer) return bytesReplacer(k, new Uint8Array(v));
+        return v;
+      }
+
+      function openSigner() {
+        const url = document.getElementById('url').value;
+        origin = new URL(url, location.href).origin;
+        signer = window.open(url, 'stoic-signer', 'width=460,height=720');
+        ready = false;
+        document.getElementById('state').textContent = 'connecting…';
+        poll();
+      }
+      function poll() {
+        if (ready || !signer) return;
+        post({jsonrpc: '2.0', id: nextId++, method: 'icrc29_status'});
+        setTimeout(poll, 1000);
+      }
+      function post(msg) {
+        if (msg.id) pending[msg.id] = msg.method;
+        signer.postMessage(msg, origin);
+      }
+      function send(method, params) {
+        if (!ready) return log('not connected — open the signer first');
+        const msg = {jsonrpc: '2.0', id: nextId++, method};
+        if (params) msg.params = params;
+        log('→ ' + method, params);
+        post(msg);
+      }
+      function requestPermissions() {
+        send('icrc25_request_permissions', {
+          scopes: [{method: 'icrc27_accounts'}, {method: 'icrc34_delegation'}, {method: 'icrc49_call_canister'}],
+        });
+      }
+      function delegation() {
+        const t = document.getElementById('targets').value.trim();
+        const targets = t ? t.split(',').map(s => s.trim()).filter(Boolean) : undefined;
+        // A throwaway demo DER Ed25519 public key (hex) — replace with your session key.
+        const demo = '302a300506032b6570032100' + 'ab'.repeat(32);
+        const publicKey = (document.getElementById('pubkey').value.trim() || demo);
+        send('icrc34_delegation', {publicKey, ...(targets ? {targets} : {})});
+      }
+
+      window.addEventListener('message', e => {
+        if (!origin || e.origin !== origin || e.source !== signer) return;
+        const d = e.data;
+        if (!d || d.jsonrpc !== '2.0') return;
+        const method = pending[d.id];
+        delete pending[d.id];
+        if (method === 'icrc29_status') {
+          if (d.result === 'ready' && !ready) {
+            ready = true;
+            document.getElementById('state').textContent = 'connected ✓';
+            log('channel established (icrc29_status → ready)');
+          }
+          return;
+        }
+        log('← ' + (method || d.id), d.result || d.error);
+      });
+    </script>
+  </body>
+</html>

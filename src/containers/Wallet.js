@@ -45,6 +45,10 @@ const useStyles = makeStyles(theme => ({
   toolbar: theme.mixins.toolbar,
   toolbarButtons: {
     marginLeft: 'auto',
+    display: 'flex',
+    // Keep the action icons on a single row; let the title ellipsize instead
+    // of the icons wrapping when the page title is long on narrow screens.
+    flexShrink: 0,
   },
   content: {
     flexGrow: 1,
@@ -153,7 +157,7 @@ function Wallet(props) {
             <MenuIcon />
           </IconButton>
 
-          <Typography variant="h6" noWrap>
+          <Typography variant="h6" noWrap style={{minWidth: 0}}>
             {toolbarTitle}
           </Typography>
           <div className={classes.toolbarButtons}>

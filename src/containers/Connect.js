@@ -7,9 +7,11 @@ import WalletDialog from '../components/WalletDialog';
 import {StoicIdentity} from '../ic/identity.js';
 import {useDispatch} from 'react-redux';
 import {useTheme} from '@material-ui/core/styles';
+import useIsMobile from '../useIsMobile';
 
 function Connect(props) {
   const theme = useTheme();
+  const fullScreen = useIsMobile();
   const [open, setOpen] = React.useState(true);
   const [initialRoute, setInitialRoute] = React.useState('');
   const dispatch = useDispatch();
@@ -77,7 +79,7 @@ function Connect(props) {
   };
   return (
     <>
-      <Dialog hideBackdrop maxWidth={'sm'} fullWidth open={open}>
+      <Dialog hideBackdrop maxWidth={'sm'} fullWidth fullScreen={fullScreen} open={open}>
         <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
           <img
             style={{

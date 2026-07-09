@@ -16,6 +16,7 @@ import CallReceivedIcon from '@material-ui/icons/CallReceived';
 import TextField from '@material-ui/core/TextField';
 import Button from '@material-ui/core/Button';
 import GetAppIcon from '@material-ui/icons/GetApp';
+import useIsMobile from '../useIsMobile';
 const formatNumber = n => {
   return n.toFixed(8).replace(/0{1,6}$/, '');
 };
@@ -23,13 +24,16 @@ const perPage = 20;
 export default function Transactions(props) {
   const [page, setPage] = React.useState(1);
   const [query, setQuery] = React.useState('');
+  const isMobile = useIsMobile();
   const styles = {
     empty: {
       maxWidth: 400,
       margin: '0 auto',
     },
+    // On phones let the table fit the viewport (text wraps) instead of forcing
+    // a fixed 650px width that triggers horizontal scrolling.
     table: {
-      minWidth: 650,
+      minWidth: isMobile ? 0 : 650,
     },
   };
   const q = query.trim().toLowerCase();

@@ -16,6 +16,7 @@ import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, validateAddress} from '../ic/utils.js';
 import {compressAddress, formatNumberForDisplay} from '../utils.js';
+import QrScannerDialog from './QrScannerDialog';
 import {useSelector} from 'react-redux';
 
 export default function SendForm(props) {
@@ -56,14 +57,13 @@ export default function SendForm(props) {
     if (Number(amount) <= 0) return error('Please enter an amount greater than 0');
     if (isNaN(fee)) return error('Please enter a valid fee to use');
     if (Number(fee) !== Number(minFee)) return error('The fee must be ' + minFee);
-    switch (props.data.symbol) {
-      case 'HZLD':
-        if (!validatePrincipal(to)) return error('Please enter a valid principal to send to');
-        break;
-      default:
-        if (!validateAddress(to) && !validatePrincipal(to))
-          return error('Please enter a valid address to send to');
-        break;
+    // Odin (and HZLD) are ICRC ledgers that only accept principals as the
+    // recipient; everything else also accepts an account address.
+    if (props.data.standard === 'odin' || props.data.symbol === 'HZLD') {
+      if (!validatePrincipal(to)) return error('Please enter a valid principal to send to');
+    } else {
+      if (!validateAddress(to) && !validatePrincipal(to))
+        return error('Please enter a valid address to send to');
     }
     if (Number(amount) + Number(fee) > balance)
       return error('You have insufficient ' + props.data.symbol);
@@ -221,7 +221,13 @@ export default function SendForm(props) {
                   />
                 )}
               />
-              <div style={{textAlign: 'right'}}>
+              <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
+                <QrScannerDialog
+                  onScan={v => {
+                    setTo(v);
+                    setToOption(v);
+                  }}
+                />
                 <Button size="small" onClick={pasteAddress} color="primary">
                   Paste address
                 </Button>
@@ -331,6 +337,13 @@ export default function SendForm(props) {
               to <strong style={{color: 'red'}}>{compressAddress(to)}</strong>
               <br />
               {fee > 0 ? ' using a fee of ' + formatNumberForDisplay(fee) : ''}
+              {props.data.standard === 'odin' && props.data.symbol !== 'BTC' ? (
+                <>
+                  <br />A network fee of 100 sats (paid in BTC) applies.
+                </>
+              ) : (
+                ''
+              )}
             </DialogContentText>
             <DialogContentText style={{textAlign: 'center'}}>
               <strong>

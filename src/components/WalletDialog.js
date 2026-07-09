@@ -21,6 +21,7 @@ import {clipboardCopy} from '../utils';
 
 import {StoicIdentity} from '../ic/identity.js';
 import {useFilePicker} from 'use-file-picker';
+import useIsMobile from '../useIsMobile';
 const tips = [
   'When accessing this wallet, always type the URL into the browser address bar yourself or use a bookmark that you yourself created. Never trust links posted on social media, in search results, sent in emails or listed on other websites.',
   'If your browser gives you any sort of security warning about this web wallet, get in touch with us and report it. Do not ignore the warning nor enter your mnemonic secret!',
@@ -37,6 +38,7 @@ export default function WalletDialog(props) {
   const [password2, setPassword2] = React.useState('');
   const [address, setAddress] = React.useState('');
   const [tipsIndex, setTipsIndex] = React.useState(1);
+  const fullScreen = useIsMobile();
   const [openFileSelector, {filesContent, clear}] = useFilePicker({
     accept: '.pem',
     multiple: false,
@@ -142,7 +144,13 @@ export default function WalletDialog(props) {
     <>
       {route === '3party' ? (
         <>
-          <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'xs'} fullWidth open>
+          <Dialog
+            hideBackdrop={props.hideBackdrop}
+            maxWidth={'xs'}
+            fullWidth
+            fullScreen={fullScreen}
+            open
+          >
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
               Select Login Provider
             </DialogTitle>
@@ -186,7 +194,13 @@ export default function WalletDialog(props) {
       )}
       {route === 'tips' ? (
         <>
-          <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
+          <Dialog
+            hideBackdrop={props.hideBackdrop}
+            maxWidth={'sm'}
+            fullWidth
+            fullScreen={fullScreen}
+            open
+          >
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
               Security Tips
             </DialogTitle>
@@ -222,7 +236,13 @@ export default function WalletDialog(props) {
       )}
       {route === 'import' ? (
         <>
-          <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
+          <Dialog
+            hideBackdrop={props.hideBackdrop}
+            maxWidth={'sm'}
+            fullWidth
+            fullScreen={fullScreen}
+            open
+          >
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
               Select Import Type
             </DialogTitle>
@@ -269,7 +289,13 @@ export default function WalletDialog(props) {
       )}
       {route === 'newMnemonic' ? (
         <>
-          <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
+          <Dialog
+            hideBackdrop={props.hideBackdrop}
+            maxWidth={'sm'}
+            fullWidth
+            fullScreen={fullScreen}
+            open
+          >
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
               Write down your seed phrase
             </DialogTitle>
@@ -328,7 +354,13 @@ export default function WalletDialog(props) {
       )}
       {route === 'confirmMnemonic' ? (
         <>
-          <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
+          <Dialog
+            hideBackdrop={props.hideBackdrop}
+            maxWidth={'sm'}
+            fullWidth
+            fullScreen={fullScreen}
+            open
+          >
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
               Confirm your mnemonic seed
             </DialogTitle>
@@ -362,7 +394,13 @@ export default function WalletDialog(props) {
       )}
       {route === 'address' ? (
         <>
-          <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
+          <Dialog
+            hideBackdrop={props.hideBackdrop}
+            maxWidth={'sm'}
+            fullWidth
+            fullScreen={fullScreen}
+            open
+          >
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
               Enter the Principal to watch
             </DialogTitle>
@@ -394,7 +432,13 @@ export default function WalletDialog(props) {
       )}
       {route === 'passwords' ? (
         <>
-          <Dialog hideBackdrop={props.hideBackdrop} maxWidth={'sm'} fullWidth open>
+          <Dialog
+            hideBackdrop={props.hideBackdrop}
+            maxWidth={'sm'}
+            fullWidth
+            fullScreen={fullScreen}
+            open
+          >
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>
               Enter a password
             </DialogTitle>
