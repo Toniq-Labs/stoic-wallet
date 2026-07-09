@@ -19,12 +19,14 @@ import Tooltip from '@material-ui/core/Tooltip';
 import IconButton from '@material-ui/core/IconButton';
 import LaunchIcon from '@material-ui/icons/Launch';
 import MoreVertIcon from '@material-ui/icons/MoreVert';
+import InfoOutlinedIcon from '@material-ui/icons/InfoOutlined';
 import Paper from '@material-ui/core/Paper';
 import SendIcon from '@material-ui/icons/Send';
 import Typography from '@material-ui/core/Typography';
 import SnackbarButton from '../components/SnackbarButton';
 import Pagination from '@material-ui/lab/Pagination';
 import SendNFTForm from '../components/SendNFTForm';
+import NFTDetailModal from '../components/NFTDetailModal';
 import LockIcon from '@material-ui/icons/Lock';
 import LockOpenIcon from '@material-ui/icons/LockOpen';
 import extjs from '../ic/extjs.js';
@@ -66,6 +68,7 @@ export default function NFTList(props) {
   const [page, setPage] = React.useState(1);
   const [openNFTForm, setOpenNFTForm] = React.useState(false);
   const [tokenNFT, setTokenNFT] = React.useState('');
+  const [detailNFT, setDetailNFT] = React.useState(false);
   const [anchorEl, setAnchorEl] = React.useState({});
   const handleClick = (id, target) => {
     setAnchorEl({id: id, target: target});
@@ -191,6 +194,12 @@ export default function NFTList(props) {
   const closeNFTForm = () => {
     setOpenNFTForm(false);
     setTokenNFT('');
+  };
+  const openDetail = nft => {
+    setDetailNFT(nft);
+  };
+  const closeDetail = () => {
+    setDetailNFT(false);
   };
   //UTILITY
   const error = e => {
@@ -359,6 +368,17 @@ export default function NFTList(props) {
                         <TableCell align="right">
                           <>
                             <>
+                              <Tooltip title="View details">
+                                <IconButton
+                                  aria-label="View details"
+                                  id={'details-' + nft.tokenid}
+                                  size="small"
+                                  onClick={() => openDetail(nft)}
+                                  edge="end"
+                                >
+                                  <InfoOutlinedIcon />
+                                </IconButton>
+                              </Tooltip>
                               <Tooltip title="More actions">
                                 <IconButton
                                   aria-label="More actions"
@@ -482,6 +502,17 @@ export default function NFTList(props) {
         loader={props.loader}
         error={error}
         nft={tokenNFT}
+      />
+      <NFTDetailModal
+        open={detailNFT !== false}
+        nft={detailNFT || false}
+        collectionName={
+          detailNFT
+            ? props.collections.find(a => a.canisterId === detailNFT.canister)?.name
+            : ''
+        }
+        close={closeDetail}
+        onSend={sendNft}
       />
     </>
   );
