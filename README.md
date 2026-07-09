@@ -20,6 +20,12 @@ npm install
 npm start          # dev server at http://localhost:3000
 ```
 
+### Tests
+
+```bash
+npm test           # runs the test suite (CRACO/Jest, watch mode)
+```
+
 ### Production build
 
 ```bash
