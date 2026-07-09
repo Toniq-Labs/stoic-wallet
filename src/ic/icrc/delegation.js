@@ -1,3 +1,4 @@
+/* global BigInt */
 // ICRC-34 delegation construction.
 //
 // Turns a Stoic signing identity into a session delegation for a relying party's
@@ -5,15 +6,11 @@
 // identity (instead of round-tripping every call back to Stoic).
 import {DelegationChain} from '@dfinity/identity';
 import {Principal} from '@dfinity/principal';
+import {toU8, bytesFromParam} from './bytes.js';
+
+export {bytesFromParam};
 
 const FIFTEEN_MINUTES_MS = 15 * 60 * 1000;
-
-const toU8 = b => {
-  if (b instanceof Uint8Array) return b;
-  if (b instanceof ArrayBuffer) return new Uint8Array(b);
-  if (Array.isArray(b)) return Uint8Array.from(b);
-  return new Uint8Array(b);
-};
 
 // Wrap a DER public key (Uint8Array) so DelegationChain.create can call toDer().
 const wrapPublicKey = der => ({toDer: () => toU8(der)});

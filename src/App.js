@@ -207,7 +207,7 @@ export default function App() {
         handler={confirmData.handler}
       />
       <OfflineBanner />
-      <SignerListener confirm={confirm} />
+      <SignerListener confirm={confirm} appState={appState} />
     </>
   );
 }
