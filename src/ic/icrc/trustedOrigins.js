@@ -4,7 +4,7 @@
 // (`targets`), it must confirm the relying party's origin is listed in EVERY
 // target canister's icrc28_trusted_origins. This prevents a malicious front-end
 // from obtaining a delegation that can act on a canister the user trusts.
-import {Actor, HttpAgent} from '@dfinity/agent';
+import {Actor, HttpAgent} from '@icp-sdk/core/agent';
 import icrc28IDL from './candid/icrc28.did.js';
 
 // Returns true only if `origin` is a trusted origin of all `targets`.

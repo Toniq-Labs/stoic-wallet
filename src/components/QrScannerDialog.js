@@ -9,7 +9,7 @@ import IconButton from '@material-ui/core/IconButton';
 import Tooltip from '@material-ui/core/Tooltip';
 import Alert from '@material-ui/lab/Alert';
 import CropFreeIcon from '@material-ui/icons/CropFree';
-import {Principal} from '@dfinity/principal';
+import {Principal} from '@icp-sdk/core/principal';
 import {validateAddress} from '../ic/format.js';
 
 // Validate a principal the same way ic/utils.js does, but import the deps

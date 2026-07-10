@@ -13,9 +13,9 @@ import {
   Certificate,
   SubmitRequestType,
   RequestStatusResponseStatus,
-} from '@dfinity/agent';
-import {Principal} from '@dfinity/principal';
-import {blobFromText} from '@dfinity/candid';
+} from '@icp-sdk/core/agent';
+import {Principal} from '@icp-sdk/core/principal';
+const blobFromText = s => new TextEncoder().encode(s); // was @dfinity/candid blobFromText (removed)
 import {toU8} from './bytes.js';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));

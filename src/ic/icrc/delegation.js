@@ -4,8 +4,8 @@
 // Turns a Stoic signing identity into a session delegation for a relying party's
 // public key, so the dapp can sign its own canister calls with a delegated
 // identity (instead of round-tripping every call back to Stoic).
-import {DelegationChain} from '@dfinity/identity';
-import {Principal} from '@dfinity/principal';
+import {DelegationChain} from '@icp-sdk/core/identity';
+import {Principal} from '@icp-sdk/core/principal';
 import {toU8, bytesFromParam} from './bytes.js';
 
 export {bytesFromParam};

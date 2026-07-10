@@ -1,6 +1,6 @@
 // ICRC-21: fetch a human-readable consent message for a canister call, shown to
 // the user before an ICRC-49 call is approved.
-import {Actor, HttpAgent} from '@dfinity/agent';
+import {Actor, HttpAgent} from '@icp-sdk/core/agent';
 import icrc21IDL from './candid/icrc21.did.js';
 import {toU8} from './bytes.js';
 

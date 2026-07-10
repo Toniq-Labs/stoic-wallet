@@ -1,6 +1,6 @@
 /* global BigInt */
-import {Actor, HttpAgent} from '@dfinity/agent';
-import {Principal} from '@dfinity/principal';
+import {Actor, HttpAgent} from '@icp-sdk/core/agent';
+import {Principal} from '@icp-sdk/core/principal';
 import {
   LEDGER_CANISTER_ID,
   GOVERNANCE_CANISTER_ID,
