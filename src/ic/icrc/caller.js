@@ -14,8 +14,8 @@ import {
   SubmitRequestType,
   RequestStatusResponseStatus,
   lookupResultToBuffer,
-} from '@dfinity/agent';
-import {Principal} from '@dfinity/principal';
+} from '@icp-sdk/core/agent';
+import {Principal} from '@icp-sdk/core/principal';
 import {toU8} from './bytes.js';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));

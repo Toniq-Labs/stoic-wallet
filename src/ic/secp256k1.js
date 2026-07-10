@@ -1,4 +1,4 @@
-import {SignIdentity} from '@dfinity/agent';
+import {SignIdentity} from '@icp-sdk/core/agent';
 import {Buffer} from 'buffer/';
 import * as bigintConversion from 'bigint-conversion';
 const ellipticcurve = require('starkbank-ecdsa');

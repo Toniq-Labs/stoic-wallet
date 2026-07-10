@@ -1,5 +1,5 @@
 /* global BigInt */
-import {Ed25519KeyIdentity} from '@dfinity/identity';
+import {Ed25519KeyIdentity} from '@icp-sdk/core/identity';
 import {AuthClient} from '@dfinity/auth-client';
 import {Secp256k1KeyIdentity} from './secp256k1.js';
 import OpenLogin from '@toruslabs/openlogin';

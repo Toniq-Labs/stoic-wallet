@@ -1,5 +1,5 @@
-import {Principal} from '@dfinity/principal';
-import {Ed25519KeyIdentity} from '@dfinity/identity';
+import {Principal} from '@icp-sdk/core/principal';
+import {Ed25519KeyIdentity} from '@icp-sdk/core/identity';
 import {sha224} from 'js-sha256';
 import RosettaApi from './RosettaApi.js';
 import {
