@@ -626,7 +626,7 @@ class ExtConnection {
     var args = {};
     if (this._identity) args['identity'] = this._identity;
     if (this._host) args['host'] = this._host;
-    this._agent = new HttpAgent(args);
+    this._agent = HttpAgent.createSync(args);
   }
 }
 

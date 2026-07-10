@@ -12,7 +12,7 @@ import icrc28IDL from './candid/icrc28.did.js';
 // Any canister that can't be verified fails closed (returns false).
 export async function validateTrustedOrigins(origin, targets, host = 'https://icp0.io/') {
   if (!targets || targets.length === 0) return true;
-  const agent = new HttpAgent({host});
+  const agent = HttpAgent.createSync({host});
   for (const canisterId of targets) {
     let trusted = [];
     try {

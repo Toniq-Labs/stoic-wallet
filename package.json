@@ -3,12 +3,11 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "@dfinity/agent": "0.9.3",
-    "@dfinity/auth-client": "0.9.3",
-    "@dfinity/authentication": "0.9.3",
-    "@dfinity/candid": "0.9.3",
-    "@dfinity/identity": "0.9.3",
-    "@dfinity/principal": "0.9.3",
+    "@dfinity/agent": "^3.4.3",
+    "@dfinity/auth-client": "^3.4.3",
+    "@dfinity/candid": "^3.4.3",
+    "@dfinity/identity": "^3.4.3",
+    "@dfinity/principal": "^3.4.3",
     "@fontsource/roboto": "^4.4.5",
     "@material-ui/core": "^4.12.4",
     "@material-ui/icons": "^4.11.3",
@@ -29,6 +28,7 @@
     "dotenv": "^17.4.2",
     "ethereum-blockies-base64": "^1.0.2",
     "https-browserify": "^1.0.0",
+    "js-sha256": "^0.11.1",
     "json-bigint": "^1.0.0",
     "os-browserify": "^0.3.0",
     "path-browserify": "^1.0.1",
@@ -96,5 +96,9 @@
   },
   "bugs": {
     "url": "https://github.com/Toniq-Labs/stoic-wallet/issues"
+  },
+  "overrides": {
+    "@noble/curves": "1.9.7",
+    "@noble/hashes": "1.8.0"
   }
 }
