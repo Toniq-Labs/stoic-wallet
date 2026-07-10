@@ -9,17 +9,20 @@ import FormControl from '@material-ui/core/FormControl';
 import InputLabel from '@material-ui/core/InputLabel';
 import Select from '@material-ui/core/Select';
 import MenuItem from '@material-ui/core/MenuItem';
+import useIsMobile from '../useIsMobile';
 const standards = [
   ['ext', 'EXT'],
   ['icrc', 'ICRC'],
   ['dip20', 'DIP20'],
   ['drc20', 'DRC20'],
   ['ledger', 'ICP Ledger'],
+  ['odin', 'Odin'],
 ];
 export default function AddTokenForm(props) {
   const [open, setOpen] = React.useState(false);
   const [canisterId, setCanisterId] = React.useState('');
   const [standard, setStandard] = React.useState('ext');
+  const fullScreen = useIsMobile();
 
   const submit = async () => {
     if (typeof props.onClick != 'undefined') {
@@ -51,6 +54,7 @@ export default function AddTokenForm(props) {
       <Dialog
         maxWidth={'sm'}
         fullWidth
+        fullScreen={fullScreen}
         open={open}
         onClose={handleClose}
         aria-labelledby="form-dialog-title"
@@ -59,13 +63,15 @@ export default function AddTokenForm(props) {
           <h3>Add Token</h3>
           <div>
             <DialogContentText>
-              Add the Canister ID and the Token Standard for the token you wish to add
+              {standard === 'odin'
+                ? 'Enter the Odin token ID (e.g. "btc" or a launched token id like "hjsu"). All Odin assets appear under your main account.'
+                : 'Add the Canister ID and the Token Standard for the token you wish to add'}
             </DialogContentText>
             <FormControl style={{width: '49%', top: 0, marginRight: 5}}>
               <TextField
                 autoFocus
                 margin="dense"
-                label="Canister ID"
+                label={standard === 'odin' ? 'Token ID' : 'Canister ID'}
                 value={canisterId}
                 onChange={e => setCanisterId(e.target.value)}
                 type="text"

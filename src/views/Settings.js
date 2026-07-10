@@ -25,6 +25,8 @@ import InputForm from '../components/InputForm';
 import EditIcon from '@material-ui/icons/Edit';
 import extjs from '../ic/extjs.js';
 import {LEDGER_CANISTER_ID} from '../ic/utils.js';
+import {CURRENCIES, getCurrency, setCurrency} from '../ic/RosettaApi';
+const sjcl = require('sjcl');
 
 function Settings(props) {
   const [assets, setAssets] = React.useState([]);
@@ -143,6 +145,89 @@ function Settings(props) {
         }
       });
   };
+  const restoreInput = React.useRef(null);
+  const [restorePassword, setRestorePassword] = React.useState('');
+  const backupWallet = password => {
+    if (!password) return error('Please enter a password to encrypt your backup.');
+    try {
+      const payload = localStorage.getItem('_db');
+      if (!payload) return error('There is no wallet data to back up yet.');
+      const encrypted = sjcl.encrypt(password, payload);
+      const blob = new Blob([encrypted], {type: 'application/octet-stream'});
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = 'stoic-' + new Date().toISOString().slice(0, 10) + '.stoic-backup';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      error(e.message || String(e));
+    }
+  };
+  const startRestore = password => {
+    if (!password) return error('Please enter the password used to encrypt your backup.');
+    setRestorePassword(password);
+    if (restoreInput.current) {
+      restoreInput.current.value = '';
+      restoreInput.current.click();
+    }
+  };
+  const restoreWallet = file => {
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      let decrypted;
+      try {
+        decrypted = sjcl.decrypt(restorePassword, reader.result);
+      } catch (e) {
+        return error('Incorrect password, or this is not a valid backup file.');
+      }
+      let imported;
+      try {
+        imported = JSON.parse(decrypted);
+      } catch (e) {
+        return error('This backup file is corrupt and could not be read.');
+      }
+      try {
+        let existing = null;
+        try {
+          const raw = localStorage.getItem('_db');
+          existing = raw ? JSON.parse(raw) : null;
+        } catch (e) {}
+        let merged;
+        if (existing && Array.isArray(existing) && Array.isArray(imported)) {
+          const principals = [...(existing[0] || [])];
+          const seen = new Set(principals.map(p => p.identity.principal));
+          (imported[0] || []).forEach(p => {
+            if (p && p.identity && !seen.has(p.identity.principal)) {
+              seen.add(p.identity.principal);
+              principals.push(p);
+            }
+          });
+          const addresses = [...(existing[1] || [])];
+          const seenAddr = new Set(addresses.map(a => a.address));
+          (imported[1] || []).forEach(a => {
+            if (a && !seenAddr.has(a.address)) {
+              seenAddr.add(a.address);
+              addresses.push(a);
+            }
+          });
+          merged = [principals, addresses, existing[2], existing[3]];
+        } else {
+          merged = imported;
+        }
+        const mergedStr = JSON.stringify(merged);
+        localStorage.setItem('_db', mergedStr);
+        dispatch({type: 'refresh', payload: mergedStr});
+        props.alert('Restore complete', 'Your wallet data has been restored successfully.');
+      } catch (e) {
+        error(e.message || String(e));
+      }
+    };
+    reader.readAsText(file);
+  };
   const clearWallet = () => {
     props
       .confirm(
@@ -175,6 +260,7 @@ function Settings(props) {
       return 15;
     }
   });
+  const [currency, setCurrencyValue] = React.useState(getCurrency);
   return (
     <>
       <List
@@ -390,6 +476,30 @@ function Settings(props) {
             </FormControl>
           </ListItemSecondaryAction>
         </ListItem>
+        <ListItem>
+          <ListItemText
+            primary="Display currency"
+            secondary="Currency used for portfolio and fiat values"
+          />
+          <ListItemSecondaryAction>
+            <FormControl size="small" variant="outlined" style={{minWidth: 130}}>
+              <Select
+                value={currency}
+                onChange={e => {
+                  setCurrencyValue(e.target.value);
+                  setCurrency(e.target.value);
+                }}
+                inputProps={{'aria-label': 'Display currency'}}
+              >
+                {Object.keys(CURRENCIES).map(code => (
+                  <MenuItem key={code} value={code}>
+                    {CURRENCIES[code].label}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+          </ListItemSecondaryAction>
+        </ListItem>
       </List>
       <Divider />
       <ConnectList add handler={connectList} />
@@ -400,6 +510,41 @@ function Settings(props) {
         aria-labelledby="settings-list"
         subheader={<ListSubheader id="nested-list-subheader">Advanced Settings</ListSubheader>}
       >
+        <InputForm
+          title="Backup wallet"
+          content="Export an encrypted backup of your accounts, tokens, address book and settings. Choose a password — you'll need it to restore this backup later."
+          inputLabel="Backup password"
+          buttonLabel="Backup"
+          onClick={password => backupWallet(password)}
+        >
+          <ListItem button>
+            <ListItemText
+              primary="Backup wallet"
+              secondary="Download an encrypted backup of your wallet data"
+            />
+          </ListItem>
+        </InputForm>
+        <InputForm
+          title="Restore wallet"
+          content="Restore an encrypted backup. Enter the password used when the backup was created, then choose your .stoic-backup file."
+          inputLabel="Backup password"
+          buttonLabel="Choose file"
+          onClick={password => startRestore(password)}
+        >
+          <ListItem button>
+            <ListItemText
+              primary="Restore wallet"
+              secondary="Import wallet data from an encrypted backup file"
+            />
+          </ListItem>
+        </InputForm>
+        <input
+          type="file"
+          accept=".stoic-backup"
+          ref={restoreInput}
+          style={{display: 'none'}}
+          onChange={e => restoreWallet(e.target.files[0])}
+        />
         <ListItem button onClick={clearWallet}>
           <ListItemText
             primaryTypographyProps={{noWrap: true, color: 'error'}}

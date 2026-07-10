@@ -18,6 +18,7 @@ import List from '@material-ui/core/List';
 import ListItem from '@material-ui/core/ListItem';
 import Blockie from '../components/Blockie';
 import NeuronManager from '../ic/neuron.js';
+import useIsMobile from '../useIsMobile';
 
 const api = extjs.connect('https://icp0.io/');
 export default function NeuronForm(props) {
@@ -35,6 +36,7 @@ export default function NeuronForm(props) {
   const [balance, setBalance] = React.useState(false);
   const [amount, setAmount] = React.useState('');
   const [subaccount, setSubaccount] = React.useState(0);
+  const fullScreen = useIsMobile();
 
   React.useEffect(() => {
     let cancelled = false;
@@ -94,7 +96,7 @@ export default function NeuronForm(props) {
   return (
     <>
       {React.cloneElement(props.children, {onClick: handleClick})}
-      <Dialog open={open} onClose={handleClose} maxWidth={'xs'} fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth={'xs'} fullWidth fullScreen={fullScreen}>
         {step === 0 ? (
           <>
             <DialogTitle id="form-dialog-title" style={{textAlign: 'center'}}>

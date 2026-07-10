@@ -15,6 +15,7 @@ import Autocomplete from '@material-ui/lab/Autocomplete';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {compressAddress} from '../utils.js';
+import QrScannerDialog from './QrScannerDialog';
 import {useSelector} from 'react-redux';
 
 export default function SendNFTForm(props) {
@@ -166,6 +167,14 @@ export default function SendNFTForm(props) {
                 />
               )}
             />
+            <div style={{display: 'flex', alignItems: 'center', justifyContent: 'flex-end'}}>
+              <QrScannerDialog
+                onScan={v => {
+                  setTo(v);
+                  setToOption(v);
+                }}
+              />
+            </div>
           </DialogContent>
         ) : (
           <DialogContent>

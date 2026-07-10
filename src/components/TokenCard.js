@@ -7,28 +7,7 @@ import Grid from '@material-ui/core/Grid';
 import extjs from '../ic/extjs.js';
 import {useSelector} from 'react-redux';
 import {BalanceVisibilityContext} from '../balanceVisibility';
-
-// Cached ICP/USD spot price (one network call per session, shared by all cards).
-let _icpUsd = null;
-let _icpUsdPromise = null;
-const getIcpPrice = () => {
-  if (_icpUsd !== null) return Promise.resolve(_icpUsd);
-  if (!_icpUsdPromise) {
-    _icpUsdPromise = fetch(
-      'https://api.coingecko.com/api/v3/simple/price?ids=internet-computer&vs_currencies=usd',
-    )
-      .then(r => r.json())
-      .then(j => {
-        _icpUsd = (j['internet-computer'] || {}).usd ?? null;
-        return _icpUsd;
-      })
-      .catch(() => {
-        _icpUsdPromise = null;
-        return null;
-      });
-  }
-  return _icpUsdPromise;
-};
+import {getIcpPrice, formatFiat, useCurrency, CURRENCIES} from '../ic/RosettaApi';
 
 const styles = {
   root: {
@@ -58,15 +37,23 @@ const api = extjs.connect('https://icp0.io/');
 function TokenCard(props) {
   const [balance, setBalance] = React.useState(false);
   const hideBalances = React.useContext(BalanceVisibilityContext);
-  const [usd, setUsd] = React.useState(null);
+  const currency = useCurrency();
+  // Fiat price of one token unit. Only ICP has a known price feed; other tokens
+  // stay null and gracefully render as 'N/A'.
+  const [price, setPrice] = React.useState(null);
   React.useEffect(() => {
-    if (props.data.symbol === 'ICP' && balance !== false && balance > 0) {
-      getIcpPrice().then(p => {
-        if (p) setUsd(p);
+    let cancelled = false;
+    if (props.data.symbol === 'ICP') {
+      getIcpPrice(currency).then(p => {
+        if (!cancelled) setPrice(p);
       });
+    } else {
+      setPrice(null);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [balance, props.data.symbol]);
+    return () => {
+      cancelled = true;
+    };
+  }, [props.data.symbol, currency]);
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const identity = useSelector(state =>
     state.principals.length ? state.principals[currentPrincipal].identity : {},
@@ -114,13 +101,15 @@ function TokenCard(props) {
                   ? '••••••'
                   : balance + ' ' + props.data.symbol}
             </Typography>
-            {usd && balance !== false && !hideBalances && props.data.symbol === 'ICP' ? (
+            {balance !== false && !hideBalances ? (
               <Typography
                 style={styles.pos}
                 variant="body2"
                 color={props.selected ? 'inherit' : 'textSecondary'}
               >
-                ≈ ${(balance * usd).toFixed(2)} USD
+                {price != null
+                  ? '≈ ' + formatFiat(balance * price, currency) + ' ' + CURRENCIES[currency].code
+                  : 'N/A'}
               </Typography>
             ) : null}
           </CardContent>

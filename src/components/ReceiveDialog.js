@@ -10,17 +10,19 @@ import FileCopyIcon from '@material-ui/icons/FileCopy';
 import {QRCodeCanvas} from 'qrcode.react';
 import SnackbarButton from './SnackbarButton';
 import {clipboardCopy} from '../utils';
+import useIsMobile from '../useIsMobile';
 
 // A dedicated "Receive" dialog: scannable QR of the account address, the full
 // address, and a copy button. Wraps its child element and opens on click.
 export default function ReceiveDialog(props) {
   const [open, setOpen] = React.useState(false);
+  const fullScreen = useIsMobile();
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   return (
     <>
       {React.cloneElement(props.children, {onClick: handleOpen})}
-      <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth>
+      <Dialog open={open} onClose={handleClose} maxWidth="xs" fullWidth fullScreen={fullScreen}>
         <DialogTitle style={{textAlign: 'center'}}>Receive</DialogTitle>
         <DialogContent style={{textAlign: 'center'}}>
           <div style={{padding: '8px 0'}}>

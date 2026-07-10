@@ -18,6 +18,7 @@ import EditIcon from '@material-ui/icons/Edit';
 import Fab from '@material-ui/core/Fab';
 import AddIcon from '@material-ui/icons/Add';
 import EvStationIcon from '@material-ui/icons/EvStation';
+import DynamicFeedIcon from '@material-ui/icons/DynamicFeed';
 import {useTheme} from '@material-ui/core/styles';
 import Tooltip from '@material-ui/core/Tooltip';
 import Blockie from '../components/Blockie';
@@ -25,6 +26,7 @@ import SnackbarButton from '../components/SnackbarButton';
 import TokenCard from '../components/TokenCard';
 import NFTCard from '../components/NFTCard';
 import SendForm from '../components/SendForm';
+import BulkSendForm from '../components/BulkSendForm';
 import ReceiveDialog from '../components/ReceiveDialog';
 import TopupForm from '../components/TopupForm';
 import Transactions from '../components/Transactions';
@@ -37,8 +39,10 @@ import Chip from '@material-ui/core/Chip';
 import extjs from '../ic/extjs.js';
 import {StoicIdentity} from '../ic/identity.js';
 import {validatePrincipal, mnemonicToId} from '../ic/utils.js';
+import {getIcpPrice, formatFiat, getCurrency, useCurrency, CURRENCIES} from '../ic/RosettaApi';
 import {clipboardCopy} from '../utils';
 import {makeStyles} from '@material-ui/core/styles';
+import useIsMobile from '../useIsMobile';
 const knownTokens = {
   'fjbi2-fyaaa-aaaan-qanjq-cai': 'ext',
   'mxzaz-hqaaa-aaaar-qaada-cai': 'icrc',
@@ -96,6 +100,7 @@ const useStyles = makeStyles(theme => ({
 const api = extjs.connect('https://icp0.io/');
 function AccountDetail(props) {
   const classes = useStyles();
+  const isMobile = useIsMobile();
   const currentPrincipal = useSelector(state => state.currentPrincipal);
   const currentAccount = useSelector(state => state.currentAccount);
   const principal = useSelector(state => state.principals[currentPrincipal].identity.principal);
@@ -114,6 +119,10 @@ function AccountDetail(props) {
         : state.currentToken,
   );
   const [tokens, setTokens] = React.useState(account.tokens);
+  // Total account value in the selected fiat currency. null = loading,
+  // 'N/A' = no price feed available.
+  const [portfolio, setPortfolio] = React.useState(null);
+  const currency = useCurrency();
   const [nfts, setNfts] = React.useState(false);
   const [transactions, setTransactions] = React.useState(false);
   const [collections, setCollections] = React.useState([]);
@@ -232,16 +241,21 @@ function AccountDetail(props) {
     refresh(true);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [currentAccount, currentPrincipal]);
+  React.useEffect(() => {
+    setPortfolio(null);
+    loadPortfolio();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currency]);
   useInterval(() => refresh(), 60 * 1000);
   const theme = useTheme();
   const styles = {
     root: {
       flexGrow: 1,
-      padding: theme.spacing(3),
+      padding: theme.spacing(isMobile ? 1 : 3),
     },
     grid: {
       flexGrow: 1,
-      padding: theme.spacing(2),
+      padding: theme.spacing(isMobile ? 1 : 2),
     },
   };
   const error = e => {
@@ -274,6 +288,7 @@ function AccountDetail(props) {
       setCollections([]);
     }
     ps.push(loadBalances());
+    ps.push(loadPortfolio());
     ps.push(loadNfts());
     if (currentToken !== 'nft') {
       if (hardRefresh) {
@@ -282,6 +297,31 @@ function AccountDetail(props) {
       ps.push(loadTransactions());
     }
     await Promise.all(ps);
+  };
+  // Aggregate the fiat value of every token in the account that has a known
+  // price (currently ICP). Zero-price tokens are skipped; if no price feed is
+  // available at all, the total resolves to 'N/A'.
+  const computePortfolio = async (_address, _principal, _currency) => {
+    const price = await getIcpPrice(_currency);
+    if (price == null) return ['N/A', _address, _principal];
+    let total = 0;
+    await Promise.all(
+      account.tokens.map(async token => {
+        const tokenPrice = token.symbol === 'ICP' ? price : null;
+        if (!tokenPrice) return;
+        try {
+          const b = await api.token(token.id, token.standard).getBalance(_address, _principal);
+          total += (Number(b) / 10 ** token.decimals) * tokenPrice;
+        } catch (e) {}
+      }),
+    );
+    return [total, _address, _principal];
+  };
+  const loadPortfolio = async () => {
+    await computePortfolio(account.address, principal, getCurrency()).then(res => {
+      if (res[1] !== selected.current.address || res[2] !== selected.current.principal) return;
+      setPortfolio(res[0]);
+    });
   };
   const loadNfts = async () => {
     await updateNfts(account.address, principal).then(nfts => {
@@ -357,11 +397,19 @@ function AccountDetail(props) {
     }
   };
   const addToken = async (cid, standard, ignoreChange) => {
-    //ext,icrc,dip20,drc20,ledger
-    if (cid === 'ryjl3-tyaaa-aaaaa-aaaba-cai') throw new Error("Can't add ledger canister");
-    if (tokens.some(token => token.id === cid)) throw new Error('Token already added');
-    if (!validatePrincipal(cid)) throw new Error('Please enter a valid canister ID');
+    //ext,icrc,dip20,drc20,ledger,odin
     if (!standard) throw new Error('Please enter a valid token standard');
+    if (standard === 'odin') {
+      // Odin tokens are registered by text token id (not a canister principal).
+      cid = (cid ?? '').trim().toLowerCase();
+      if (!cid) throw new Error('Please enter a valid Odin token ID');
+      if (tokens.some(token => token.standard === 'odin' && token.id === cid))
+        throw new Error('Token already added');
+    } else {
+      if (cid === 'ryjl3-tyaaa-aaaaa-aaaba-cai') throw new Error("Can't add ledger canister");
+      if (tokens.some(token => token.id === cid)) throw new Error('Token already added');
+      if (!validatePrincipal(cid)) throw new Error('Please enter a valid canister ID');
+    }
     //Load metadata
     try {
       let metadata = await api.token(cid, standard).getMetadata();
@@ -389,8 +437,8 @@ function AccountDetail(props) {
             </Avatar>
           </ListItemAvatar>
           <ListItemText
-            style={{paddingLeft: 20}}
-            primaryTypographyProps={{noWrap: true, variant: 'h4'}}
+            style={{paddingLeft: isMobile ? 10 : 20}}
+            primaryTypographyProps={{noWrap: true, variant: isMobile ? 'h5' : 'h4'}}
             secondaryTypographyProps={{noWrap: true, variant: 'subtitle1'}}
             primary={
               <>
@@ -465,6 +513,19 @@ function AccountDetail(props) {
                       <FileCopyIcon style={{fontSize: 18}} />
                     </IconButton>
                   </SnackbarButton>
+                </div>
+                <div style={{fontSize: '0.9em'}}>
+                  <Chip
+                    color={'default'}
+                    style={{fontSize: '0.9em'}}
+                    size="small"
+                    label="Portfolio"
+                  />{' '}
+                  {portfolio === null
+                    ? 'Loading…'
+                    : portfolio === 'N/A'
+                      ? 'N/A'
+                      : '≈ ' + formatFiat(portfolio, currency) + ' ' + CURRENCIES[currency].code}
                 </div>
                 {currentAccount === 0 ? (
                   <div style={{fontSize: '0.9em'}}>
@@ -642,6 +703,26 @@ function AccountDetail(props) {
                 <SendIcon />
               </MainFab>
             </SendForm>
+          ) : (
+            ''
+          )}
+          {currentToken === 0 ? (
+            <BulkSendForm
+              refresh={refresh}
+              alert={alert}
+              loader={props.loader}
+              error={error}
+              address={account.address}
+              data={account.tokens[0]}
+            >
+              <MainFab
+                style={{inset: 'auto 90px 20px auto', position: 'fixed'}}
+                color="primary"
+                aria-label="bulk send"
+              >
+                <DynamicFeedIcon />
+              </MainFab>
+            </BulkSendForm>
           ) : (
             ''
           )}

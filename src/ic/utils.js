@@ -1,4 +1,3 @@
-/* global BigInt */
 import {Principal} from '@dfinity/principal';
 import {Ed25519KeyIdentity} from '@dfinity/identity';
 import {getCrc32} from '@dfinity/principal/lib/esm/utils/getCrc';

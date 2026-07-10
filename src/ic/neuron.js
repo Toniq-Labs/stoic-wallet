@@ -228,6 +228,23 @@ class ICNeuron {
       error('Error:' + JSON.stringify(res.command[0].Error.error_message));
     else return res.command[0][cmdId];
   }
+  async vote(proposalId, vote, error) {
+    //vote: 1 = Yes, 2 = No, 0 = Abstain/Unspecified
+    var commandArgs = {
+      vote: vote,
+      proposal: [{id: BigInt(proposalId)}],
+    };
+    var cmdId = 'RegisterVote';
+    var cmdBody = {};
+    cmdBody[cmdId] = commandArgs;
+    var res = await this.#api.manage_neuron({
+      id: [{id: this.neuronid}],
+      command: [cmdBody],
+    });
+    if (res.command[0].hasOwnProperty('Error'))
+      error('Error:' + JSON.stringify(res.command[0].Error.error_message));
+    else return res.command[0][cmdId];
+  }
 }
 const NeuronManager = {
   scan: async id => {
@@ -328,6 +345,19 @@ const NeuronManager = {
       );
     }
     return ndata;
+  },
+  listProposals: async id => {
+    var res = await extjs
+      .connect('https://icp0.io/', id)
+      .canister(GOVERNANCE_CANISTER_ID)
+      .list_proposals({
+        include_reward_status: [],
+        before_proposal: [],
+        limit: 100,
+        exclude_topic: [],
+        include_status: [1], //1 = OPEN proposals only
+      });
+    return res.proposal_info;
   },
   topics: topics,
 };

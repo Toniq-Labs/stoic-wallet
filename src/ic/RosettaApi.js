@@ -4,12 +4,116 @@
  * @license MIT License
  */
 
+import React from 'react';
 import axios from 'axios';
 import BigNumber from 'bignumber.js';
 import jsonBigint from 'json-bigint';
 
 // Set useNativeBigInt to true and use BigInt once BigInt is widely supported.
 const JSONbig = jsonBigint({strict: true});
+
+/**
+ * Display currencies supported for portfolio/fiat values.
+ */
+export const CURRENCIES = {
+  usd: {label: 'US Dollar (USD)', symbol: '$', code: 'USD'},
+  eur: {label: 'Euro (EUR)', symbol: '€', code: 'EUR'},
+  btc: {label: 'Bitcoin (BTC)', symbol: '₿', code: 'BTC'},
+};
+
+const CURRENCY_STORAGE_KEY = 'stoic-currency';
+const CURRENCY_EVENT = 'stoic-currency-change';
+
+/**
+ * Return the currently selected display currency code, defaulting to 'usd'.
+ * @returns {string} One of the keys of CURRENCIES.
+ */
+export const getCurrency = () => {
+  try {
+    const c = localStorage.getItem(CURRENCY_STORAGE_KEY);
+    return c && CURRENCIES[c] ? c : 'usd';
+  } catch (e) {
+    return 'usd';
+  }
+};
+
+/**
+ * Persist the selected display currency and notify listeners.
+ * @param {string} currency One of the keys of CURRENCIES.
+ */
+export const setCurrency = currency => {
+  try {
+    localStorage.setItem(CURRENCY_STORAGE_KEY, currency);
+  } catch (e) {}
+  window.dispatchEvent(new CustomEvent(CURRENCY_EVENT, {detail: currency}));
+};
+
+/**
+ * React hook returning the current currency code, re-rendering when it changes
+ * (including changes made from the Settings view in the same tab).
+ * @returns {string} The current currency code.
+ */
+export const useCurrency = () => {
+  const [currency, setCurrencyState] = React.useState(getCurrency);
+  React.useEffect(() => {
+    const handler = () => setCurrencyState(getCurrency());
+    window.addEventListener(CURRENCY_EVENT, handler);
+    window.addEventListener('storage', handler);
+    return () => {
+      window.removeEventListener(CURRENCY_EVENT, handler);
+      window.removeEventListener('storage', handler);
+    };
+  }, []);
+  return currency;
+};
+
+/**
+ * Format a numeric value in the given currency, including its symbol.
+ * @param {number} value The value to format.
+ * @param {string} currency One of the keys of CURRENCIES.
+ * @returns {string} The formatted value (e.g. "$12.34" or "₿0.00012345").
+ */
+export const formatFiat = (value, currency) => {
+  const c = CURRENCIES[currency] || CURRENCIES.usd;
+  return c.symbol + value.toFixed(currency === 'btc' ? 8 : 2);
+};
+
+// Cached ICP spot prices (all currencies fetched at once). The CoinGecko free
+// API is rate limited, so responses are cached for CURRENCY_PRICE_TTL_MS.
+const CURRENCY_PRICE_TTL_MS = 60 * 1000;
+let _icpPrices = null;
+let _icpPricesAt = 0;
+let _icpPricesPromise = null;
+
+/**
+ * Return the spot price of 1 ICP in the specified currency, or null if the
+ * price feed is unavailable (so callers can gracefully show 'N/A').
+ * @param {string} currency One of the keys of CURRENCIES.
+ * @returns {Promise<number|null>} The ICP price in the given currency, or null.
+ */
+export const getIcpPrice = (currency = 'usd') => {
+  const cur = (currency || 'usd').toLowerCase();
+  const pick = prices => (prices && prices[cur] != null ? prices[cur] : null);
+  const fresh = _icpPrices !== null && Date.now() - _icpPricesAt < CURRENCY_PRICE_TTL_MS;
+  if (fresh) return Promise.resolve(pick(_icpPrices));
+  if (!_icpPricesPromise) {
+    _icpPricesPromise = fetch(
+      'https://api.coingecko.com/api/v3/simple/price?ids=internet-computer&vs_currencies=usd,eur,btc',
+    )
+      .then(r => r.json())
+      .then(j => {
+        _icpPrices = j['internet-computer'] || {};
+        _icpPricesAt = Date.now();
+        _icpPricesPromise = null;
+        return _icpPrices;
+      })
+      .catch(() => {
+        _icpPricesPromise = null;
+        return null;
+      });
+  }
+  return _icpPricesPromise.then(pick);
+};
 
 /**
  * Types of Rosetta API errors.
@@ -128,6 +232,16 @@ export default class RosettaApi {
         axios.isAxiosError(error) ? error?.response?.status : undefined,
       );
     }
+  }
+
+  /**
+   * Return the spot price of 1 ICP in the specified display currency, or null if
+   * the price feed is unavailable.
+   * @param {string} currency One of the keys of CURRENCIES (defaults to 'usd').
+   * @returns {Promise<number|null>} The ICP price in the given currency, or null.
+   */
+  async getIcpPrice(currency) {
+    return getIcpPrice(currency);
   }
 
   /**
