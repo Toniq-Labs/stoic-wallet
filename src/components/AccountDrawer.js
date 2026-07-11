@@ -12,6 +12,7 @@ import Avatar from '@material-ui/core/Avatar';
 import AddIcon from '@material-ui/icons/Add';
 import PeopleIcon from '@material-ui/icons/People';
 import AllInclusiveIcon from '@material-ui/icons/AllInclusive';
+import TrendingUpIcon from '@material-ui/icons/TrendingUp';
 import LockIcon from '@material-ui/icons/Lock';
 import {makeStyles, useTheme} from '@material-ui/core/styles';
 import {useSelector, useDispatch} from 'react-redux';
@@ -161,6 +162,19 @@ export default function AccountDrawer(props) {
             <AppsIcon />
           </ListItemIcon>
           <ListItemText primary="Applications" />
+        </ListItem>
+        <ListItem
+          button
+          selected={props.route === 'earn'}
+          onClick={() => {
+            props.onClose();
+            props.changeRoute('earn');
+          }}
+        >
+          <ListItemIcon>
+            <TrendingUpIcon />
+          </ListItemIcon>
+          <ListItemText primary="Earn" />
         </ListItem>
         {idtype === 'watch' ? (
           ''

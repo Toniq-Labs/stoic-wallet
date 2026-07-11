@@ -21,6 +21,7 @@ import AccountDetail from '../views/AccountDetail';
 import AddressBook from '../views/AddressBook';
 import Neurons from '../views/Neurons';
 import Applications from '../views/Applications';
+import Earn from '../views/Earn';
 import Settings from '../views/Settings';
 
 import {makeStyles} from '@material-ui/core/styles';
@@ -67,6 +68,10 @@ const routes = {
   applications: {
     title: 'Applications',
     view: Applications,
+  },
+  earn: {
+    title: 'Earn',
+    view: Earn,
   },
   addressBook: {
     title: 'Address Book',
