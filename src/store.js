@@ -212,6 +212,8 @@ function rootReducer(state = initDb(), action) {
                   return {
                     ...app,
                     apikey: action.payload.app.apikey,
+                    principal: action.payload.app.principal ?? app.principal,
+                    lastUsed: action.payload.app.lastUsed ?? app.lastUsed,
                   };
                 } else {
                   return app;
@@ -260,17 +262,26 @@ function rootReducer(state = initDb(), action) {
           if (i !== state.currentPrincipal) return principal;
           const host = action.payload.host;
           const newScopes = action.payload.scopes || [];
+          const {principal: appPrincipal, lastUsed} = action.payload;
           if (principal.apps.some(a => a && a.host === host)) {
             return {
               ...principal,
               apps: principal.apps.map(a =>
                 a && a.host === host
-                  ? {...a, scopes: Array.from(new Set([...(a.scopes || []), ...newScopes]))}
+                  ? {
+                      ...a,
+                      scopes: Array.from(new Set([...(a.scopes || []), ...newScopes])),
+                      principal: appPrincipal ?? a.principal,
+                      lastUsed: lastUsed ?? a.lastUsed,
+                    }
                   : a,
               ),
             };
           }
-          return {...principal, apps: [...principal.apps, {host, scopes: newScopes}]};
+          return {
+            ...principal,
+            apps: [...principal.apps, {host, scopes: newScopes, principal: appPrincipal, lastUsed}],
+          };
         }),
       });
     // ICRC-25: revoke specific scopes for an origin, or all scopes when none given.

@@ -51,8 +51,13 @@ export default function SignerListener({confirm, appState}) {
       const app = p && p.apps ? p.apps.find(a => a && a.host === origin) : null;
       return (app && app.scopes) || [];
     };
-    const grant = (origin, scopes) =>
-      ctxRef.current.dispatch({type: 'app/permissions/grant', payload: {host: origin, scopes}});
+    const grant = (origin, scopes) => {
+      const p = activePrincipal();
+      ctxRef.current.dispatch({
+        type: 'app/permissions/grant',
+        payload: {host: origin, scopes, principal: p && p.identity.principal, lastUsed: Date.now()},
+      });
+    };
     const permissionsResult = origin => {
       const granted = grantedScopes(origin);
       return {
