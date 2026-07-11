@@ -93,7 +93,12 @@ export default function SignerListener({confirm, appState}) {
       new Promise((resolve, reject) => {
         if (ctxRef.current.appState === 2) return resolve();
         const timer = setTimeout(() => reject(actionAborted()), 5 * 60 * 1000);
-        waitersRef.current.push({resolve: () => (clearTimeout(timer), resolve())});
+        waitersRef.current.push({
+          resolve: () => {
+            clearTimeout(timer);
+            resolve();
+          },
+        });
       });
 
     const handleDelegation = async (origin, params) => {

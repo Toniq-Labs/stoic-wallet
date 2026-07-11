@@ -1,5 +1,5 @@
 /* global BigInt */
-import {Ed25519KeyIdentity} from '@dfinity/identity';
+import {Ed25519KeyIdentity} from '@icp-sdk/core/identity';
 import {AuthClient} from '@dfinity/auth-client';
 import {Secp256k1KeyIdentity} from './secp256k1.js';
 import OpenLogin from '@toruslabs/openlogin';
@@ -13,6 +13,12 @@ var identities = {};
 var openlogin = false;
 //var _iisessionInterval = false;
 const oauths = ['google', 'twitter', 'facebook', 'github'];
+
+// Internet Identity session tuning: request the longest delegation II allows
+// (30 days) and disable auth-client's IdleManager, which otherwise logs the user
+// out after ~10 minutes of inactivity (the main cause of II "kicking you out").
+const II_MAX_TTL = BigInt(30 * 24 * 60 * 60 * 1000000000); // 30 days, in nanoseconds
+const II_AUTH_OPTS = {idleOptions: {disableIdle: true}};
 const loadOpenLogin = async () => {
   if (!openlogin) {
     openlogin = new OpenLogin({
@@ -46,9 +52,9 @@ const StoicIdentity = {
       var id;
       switch (type) {
         case 'ii':
-          var auth = await AuthClient.create();
+          var auth = await AuthClient.create(II_AUTH_OPTS);
           auth.login({
-            maxTimeToLive: BigInt(30 * 24 * 60 * 60 * 1000000000),
+            maxTimeToLive: II_MAX_TTL,
             identityProvider: 'https://identity.ic0.app/',
             onSuccess: async () => {
               id = await auth.getIdentity();
@@ -106,7 +112,7 @@ const StoicIdentity = {
       var id;
       switch (_id.type) {
         case 'ii':
-          var auth = await AuthClient.create();
+          var auth = await AuthClient.create(II_AUTH_OPTS);
           id = await auth.getIdentity();
           if (id.getPrincipal().toString() === '2vxsx-fae') return reject('Not logged in');
           if (id.getPrincipal().toString() !== _id.principal)
@@ -186,9 +192,9 @@ const StoicIdentity = {
           var id;
           switch (_id.type) {
             case 'ii':
-              var auth = await AuthClient.create();
+              var auth = await AuthClient.create(II_AUTH_OPTS);
               auth.login({
-                maxTimeToLive: BigInt(24 * 60 * 60 * 1000000000),
+                maxTimeToLive: II_MAX_TTL,
                 identityProvider: 'https://identity.ic0.app/',
                 onSuccess: async () => {
                   id = await auth.getIdentity();
@@ -270,8 +276,10 @@ const StoicIdentity = {
     return new Promise(async (resolve, reject) => {
       switch (_id.type) {
         case 'ii':
-          var auth = await AuthClient.create();
-          auth.logout();
+          // Do NOT log out of Internet Identity on lock: keep the delegation in
+          // storage so locking (including the inactivity auto-lock) can be
+          // reopened without a full II re-login. Deleting the wallet — clear() —
+          // still logs out. Only the in-memory identity is dropped below.
           break;
         case 'private':
           localStorage.removeItem('_m');
@@ -298,7 +306,7 @@ const StoicIdentity = {
     return new Promise(async (resolve, reject) => {
       switch (_id.type) {
         case 'ii':
-          var auth = await AuthClient.create();
+          var auth = await AuthClient.create(II_AUTH_OPTS);
           auth.logout();
           break;
         case 'private':
@@ -327,7 +335,7 @@ const StoicIdentity = {
     return new Promise(async (resolve, reject) => {
       switch (_id.type) {
         case 'ii':
-          var auth = await AuthClient.create();
+          var auth = await AuthClient.create(II_AUTH_OPTS);
           auth.logout();
           break;
         case 'private':

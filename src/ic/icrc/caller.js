@@ -13,15 +13,17 @@ import {
   Certificate,
   SubmitRequestType,
   RequestStatusResponseStatus,
-} from '@dfinity/agent';
-import {Principal} from '@dfinity/principal';
-import {blobFromText} from '@dfinity/candid';
+  lookupResultToBuffer,
+} from '@icp-sdk/core/agent';
+import {Principal} from '@icp-sdk/core/principal';
 import {toU8} from './bytes.js';
 
 const sleep = ms => new Promise(r => setTimeout(r, ms));
+const enc = s => new TextEncoder().encode(s);
+const dec = b => (b ? new TextDecoder().decode(b) : undefined);
 
 export async function callCanister(identity, {canisterId, method, arg, nonce}, host = 'https://icp0.io/') {
-  const agent = new HttpAgent({identity, host});
+  const agent = HttpAgent.createSync({identity, host});
   const canister = Principal.fromText(canisterId);
 
   const submit = {
@@ -30,7 +32,7 @@ export async function callCanister(identity, {canisterId, method, arg, nonce}, h
     method_name: method,
     arg: toU8(arg),
     sender: identity.getPrincipal(),
-    ingress_expiry: new Expiry(5 * 60 * 1000),
+    ingress_expiry: Expiry.fromDeltaInMilliseconds(5 * 60 * 1000),
   };
   if (nonce) submit.nonce = toU8(nonce);
   const requestId = requestIdOf(submit);
@@ -51,15 +53,19 @@ export async function callCanister(identity, {canisterId, method, arg, nonce}, h
 
   // Poll read_state until the request reaches a terminal state, returning the
   // exact contentMap and the verified certificate.
-  const path = [blobFromText('request_status'), requestId];
+  const path = [enc('request_status'), requestId];
   const deadline = Date.now() + 60 * 1000;
   // eslint-disable-next-line no-constant-condition
   while (true) {
     const state = await agent.readState(canister, {paths: [path]});
-    const cert = new Certificate(state, agent);
-    if (!(await cert.verify())) throw new Error('Certificate verification failed');
-    const statusBuf = cert.lookup([...path, blobFromText('status')]);
-    const status = statusBuf ? statusBuf.toString() : RequestStatusResponseStatus.Unknown;
+    // Certificate.create verifies the BLS signature against the (mainnet) root
+    // key and throws on failure.
+    const cert = await Certificate.create({
+      certificate: state.certificate,
+      canisterId: canister,
+      rootKey: agent.rootKey,
+    });
+    const status = dec(lookupResultToBuffer(cert.lookup_path([...path, enc('status')])));
     if (status === RequestStatusResponseStatus.Replied) {
       return {
         contentMap: new Uint8Array(Cbor.encode(submit)),
@@ -67,8 +73,8 @@ export async function callCanister(identity, {canisterId, method, arg, nonce}, h
       };
     }
     if (status === RequestStatusResponseStatus.Rejected) {
-      const msg = cert.lookup([...path, blobFromText('reject_message')]);
-      throw new Error('Call rejected: ' + (msg ? msg.toString() : 'unknown'));
+      const msg = dec(lookupResultToBuffer(cert.lookup_path([...path, enc('reject_message')])));
+      throw new Error('Call rejected: ' + (msg || 'unknown'));
     }
     if (Date.now() > deadline) throw new Error('Timed out waiting for the call to complete');
     await sleep(1000);

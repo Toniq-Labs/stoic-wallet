@@ -1,7 +1,6 @@
-import {Principal} from '@dfinity/principal';
-import {Ed25519KeyIdentity} from '@dfinity/identity';
-import {getCrc32} from '@dfinity/principal/lib/esm/utils/getCrc';
-import {sha224} from '@dfinity/principal/lib/esm/utils/sha224';
+import {Principal} from '@icp-sdk/core/principal';
+import {Ed25519KeyIdentity} from '@icp-sdk/core/identity';
+import {sha224} from 'js-sha256';
 import RosettaApi from './RosettaApi.js';
 import {
   amountToBigInt,
@@ -13,6 +12,25 @@ import {
   isHex,
   validateAddress,
 } from './format.js';
+
+// CRC32 (IEEE 802.3) — vendored because @icp-sdk/core/@dfinity principal no
+// longer exports the internal getCrc32 the old version did. Returns an unsigned
+// 32-bit integer; verified to match the previous implementation for account ids.
+const CRC32_TABLE = (() => {
+  const table = new Array(256);
+  for (let n = 0; n < 256; n++) {
+    let c = n;
+    for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1;
+    table[n] = c >>> 0;
+  }
+  return table;
+})();
+const getCrc32 = bytes => {
+  const b = bytes instanceof Uint8Array ? bytes : new Uint8Array(bytes);
+  let crc = 0xffffffff;
+  for (let i = 0; i < b.length; i++) crc = CRC32_TABLE[(crc ^ b[i]) & 0xff] ^ (crc >>> 8);
+  return (crc ^ 0xffffffff) >>> 0;
+};
 const LEDGER_CANISTER_ID = 'ryjl3-tyaaa-aaaaa-aaaba-cai';
 const GOVERNANCE_CANISTER_ID = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
 const NNS_CANISTER_ID = 'qoctq-giaaa-aaaaa-aaaea-cai';
@@ -38,7 +56,7 @@ const principalToAccountIdentifier = (p, s) => {
     ...Principal.fromText(p).toUint8Array(),
     ...getSubAccountArray(s),
   ]);
-  const hash = sha224(array);
+  const hash = new Uint8Array(sha224.array(array));
   const checksum = to32bits(getCrc32(hash));
   const array2 = new Uint8Array([...checksum, ...hash]);
   return toHexString(array2);

@@ -1,6 +1,6 @@
 // ICRC-21: fetch a human-readable consent message for a canister call, shown to
 // the user before an ICRC-49 call is approved.
-import {Actor, HttpAgent} from '@dfinity/agent';
+import {Actor, HttpAgent} from '@icp-sdk/core/agent';
 import icrc21IDL from './candid/icrc21.did.js';
 import {toU8} from './bytes.js';
 
@@ -19,7 +19,7 @@ export const formatConsentMessage = cm => {
 // allow blind approval.
 export async function fetchConsentMessage({canisterId, method, arg}, host = 'https://icp0.io/') {
   try {
-    const actor = Actor.createActor(icrc21IDL, {agent: new HttpAgent({host}), canisterId});
+    const actor = Actor.createActor(icrc21IDL, {agent: HttpAgent.createSync({host}), canisterId});
     const res = await actor.icrc21_canister_call_consent_message({
       method,
       arg: toU8(arg),

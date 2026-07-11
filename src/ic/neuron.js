@@ -1,5 +1,5 @@
 /* global BigInt */
-import {Principal} from '@dfinity/principal';
+import {Principal} from '@icp-sdk/core/principal';
 import {
   GOVERNANCE_CANISTER_ID,
   LEDGER_CANISTER_ID,
