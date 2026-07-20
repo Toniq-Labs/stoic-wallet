@@ -20,7 +20,7 @@
     "@toruslabs/openlogin": "^0.9.0",
     "ajv": "^8.17.1",
     "assert": "^2.1.0",
-    "axios": "^0.32.0",
+    "axios": "^0.33.0",
     "bigint-conversion": "^2.4.3",
     "bip39": "^3.1.0",
     "browserify-zlib": "^0.2.0",
